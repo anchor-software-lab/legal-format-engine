@@ -56,10 +56,10 @@ def _make_meta(**kwargs):
         attorney=AttorneyInfo(
             name=kwargs.get("attorney_name", "Jane Doe"),
             bar_number=kwargs.get("bar_number", "1234567"),
-            firm=kwargs.get("firm", "SPD"),
+            firm=kwargs.get("firm", "Test Firm"),
             address=kwargs.get("address", "123 Main St"),
             phone=kwargs.get("phone", "(608) 555-1234"),
-            email=kwargs.get("email", "jane@spd.wi.gov"),
+            email=kwargs.get("email", "jane@test.com"),
         ),
         document_title=kwargs.get("title", "Brief of Defendant-Appellant"),
     )
@@ -173,7 +173,7 @@ class TestHeadingEdgeCases:
         ]
         result = normalize_headings(sections, wi_appellate_ruleset)
         assert len(result) == 4
-        assert result[0].heading_text == "ARGUMENT"
+        assert result[0].heading_text == "Argument"
 
 
 # ── Section Engine Edge Cases ──────────────────────────────────────

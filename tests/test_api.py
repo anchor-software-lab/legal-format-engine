@@ -31,10 +31,10 @@ def _meta_dict():
         "attorney": {
             "name": "Jane Doe",
             "bar_number": "1234567",
-            "firm": "SPD",
+            "firm": "Test Firm",
             "address": "123 Main St",
             "phone": "(608) 555-1234",
-            "email": "jane@spd.wi.gov",
+            "email": "jane@test.com",
         },
         "document_title": "Brief of Defendant-Appellant",
     }
@@ -86,7 +86,7 @@ class TestValidate:
         resp = client.post("/api/validate", json={
             "text": "ARGUMENT\n\nContent.",
             "metadata": _meta_dict(),
-            "variant": "spd",
+            "variant": None,
         })
         assert resp.status_code == 200
 
@@ -112,7 +112,7 @@ class TestFormat:
         assert resp.status_code == 200
         data = resp.json()
         assert "markdown" in data
-        assert "ARGUMENT" in data["markdown"]
+        assert "Argument" in data["markdown"]
         assert isinstance(data["issues"], list)
         assert isinstance(data["sections"], list)
 
@@ -149,12 +149,11 @@ class TestFormat:
         generated = [s for s in data["sections"] if s["is_generated"]]
         assert len(generated) == 0
 
-    def test_format_spd_variant(self):
+    def test_format_default(self):
         resp = client.post("/api/format", json={
             "text": "ARGUMENT\n\nContent.\n\nCONCLUSION\n\nDone.",
             "metadata": _meta_dict(),
             "output_format": "docx",
-            "variant": "spd",
         })
         assert resp.status_code == 200
 
@@ -175,7 +174,7 @@ class TestFormatUpload:
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert "ARGUMENT" in data["markdown"]
+        assert "Argument" in data["markdown"]
 
     def test_upload_invalid_metadata(self):
         resp = client.post(

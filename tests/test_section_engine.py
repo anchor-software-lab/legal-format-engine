@@ -93,7 +93,7 @@ class TestInsertMissing:
 class TestGroupValidation:
     def test_combined_case_facts_satisfies_group(self):
         from legal_format_engine.rules.loader import load_ruleset
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         doc = LegalDocument(sections=[
             Section(id="toc", heading_text="TABLE OF CONTENTS",
                     heading_level=HeadingLevel.LEVEL_1, content=[]),
@@ -118,7 +118,7 @@ class TestGroupValidation:
 
     def test_separate_case_facts_satisfies_group(self):
         from legal_format_engine.rules.loader import load_ruleset
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         doc = LegalDocument(sections=[
             Section(id="case", heading_text="STATEMENT OF THE CASE",
                     heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Case.")]),
@@ -133,7 +133,7 @@ class TestGroupValidation:
 
     def test_missing_all_case_facts_flags_group(self):
         from legal_format_engine.rules.loader import load_ruleset
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         doc = LegalDocument(sections=[
             Section(id="arg", heading_text="ARGUMENT",
                     heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Arg.")]),

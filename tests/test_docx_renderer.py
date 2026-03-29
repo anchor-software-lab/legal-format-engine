@@ -31,9 +31,9 @@ class TestDocxRenderer:
             path = render_docx(doc, wi_appellate_ruleset, f.name)
         docx = DocxDocument(str(path))
         section = docx.sections[0]
-        # 1 inch = 914400 EMU
-        assert section.top_margin == 914400
-        assert section.left_margin == 914400
+        # 1.25 inch = 1143000 EMU, 2.0 inch = 1828800 EMU
+        assert section.top_margin == 1143000
+        assert section.left_margin == 1828800
 
     def test_contains_caption(self, sample_brief_text, sample_metadata, wi_appellate_ruleset):
         doc = format_document(sample_brief_text, sample_metadata, wi_appellate_ruleset)

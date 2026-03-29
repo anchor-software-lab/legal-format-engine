@@ -15,15 +15,16 @@ class TestLoadRuleset:
     def test_page_format(self, wi_appellate_ruleset):
         fmt = wi_appellate_ruleset.page_format
         assert fmt.font_name == "Times New Roman"
-        assert fmt.font_size_pt == 12
+        assert fmt.font_size_pt == 10
         assert fmt.line_spacing == 2.0
-        assert fmt.margin_top_inches == 1.0
+        assert fmt.margin_top_inches == 1.25
+        assert fmt.margin_left_inches == 2.0
 
     def test_heading_rules(self, wi_appellate_ruleset):
         rules = wi_appellate_ruleset.heading_rules
         assert len(rules) == 4
         assert rules[0].level == 1
-        assert rules[0].case_style == "upper"
+        assert rules[0].case_style == "title"
         assert rules[0].alignment == "center"
 
     def test_required_sections(self, wi_appellate_ruleset):
@@ -36,10 +37,10 @@ class TestLoadRuleset:
 
     def test_certifications(self, wi_appellate_ruleset):
         certs = wi_appellate_ruleset.certifications
-        assert len(certs) >= 3
+        assert len(certs) >= 2
         cert_ids = [c.id for c in certs]
         assert "form_and_length" in cert_ids
-        assert "certificate_of_service" in cert_ids
+        assert "appendix_certification" in cert_ids
 
     def test_section_aliases(self, wi_appellate_ruleset):
         aliases = wi_appellate_ruleset.get_section_aliases()
@@ -51,27 +52,22 @@ class TestLoadRuleset:
             load_ruleset("nonexistent", "court", "type")
 
 
-class TestSPDRuleset:
-    """Tests for the Wisconsin SPD appellate brief variant."""
+class TestWisconsinAppellateFormat:
+    """Tests for the Wisconsin appellate brief default format."""
 
-    def test_load_spd_variant(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
-        assert rs.jurisdiction == "wisconsin"
-        assert rs.document_type == "brief"
-
-    def test_spd_margins(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_margins(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         assert rs.page_format.margin_top_inches == 1.25
         assert rs.page_format.margin_left_inches == 2.0
 
-    def test_spd_font_size(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_font_size(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         assert rs.page_format.font_size_pt == 10
 
-    def test_spd_case_and_facts_flexible(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_case_and_facts_flexible(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         ids = [s.id for s in rs.required_sections]
-        # SPD accepts both combined and separate formats
+        # Accepts both combined and separate formats
         assert "statement_of_case_and_facts" in ids
         assert "statement_of_case" in ids
         assert "statement_of_facts" in ids
@@ -82,19 +78,16 @@ class TestSPDRuleset:
         assert len(case_facts_sections) == 3
         assert all(not s.required for s in case_facts_sections)
 
-    def test_spd_issues_presented(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_issues_presented(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         issues = next(s for s in rs.required_sections if s.id == "statement_of_issues")
         assert issues.canonical_name == "Issues Presented"
 
-    def test_spd_section_order(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
-        # Sort by order; sections with same order are interchangeable
+    def test_section_order(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         by_order = sorted(rs.required_sections, key=lambda s: s.order)
         orders = [s.order for s in by_order]
-        # Orders should be non-decreasing
         assert orders == sorted(orders)
-        # First few should be in expected sequence
         first_ids = [s.id for s in by_order if s.order <= 4]
         assert first_ids == [
             "table_of_contents",
@@ -103,21 +96,20 @@ class TestSPDRuleset:
             "position_on_oral_argument",
         ]
 
-    def test_spd_certifications(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_certifications(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         cert_ids = [c.id for c in rs.certifications]
         assert "form_and_length" in cert_ids
         assert "appendix_certification" in cert_ids
 
-    def test_spd_heading_level_1_centered(self):
-        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+    def test_heading_level_1_centered(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief")
         h1 = rs.get_heading_rule(1)
         assert h1.alignment == "center"
         assert h1.bold is True
 
     def test_variant_fallback(self):
-        """Unknown variant falls back to generic ruleset."""
+        """Unknown variant falls back to default ruleset."""
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="nonexistent")
         assert rs.jurisdiction == "wisconsin"
-        # Falls back to generic which has 1.0" margins
-        assert rs.page_format.margin_top_inches == 1.0
+        assert rs.page_format.margin_top_inches == 1.25

@@ -16,7 +16,7 @@ reference/
 
 These briefs are used to:
 1. Extract exact formatting patterns (margins, fonts, spacing, indentation)
-2. Derive the "Wisconsin State Public Defender" house style
+2. Derive the Wisconsin appellate brief formatting rules
 3. Validate that the engine produces output matching real filed briefs
 4. Build test fixtures
 

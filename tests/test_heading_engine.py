@@ -14,8 +14,8 @@ class TestNormalizeHeadings:
                     heading_level=HeadingLevel.LEVEL_1, content=[]),
         ]
         result = normalize_headings(sections, wi_appellate_ruleset)
-        assert result[0].heading_text == "ARGUMENT"
-        assert result[1].heading_text == "CONCLUSION"
+        assert result[0].heading_text == "Argument"
+        assert result[1].heading_text == "Conclusion"
         # Level 1 has no numbering
         assert result[0].numbering_prefix == ""
 
@@ -25,7 +25,7 @@ class TestNormalizeHeadings:
                     heading_level=HeadingLevel.LEVEL_1, content=[]),
         ]
         result = normalize_headings(sections, wi_appellate_ruleset)
-        assert result[0].heading_text == "ARGUMENT"
+        assert result[0].heading_text == "Argument"
 
 
 class TestNormalizeSingle:

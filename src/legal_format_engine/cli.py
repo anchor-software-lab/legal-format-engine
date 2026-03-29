@@ -31,7 +31,7 @@ def main() -> None:
 @click.option("--jurisdiction", default="wisconsin", help="Jurisdiction (default: wisconsin).")
 @click.option("--court-level", default="appellate", help="Court level (default: appellate).")
 @click.option("--doc-type", default="brief", help="Document type (default: brief).")
-@click.option("--variant", default=None, help="Ruleset variant (e.g., 'spd' for State Public Defender).")
+@click.option("--variant", default=None, help="Ruleset variant override.")
 @click.option("--format", "output_format", type=click.Choice(["docx", "markdown"]),
               default="docx", help="Output format.")
 @click.option("--word-count", type=int, default=None, help="Word count for compliance cert.")
@@ -103,7 +103,7 @@ def format(
 @click.option("--jurisdiction", default="wisconsin")
 @click.option("--court-level", default="appellate")
 @click.option("--doc-type", default="brief")
-@click.option("--variant", default=None, help="Ruleset variant (e.g., 'spd').")
+@click.option("--variant", default=None, help="Ruleset variant override.")
 def caption(metadata: str, jurisdiction: str, court_level: str, doc_type: str,
             variant: str | None) -> None:
     """Generate just a caption block and print it."""
@@ -127,7 +127,7 @@ def caption(metadata: str, jurisdiction: str, court_level: str, doc_type: str,
 @click.option("--jurisdiction", default="wisconsin")
 @click.option("--court-level", default="appellate")
 @click.option("--doc-type", default="brief")
-@click.option("--variant", default=None, help="Ruleset variant (e.g., 'spd').")
+@click.option("--variant", default=None, help="Ruleset variant override.")
 def validate(
     metadata: str, input_file: str, jurisdiction: str, court_level: str,
     doc_type: str, variant: str | None,

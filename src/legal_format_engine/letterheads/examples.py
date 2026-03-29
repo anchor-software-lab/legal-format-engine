@@ -37,22 +37,17 @@ def anchor_filings_letterhead() -> Letterhead:
                 alignment="center",
             ),
             LetterheadLine(
-                text="Nicholas G. Smith | State Bar No. 1089586",
+                text="Nicholas G. Smith, Esq.",
                 font_size_pt=9,
                 alignment="center",
             ),
             LetterheadLine(
-                text="Office of the State Public Defender",
+                text="Madison, WI 53707",
                 font_size_pt=9,
                 alignment="center",
             ),
             LetterheadLine(
-                text="Post Office Box 7862, Madison, WI 53707-7862",
-                font_size_pt=9,
-                alignment="center",
-            ),
-            LetterheadLine(
-                text="(608) 261-5417 | smithn@opd.wi.gov",
+                text="info@anchorfilings.com",
                 font_size_pt=9,
                 alignment="center",
             ),

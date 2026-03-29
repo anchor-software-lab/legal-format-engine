@@ -124,7 +124,7 @@ class TestPipelineEndToEnd:
         text = "ARGUMENT\n\nThe court erred.\n\nCONCLUSION\n\nReverse."
         doc, md = format_and_render_markdown(text, meta, ruleset)
         assert isinstance(md, str)
-        assert "ARGUMENT" in md
+        assert "Argument" in md
         assert len(md) > 50
 
     def test_format_and_render_docx(self):
@@ -138,11 +138,11 @@ class TestPipelineEndToEnd:
         # Verify it's a valid DOCX
         docx = DocxDocument(str(path))
         all_text = "\n".join(p.text for p in docx.paragraphs)
-        assert "ARGUMENT" in all_text
+        assert "Argument" in all_text
 
-    def test_spd_variant_pipeline(self):
+    def test_default_format_pipeline(self):
         meta = _make_meta()
-        ruleset = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        ruleset = load_ruleset("wisconsin", "appellate", "brief")
         text = (
             "ISSUES PRESENTED\n\n"
             "Whether the court erred.\n\n"
@@ -156,7 +156,7 @@ class TestPipelineEndToEnd:
             "Reverse.\n"
         )
         doc = format_document(text, meta, ruleset, insert_missing=False)
-        # SPD uses 10pt, 1.25" margins - should apply without error
+        # Default uses 10pt, 1.25" margins - should apply without error
         assert isinstance(doc.sections, list)
 
 
@@ -232,7 +232,7 @@ class TestCLIEdgeCases:
         ])
         assert result.exit_code != 0
 
-    def test_format_with_variant(self):
+    def test_format_default(self):
         runner = CliRunner()
         meta = _make_meta()
         with runner.isolated_filesystem():
@@ -240,7 +240,6 @@ class TestCLIEdgeCases:
             meta_path = _write_meta_json(meta)
             result = runner.invoke(main, [
                 "format", "input.txt", "-o", "out.docx", "-m", str(meta_path),
-                "--variant", "spd",
             ])
             assert result.exit_code == 0
             assert Path("out.docx").exists()
@@ -305,7 +304,7 @@ class TestRealChristophersonBrief:
         assert "TABLE OF CONTENTS" in heading_text
         assert "ARGUMENT" in heading_text
 
-    def test_full_pipeline_spd(self, brief_path):
+    def test_full_pipeline(self, brief_path):
         doc = parse_docx(brief_path)
         text = doc.raw_text or ""
         meta = DocumentMetadata(
@@ -326,14 +325,14 @@ class TestRealChristophersonBrief:
             attorney=AttorneyInfo(
                 name="Nicholas G. Smith",
                 bar_number="1089586",
-                firm="Office of the State Public Defender",
+                firm="Appellate Law Office",
                 address="Post Office Box 7862\nMadison, WI 53707-7862",
                 phone="(608) 261-5417",
                 email="smithn@opd.wi.gov",
             ),
             document_title="Brief of Defendant-Appellant",
         )
-        ruleset = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        ruleset = load_ruleset("wisconsin", "appellate", "brief")
         result = format_document(text, meta, ruleset, insert_missing=False)
         assert len(result.sections) > 0
 

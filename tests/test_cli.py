@@ -36,7 +36,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert "Markdown written to" in result.output
         content = Path(f.name).read_text()
-        assert "ARGUMENT" in content
+        assert "Argument" in content
 
     def test_caption_command(self):
         runner = CliRunner()

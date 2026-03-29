@@ -25,7 +25,7 @@ def load_ruleset(
         jurisdiction: e.g., "wisconsin"
         court_level: e.g., "appellate"
         document_type: e.g., "brief"
-        variant: e.g., "spd" for State Public Defender format
+        variant: Optional variant name to load an alternative ruleset
 
     Returns:
         A validated Ruleset object.
