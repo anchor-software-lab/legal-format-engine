@@ -633,3 +633,246 @@ async def upload_google_doc(
         tags=tags,
         notes=notes,
     )
+
+
+# ── ML Pipeline Endpoints ─────────────────────────────────────────────
+
+
+from legal_format_engine.ml.pipeline import MLPipeline
+
+_ml_pipeline = MLPipeline()
+
+
+@app.post("/api/ml/ingest", status_code=201)
+async def ml_ingest_document(
+    file: UploadFile = File(...),
+    jurisdiction: str | None = Form(None),
+    court_level: str | None = Form(None),
+    document_type: str | None = Form(None),
+    tags: str | None = Form(None),
+    notes: str | None = Form(None),
+):
+    """Ingest a document into the ML pipeline.
+
+    Accepts DOCX, PDF, legacy .doc, HTML (Google Docs export), RTF.
+    The document is normalized (format quirks stripped) and stored for learning.
+    """
+    suffix_map = {
+        "application/pdf": ".pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+        "application/msword": ".doc",
+        "text/html": ".html",
+        "application/rtf": ".rtf",
+    }
+
+    # Determine file extension
+    original_name = file.filename or "document"
+    ext = Path(original_name).suffix.lower()
+    if not ext:
+        ext = suffix_map.get(file.content_type, ".docx")
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else None
+
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+
+    try:
+        doc = _ml_pipeline.ingest(
+            tmp_path,
+            jurisdiction=jurisdiction,
+            court_level=court_level,
+            document_type=document_type,
+            tags=tag_list,
+            notes=notes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Processing failed: {exc}")
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    return {
+        "id": doc.id,
+        "source_filename": original_name,
+        "source_format": doc.source_format,
+        "extraction_confidence": doc.extraction_confidence,
+        "primary_font": doc.primary_font.family if doc.primary_font else None,
+        "font_size_pt": doc.primary_font.size_pt if doc.primary_font else None,
+        "margins": doc.margins.model_dump() if doc.margins else None,
+        "line_spacing": doc.line_spacing,
+        "heading_count": len(doc.heading_styles),
+        "section_count": len(doc.sections),
+        "sections": [s.id for s in doc.sections],
+    }
+
+
+@app.post("/api/ml/ingest-batch", status_code=201)
+async def ml_ingest_batch(
+    files: list[UploadFile] = File(...),
+    jurisdiction: str | None = Form(None),
+    court_level: str | None = Form(None),
+    document_type: str | None = Form(None),
+    tags: str | None = Form(None),
+):
+    """Ingest multiple documents at once."""
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else None
+    results = []
+    errors = []
+
+    for file in files:
+        original_name = file.filename or "document"
+        ext = Path(original_name).suffix.lower() or ".docx"
+
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            content = await file.read()
+            tmp.write(content)
+            tmp_path = Path(tmp.name)
+
+        try:
+            doc = _ml_pipeline.ingest(
+                tmp_path,
+                jurisdiction=jurisdiction,
+                court_level=court_level,
+                document_type=document_type,
+                tags=tag_list,
+            )
+            results.append({
+                "id": doc.id,
+                "source_filename": original_name,
+                "extraction_confidence": doc.extraction_confidence,
+            })
+        except Exception as exc:
+            errors.append({"filename": original_name, "error": str(exc)})
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    return {
+        "processed": len(results),
+        "failed": len(errors),
+        "results": results,
+        "errors": errors,
+    }
+
+
+@app.get("/api/ml/learn")
+async def ml_learn(
+    jurisdiction: str | None = None,
+    court_level: str | None = None,
+    document_type: str | None = None,
+    tag: str | None = None,
+):
+    """Run the ML learner on stored documents matching the filter.
+
+    Returns learned formatting patterns with confidence scores.
+    """
+    tags = [tag] if tag else None
+    learned = _ml_pipeline.learn(jurisdiction, court_level, document_type, tags)
+
+    def _lv(lv):
+        if lv is None:
+            return None
+        return {
+            "value": lv.value,
+            "confidence": lv.confidence,
+            "sample_count": lv.sample_count,
+            "agreement": lv.agreement,
+        }
+
+    return {
+        "jurisdiction": learned.jurisdiction,
+        "court_level": learned.court_level,
+        "document_type": learned.document_type,
+        "document_count": learned.document_count,
+        "overall_confidence": learned.overall_confidence,
+        "font_family": _lv(learned.font_family),
+        "font_size_pt": _lv(learned.font_size_pt),
+        "line_spacing": _lv(learned.line_spacing),
+        "margin_top": _lv(learned.margin_top),
+        "margin_bottom": _lv(learned.margin_bottom),
+        "margin_left": _lv(learned.margin_left),
+        "margin_right": _lv(learned.margin_right),
+        "body_indent": _lv(learned.body_indent),
+        "heading_styles": [
+            {
+                "level": hs.level,
+                "case_style": _lv(hs.case_style),
+                "alignment": _lv(hs.alignment),
+                "bold": _lv(hs.bold),
+                "font_size_pt": _lv(hs.font_size_pt),
+                "numbering": _lv(hs.numbering),
+            }
+            for hs in learned.heading_styles
+        ],
+        "section_order": [
+            {
+                "id": so.id,
+                "frequency": so.frequency,
+                "median_order": so.median_order,
+            }
+            for so in learned.section_order
+        ],
+    }
+
+
+@app.get("/api/ml/suggest-ruleset")
+async def ml_suggest_ruleset(
+    jurisdiction: str,
+    court_level: str = "appellate",
+    document_type: str = "brief",
+    tag: str | None = None,
+):
+    """Generate a suggested YAML ruleset from ML-learned patterns."""
+    tags = [tag] if tag else None
+    return _ml_pipeline.suggest_ruleset(jurisdiction, court_level, document_type, tags)
+
+
+@app.get("/api/ml/recommend")
+async def ml_recommend(
+    jurisdiction: str,
+    court_level: str = "appellate",
+    document_type: str = "brief",
+    tag: str | None = None,
+):
+    """Compare ML-learned patterns against existing ruleset.
+
+    Returns specific recommendations for ruleset changes with confidence levels.
+    """
+    tags = [tag] if tag else None
+    return _ml_pipeline.recommend(jurisdiction, court_level, document_type, tags)
+
+
+@app.get("/api/ml/documents")
+async def ml_list_documents(
+    jurisdiction: str | None = None,
+    court_level: str | None = None,
+    tag: str | None = None,
+):
+    """List all documents in the ML pipeline store."""
+    tags = [tag] if tag else None
+    return _ml_pipeline.list_documents(jurisdiction, court_level, tags)
+
+
+@app.get("/api/ml/documents/{doc_id}")
+async def ml_get_document(doc_id: str):
+    """Get details of a specific ML-ingested document."""
+    doc = _ml_pipeline.get_document(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return doc.model_dump()
+
+
+@app.delete("/api/ml/documents/{doc_id}")
+async def ml_delete_document(doc_id: str):
+    """Delete a document from the ML store."""
+    if not _ml_pipeline.delete_document(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    return {"deleted": True}
+
+
+@app.get("/api/ml/stats")
+async def ml_stats():
+    """Get statistics about the ML document store."""
+    return _ml_pipeline.get_stats()
