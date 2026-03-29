@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: #323130;
+  background: #faf9f8;
+  padding: 12px;
+}
+
+#app {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid #edebe9;
+  margin-bottom: 16px;
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0078d4;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #605e5c;
+  margin-top: 4px;
+}
+
+h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: #323130;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #605e5c;
+  margin-bottom: 3px;
+}
+
+.form-group.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-group.checkbox label {
+  display: inline;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #8a8886;
+  border-radius: 2px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+#actions-section {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-primary {
+  background: #0078d4;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #106ebe;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #323130;
+  border: 1px solid #8a8886;
+}
+
+.btn-secondary:hover {
+  background: #f3f2f1;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#results-section {
+  border-top: 1px solid #edebe9;
+  padding-top: 12px;
+}
+
+.hidden {
+  display: none;
+}
+
+.issue {
+  padding: 6px 8px;
+  margin: 4px 0;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+.issue-error {
+  background: #fde7e9;
+  border-left: 3px solid #d13438;
+}
+
+.issue-warning {
+  background: #fff4ce;
+  border-left: 3px solid #ffb900;
+}
+
+.issue-info {
+  background: #f0f6ff;
+  border-left: 3px solid #0078d4;
+}
+
+.success {
+  background: #dff6dd;
+  border-left: 3px solid #107c10;
+  padding: 8px;
+  border-radius: 2px;
+}
+
+.section-list {
+  list-style: none;
+  padding: 0;
+}
+
+.section-list li {
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #f3f2f1;
+}
+
+.section-list .generated {
+  color: #0078d4;
+  font-style: italic;
+}
+
+#status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 12px;
+  background: #f3f2f1;
+  border-top: 1px solid #edebe9;
+  font-size: 11px;
+  color: #605e5c;
+}

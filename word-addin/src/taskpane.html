@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Legal Format Engine</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css"/>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Legal Format Engine</h1>
+      <p class="subtitle">Wisconsin Appellate Brief Formatter</p>
+    </header>
+
+    <!-- Metadata Section -->
+    <section id="metadata-section">
+      <h2>Case Information</h2>
+      <div class="form-group">
+        <label for="case-number">Case Number</label>
+        <input type="text" id="case-number" placeholder="2025AP001234-CR"/>
+      </div>
+      <div class="form-group">
+        <label for="court-name">Court</label>
+        <input type="text" id="court-name" value="Court of Appeals"/>
+      </div>
+      <div class="form-group">
+        <label for="district">District</label>
+        <select id="district">
+          <option value="District I">District I</option>
+          <option value="District II" selected>District II</option>
+          <option value="District III">District III</option>
+          <option value="District IV">District IV</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="county">County of Origin</label>
+        <input type="text" id="county" placeholder="Dane"/>
+      </div>
+      <div class="form-group">
+        <label for="judge">Trial Judge</label>
+        <input type="text" id="judge" placeholder="Hon. Smith"/>
+      </div>
+
+      <h2>Parties</h2>
+      <div class="form-group">
+        <label for="plaintiff-name">Plaintiff-Respondent</label>
+        <input type="text" id="plaintiff-name" value="State of Wisconsin"/>
+      </div>
+      <div class="form-group">
+        <label for="defendant-name">Defendant-Appellant</label>
+        <input type="text" id="defendant-name" placeholder="John Doe"/>
+      </div>
+
+      <h2>Attorney</h2>
+      <div class="form-group">
+        <label for="attorney-name">Name</label>
+        <input type="text" id="attorney-name"/>
+      </div>
+      <div class="form-group">
+        <label for="bar-number">Bar Number</label>
+        <input type="text" id="bar-number"/>
+      </div>
+      <div class="form-group">
+        <label for="firm">Firm/Office</label>
+        <input type="text" id="firm" value="Office of the State Public Defender"/>
+      </div>
+      <div class="form-group">
+        <label for="address">Address</label>
+        <textarea id="address" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="text" id="phone"/>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email"/>
+      </div>
+    </section>
+
+    <!-- Options Section -->
+    <section id="options-section">
+      <h2>Format Options</h2>
+      <div class="form-group">
+        <label for="variant">Style Variant</label>
+        <select id="variant">
+          <option value="">Standard Wisconsin Appellate</option>
+          <option value="spd" selected>SPD House Style</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="word-count">Word Count (for compliance cert)</label>
+        <input type="number" id="word-count" placeholder="Auto-detect"/>
+      </div>
+      <div class="form-group checkbox">
+        <input type="checkbox" id="insert-missing" checked/>
+        <label for="insert-missing">Insert stubs for missing sections</label>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section id="actions-section">
+      <button id="btn-validate" class="btn btn-secondary">Validate Structure</button>
+      <button id="btn-format" class="btn btn-primary">Format Brief</button>
+      <button id="btn-citations" class="btn btn-secondary">Check Citations</button>
+    </section>
+
+    <!-- Results -->
+    <section id="results-section" class="hidden">
+      <h2>Results</h2>
+      <div id="results-content"></div>
+    </section>
+
+    <!-- Status -->
+    <div id="status-bar">
+      <span id="status-text">Ready</span>
+    </div>
+  </div>
+
+  <script src="taskpane.js"></script>
+</body>
+</html>
