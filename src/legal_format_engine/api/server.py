@@ -11,6 +11,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from legal_format_engine.api.schemas import (
+    AggregatePatternResponse,
+    BriefAnalysisListResponse,
+    BriefUploadResponse,
     CitationInfo,
     CitationIssueInfo,
     CitationRequest,
@@ -25,6 +28,8 @@ from legal_format_engine.api.schemas import (
     ValidateRequest,
     ValidateResponse,
 )
+from legal_format_engine.analysis.brief_analyzer import analyze_brief
+from legal_format_engine.analysis.pattern_store import PatternStore
 from legal_format_engine.engines.citation_engine import check_citation_consistency
 from legal_format_engine.engines.pipeline import format_document
 from legal_format_engine.models.letterhead import Letterhead, LetterheadLine, LetterheadManager
@@ -34,6 +39,7 @@ from legal_format_engine.renderers.markdown_renderer import render_markdown
 from legal_format_engine.rules.loader import load_ruleset
 
 _letterhead_mgr = LetterheadManager()
+_pattern_store = PatternStore()
 
 app = FastAPI(
     title="Legal Format Engine API",
@@ -438,3 +444,109 @@ async def upload_letterhead_logo(letterhead_id: str, file: UploadFile = File(...
     tmp.unlink(missing_ok=True)
 
     return _lh_to_response(saved)
+
+
+# ── Brief Analysis / Pattern Learning ───────────────────────────────
+
+
+def _analysis_to_response(analysis) -> BriefUploadResponse:
+    """Convert a BriefAnalysis to the API response schema."""
+    return BriefUploadResponse(
+        id=analysis.id,
+        source_filename=analysis.source_filename,
+        jurisdiction=analysis.jurisdiction,
+        court_level=analysis.court_level,
+        analyzed_at=analysis.analyzed_at,
+        font_patterns=[fp.model_dump() for fp in analysis.font_patterns],
+        margin_pattern=analysis.margin_pattern.model_dump() if analysis.margin_pattern else None,
+        line_spacing=analysis.line_spacing,
+        heading_patterns=[hp.model_dump() for hp in analysis.heading_patterns],
+        section_patterns=[sp.model_dump() for sp in analysis.section_patterns],
+        paragraph_indent_inches=analysis.paragraph_indent_inches,
+        block_quote_indent_inches=analysis.block_quote_indent_inches,
+    )
+
+
+@app.post("/api/briefs/upload", response_model=BriefUploadResponse, status_code=201)
+async def upload_brief(
+    file: UploadFile = File(...),
+    jurisdiction: str | None = Form(None),
+    court_level: str | None = Form(None),
+):
+    """Upload a brief (DOCX or PDF) for formatting analysis.
+
+    Extracts formatting patterns from the uploaded document and stores
+    them for learning. Optionally tag with jurisdiction and court level.
+    """
+    filename = file.filename or "unknown"
+    suffix = Path(filename).suffix.lower()
+    if suffix not in (".docx", ".pdf"):
+        raise HTTPException(
+            status_code=422,
+            detail="Unsupported file type. Upload a .docx or .pdf file.",
+        )
+
+    # Write to temp file for analysis
+    tmp = Path(tempfile.mktemp(suffix=suffix))
+    try:
+        content = file.file.read()
+        if not content:
+            raise HTTPException(status_code=422, detail="Uploaded file is empty.")
+        tmp.write_bytes(content)
+
+        analysis = analyze_brief(tmp, jurisdiction=jurisdiction, court_level=court_level)
+        # Override source filename with original upload name
+        analysis.source_filename = filename
+        _pattern_store.save(analysis)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyze brief: {exc}",
+        )
+    finally:
+        tmp.unlink(missing_ok=True)
+
+    return _analysis_to_response(analysis)
+
+
+@app.get("/api/briefs/patterns/{jurisdiction}", response_model=AggregatePatternResponse)
+async def get_patterns(jurisdiction: str, court_level: str | None = None):
+    """Get aggregated learned patterns for a jurisdiction.
+
+    Computes consensus formatting patterns (fonts, margins, headings,
+    sections) from all briefs uploaded for the given jurisdiction.
+    """
+    agg = _pattern_store.aggregate(jurisdiction, court_level=court_level)
+    return AggregatePatternResponse(
+        jurisdiction=agg.jurisdiction,
+        court_level=agg.court_level,
+        brief_count=agg.brief_count,
+        font=agg.font.model_dump() if agg.font else None,
+        margins=agg.margins.model_dump() if agg.margins else None,
+        line_spacing=agg.line_spacing,
+        headings=[h.model_dump() for h in agg.headings],
+        sections=[s.model_dump() for s in agg.sections],
+        paragraph_indent_inches=agg.paragraph_indent_inches,
+    )
+
+
+@app.get("/api/briefs/analyses", response_model=BriefAnalysisListResponse)
+async def list_analyses():
+    """List all uploaded brief analyses."""
+    analyses = _pattern_store.list_all()
+    return BriefAnalysisListResponse(
+        analyses=[_analysis_to_response(a) for a in analyses],
+        total=len(analyses),
+    )
+
+
+@app.delete("/api/briefs/analyses/{analysis_id}")
+async def delete_analysis(analysis_id: str):
+    """Delete a specific brief analysis by ID."""
+    if not _pattern_store.delete(analysis_id):
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    return {"deleted": True}

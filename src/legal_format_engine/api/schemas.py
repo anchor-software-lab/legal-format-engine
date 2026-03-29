@@ -144,5 +144,46 @@ class LetterheadListResponse(BaseModel):
     letterheads: list[LetterheadResponse]
 
 
+# ── Brief Analysis Schemas ───────────────────────────────────────────
+
+
+class BriefUploadResponse(BaseModel):
+    """Response after uploading and analyzing a brief."""
+
+    id: str
+    source_filename: str
+    jurisdiction: str | None = None
+    court_level: str | None = None
+    analyzed_at: str
+    font_patterns: list[dict] = []
+    margin_pattern: dict | None = None
+    line_spacing: float | None = None
+    heading_patterns: list[dict] = []
+    section_patterns: list[dict] = []
+    paragraph_indent_inches: float | None = None
+    block_quote_indent_inches: float | None = None
+
+
+class BriefAnalysisListResponse(BaseModel):
+    """Response listing all analyzed briefs."""
+
+    analyses: list[BriefUploadResponse]
+    total: int
+
+
+class AggregatePatternResponse(BaseModel):
+    """Response with aggregated patterns for a jurisdiction."""
+
+    jurisdiction: str
+    court_level: str | None = None
+    brief_count: int = 0
+    font: dict | None = None
+    margins: dict | None = None
+    line_spacing: float | None = None
+    headings: list[dict] = []
+    sections: list[dict] = []
+    paragraph_indent_inches: float | None = None
+
+
 # Rebuild models that reference forward declarations
 ValidateResponse.model_rebuild()

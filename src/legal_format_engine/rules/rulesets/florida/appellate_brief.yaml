@@ -1,0 +1,196 @@
+# Florida District Court of Appeal - Appellate Brief Format
+# Based on Fla. R. App. P. 9.210
+# Formatting requirements per Florida Rules of Appellate Procedure.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 14pt, double-spaced
+# - Combined or separate Statement of the Case and Facts
+# - Word limit: 13,000 words (initial brief)
+# - Certificate of service and compliance required
+
+jurisdiction: florida
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Citations"
+    aliases:
+      - "Table of Authorities"
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Citations"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of the Case and of the Facts"
+    aliases:
+      - "Statement of the Case and Facts"
+      - "Case and Facts"
+      - "Statement of Case and Facts"
+    order: 3
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Nature of the Case"
+    order: 3
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: statement_of_facts
+    canonical_name: "Statement of the Facts"
+    aliases:
+      - "Statement of Facts"
+      - "Facts"
+      - "Factual Background"
+    order: 4
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
+    aliases:
+      - "Summary of the Argument"
+      - "Summary"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 8
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "Case No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name}
+    Florida Bar No. {bar_number}
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Counsel for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief was prepared in
+      Times New Roman, 14-point font, in compliance with
+      Florida Rule of Appellate Procedure 9.210(a)(2), and
+      that this brief contains {word_count} words in compliance
+      with the word-count limitation in Rule 9.210(a)(5).
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I HEREBY CERTIFY that a true and correct copy of the
+      foregoing has been furnished by [method of service] to
+      all counsel of record on {date}.
+
+      {attorney_name}
+      Counsel for {party_role}
+
+signature_block_required: true
