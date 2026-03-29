@@ -643,6 +643,63 @@ from legal_format_engine.ml.pipeline import MLPipeline
 _ml_pipeline = MLPipeline()
 
 
+@app.post("/api/ml/ingest-archive", status_code=201)
+async def ml_ingest_archive(
+    file: UploadFile = File(...),
+    jurisdiction: str | None = Form(None),
+    court_level: str | None = Form(None),
+    document_type: str | None = Form(None),
+    tags: str | None = Form(None),
+    notes: str | None = Form(None),
+):
+    """Ingest a collection of documents from an archive.
+
+    Accepts ZIP files, RAR files, or Adobe Portfolio PDFs containing
+    any number of DOCX, PDF, .doc, HTML, or RTF files. Each document
+    inside is extracted, normalized, and stored for ML learning.
+
+    Non-document files in the archive are silently skipped.
+    """
+    from legal_format_engine.ml.archive import ARCHIVE_EXTENSIONS
+
+    original_name = file.filename or "archive"
+    ext = Path(original_name).suffix.lower()
+
+    # Validate it looks like an archive
+    if ext not in ARCHIVE_EXTENSIONS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unsupported archive format: {ext}. "
+                   f"Accepted: {', '.join(sorted(ARCHIVE_EXTENSIONS))}. "
+                   f"For single documents, use /api/ml/ingest instead.",
+        )
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else None
+
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+
+    try:
+        result = _ml_pipeline.ingest_archive(
+            tmp_path,
+            jurisdiction=jurisdiction,
+            court_level=court_level,
+            document_type=document_type,
+            tags=tag_list,
+            notes=notes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Archive processing failed: {exc}")
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    return result
+
+
 @app.post("/api/ml/ingest", status_code=201)
 async def ml_ingest_document(
     file: UploadFile = File(...),
@@ -655,8 +712,26 @@ async def ml_ingest_document(
     """Ingest a document into the ML pipeline.
 
     Accepts DOCX, PDF, legacy .doc, HTML (Google Docs export), RTF.
+    Also accepts ZIP, RAR, or Adobe Portfolio — automatically routes to
+    archive processing if detected.
     The document is normalized (format quirks stripped) and stored for learning.
     """
+    from legal_format_engine.ml.archive import ARCHIVE_EXTENSIONS
+
+    # Auto-detect archives and route to archive handler
+    original_name_check = file.filename or "document"
+    ext_check = Path(original_name_check).suffix.lower()
+    if ext_check in (".zip", ".rar"):
+        # Reset file position and delegate to archive endpoint
+        return await ml_ingest_archive(
+            file=file,
+            jurisdiction=jurisdiction,
+            court_level=court_level,
+            document_type=document_type,
+            tags=tags,
+            notes=notes,
+        )
+
     suffix_map = {
         "application/pdf": ".pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",

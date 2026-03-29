@@ -22,6 +22,9 @@ Usage:
 
     # Compare against existing ruleset
     recs = pipeline.recommend(jurisdiction="wisconsin")
+
+    # Ingest an archive (ZIP, RAR, Adobe Portfolio)
+    results = pipeline.ingest_archive("briefs.zip", jurisdiction="wisconsin")
 """
 
 from __future__ import annotations
@@ -111,6 +114,80 @@ class MLPipeline:
                 # Skip failed documents but don't stop batch
                 continue
         return results
+
+    def ingest_archive(
+        self,
+        archive_path: str | Path,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+    ) -> dict:
+        """Ingest all documents from an archive (ZIP, RAR, Adobe Portfolio).
+
+        Extracts the archive, filters to supported document types, and
+        ingests each one through the full normalization pipeline.
+
+        Returns a summary dict with processed/failed counts and details.
+        """
+        from legal_format_engine.ml.archive import (
+            cleanup_extraction,
+            extract_archive,
+            is_archive,
+        )
+
+        archive_path = Path(archive_path)
+        if not archive_path.exists():
+            raise FileNotFoundError(f"Archive not found: {archive_path}")
+
+        # Extract files from archive
+        extracted_dir = None
+        try:
+            extracted_files = extract_archive(archive_path)
+            # The extraction creates a temp dir; infer it from the first file
+            if extracted_files:
+                extracted_dir = extracted_files[0].parent
+
+            results = []
+            errors = []
+
+            for file_path in extracted_files:
+                try:
+                    doc = self.ingest(
+                        file_path,
+                        jurisdiction=jurisdiction,
+                        court_level=court_level,
+                        document_type=document_type,
+                        tags=tags,
+                        notes=notes,
+                    )
+                    results.append({
+                        "id": doc.id,
+                        "source_filename": file_path.name,
+                        "source_format": doc.source_format,
+                        "extraction_confidence": doc.extraction_confidence,
+                        "primary_font": doc.primary_font.family if doc.primary_font else None,
+                        "font_size_pt": doc.primary_font.size_pt if doc.primary_font else None,
+                    })
+                except Exception as exc:
+                    errors.append({
+                        "filename": file_path.name,
+                        "error": str(exc),
+                    })
+
+            return {
+                "archive_filename": archive_path.name,
+                "total_files_found": len(extracted_files),
+                "processed": len(results),
+                "failed": len(errors),
+                "results": results,
+                "errors": errors,
+            }
+
+        finally:
+            if extracted_dir is not None:
+                cleanup_extraction(extracted_dir)
 
     # ------------------------------------------------------------------
     # Learn: run the learner on stored documents
