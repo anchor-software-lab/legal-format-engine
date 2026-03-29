@@ -11,6 +11,7 @@ Office.onReady((info) => {
     initPartyList();
     initProfileButtons();
     initActionButtons();
+    initLetterhead();
     loadSavedProfile();
     setStatus("Ready");
   }
@@ -459,6 +460,8 @@ async function onFormat() {
     const wordCount = val("word-count") ? parseInt(val("word-count")) : null;
     const insertMissing = document.getElementById("insert-missing").checked;
 
+    const letterheadId = document.getElementById("letterhead-select").value || null;
+
     const resp = await apiPost("/format", {
       text,
       metadata: buildMetadata(),
@@ -466,6 +469,7 @@ async function onFormat() {
       word_count: wordCount,
       insert_missing: insertMissing,
       output_format: "docx",
+      letterhead_id: letterheadId,
     });
 
     // Download the DOCX and insert into Word
@@ -492,6 +496,242 @@ async function onFormat() {
     disableButtons(false);
   }
 }
+
+// ── Letterhead Management ─────────────────────────────────────────────
+
+let _letterheads = [];
+
+function initLetterhead() {
+  document.getElementById("btn-new-letterhead").addEventListener("click", onNewLetterhead);
+  document.getElementById("btn-edit-letterhead").addEventListener("click", onEditLetterhead);
+  document.getElementById("btn-delete-letterhead").addEventListener("click", onDeleteLetterhead);
+  document.getElementById("btn-add-lh-line").addEventListener("click", addLetterheadLine);
+  document.getElementById("btn-lh-cancel").addEventListener("click", hideLetterheadEditor);
+  document.getElementById("btn-lh-save").addEventListener("click", onSaveLetterhead);
+  document.getElementById("letterhead-select").addEventListener("change", onLetterheadSelectChange);
+  loadLetterheads();
+}
+
+async function loadLetterheads() {
+  try {
+    const resp = await fetch(`${API_BASE}/letterheads`);
+    if (!resp.ok) return;
+    const data = await resp.json();
+    _letterheads = data.letterheads || [];
+    populateLetterheadDropdown();
+  } catch (_) {
+    // Server not available, that's fine
+  }
+}
+
+function populateLetterheadDropdown() {
+  const select = document.getElementById("letterhead-select");
+  const current = select.value;
+  // Keep the "None" option
+  select.innerHTML = '<option value="">None (no letterhead)</option>';
+  for (const lh of _letterheads) {
+    const opt = document.createElement("option");
+    opt.value = lh.id;
+    opt.textContent = lh.name;
+    select.appendChild(opt);
+  }
+  // Restore selection if still valid
+  if (current && _letterheads.some((l) => l.id === current)) {
+    select.value = current;
+  }
+  onLetterheadSelectChange();
+}
+
+function onLetterheadSelectChange() {
+  const id = document.getElementById("letterhead-select").value;
+  const editBtn = document.getElementById("btn-edit-letterhead");
+  const deleteBtn = document.getElementById("btn-delete-letterhead");
+  const preview = document.getElementById("letterhead-preview");
+  const badge = document.getElementById("letterhead-badge");
+
+  if (id) {
+    editBtn.classList.remove("hidden");
+    deleteBtn.classList.remove("hidden");
+    const lh = _letterheads.find((l) => l.id === id);
+    if (lh) {
+      renderLetterheadPreview(lh);
+      preview.classList.remove("hidden");
+      badge.textContent = lh.name;
+    }
+  } else {
+    editBtn.classList.add("hidden");
+    deleteBtn.classList.add("hidden");
+    preview.classList.add("hidden");
+    badge.textContent = "";
+  }
+}
+
+function renderLetterheadPreview(lh) {
+  const preview = document.getElementById("letterhead-preview");
+  let html = "";
+  for (const line of lh.lines) {
+    let style = `text-align:${line.alignment};`;
+    if (line.font_size_pt) style += `font-size:${line.font_size_pt}pt;`;
+    let text = line.text || "&nbsp;";
+    if (line.bold) text = `<strong>${text}</strong>`;
+    if (line.italic) text = `<em>${text}</em>`;
+    html += `<div class="lh-line" style="${style}">${text}</div>`;
+  }
+  if (lh.separator_line) {
+    html += '<div class="lh-separator"></div>';
+  }
+  preview.innerHTML = html;
+}
+
+function onNewLetterhead() {
+  document.getElementById("lh-edit-id").value = "";
+  document.getElementById("lh-name").value = "";
+  document.getElementById("lh-separator").checked = true;
+  document.getElementById("lh-spacing").value = "12";
+  document.getElementById("lh-lines-list").innerHTML = "";
+  // Add a few starter lines
+  addLetterheadLine();
+  addLetterheadLine();
+  addLetterheadLine();
+  showLetterheadEditor();
+}
+
+function onEditLetterhead() {
+  const id = document.getElementById("letterhead-select").value;
+  const lh = _letterheads.find((l) => l.id === id);
+  if (!lh) return;
+
+  document.getElementById("lh-edit-id").value = lh.id;
+  document.getElementById("lh-name").value = lh.name;
+  document.getElementById("lh-separator").checked = lh.separator_line;
+  document.getElementById("lh-spacing").value = lh.spacing_after_pt;
+
+  const list = document.getElementById("lh-lines-list");
+  list.innerHTML = "";
+  for (const line of lh.lines) {
+    addLetterheadLine(line);
+  }
+  showLetterheadEditor();
+}
+
+async function onDeleteLetterhead() {
+  const id = document.getElementById("letterhead-select").value;
+  if (!id) return;
+  const lh = _letterheads.find((l) => l.id === id);
+  if (!confirm(`Delete letterhead "${lh ? lh.name : id}"?`)) return;
+
+  try {
+    await fetch(`${API_BASE}/letterheads/${id}`, { method: "DELETE" });
+    await loadLetterheads();
+    setStatus("Letterhead deleted");
+  } catch (err) {
+    setStatus("Failed to delete letterhead");
+  }
+}
+
+function showLetterheadEditor() {
+  document.getElementById("letterhead-editor").classList.remove("hidden");
+}
+
+function hideLetterheadEditor() {
+  document.getElementById("letterhead-editor").classList.add("hidden");
+}
+
+function addLetterheadLine(data) {
+  const list = document.getElementById("lh-lines-list");
+  const row = document.createElement("div");
+  row.className = "lh-line-entry";
+
+  const text = data ? data.text : "";
+  const bold = data ? data.bold : false;
+  const italic = data ? data.italic : false;
+  const fontSize = data ? data.font_size_pt || "" : "";
+  const alignment = data ? data.alignment : "center";
+
+  row.innerHTML = `
+    <div class="lh-line-row">
+      <input type="text" class="lh-line-text" value="${escapeAttr(text)}" placeholder="Line text"/>
+      <select class="lh-line-align">
+        <option value="left"${alignment === "left" ? " selected" : ""}>Left</option>
+        <option value="center"${alignment === "center" ? " selected" : ""}>Center</option>
+        <option value="right"${alignment === "right" ? " selected" : ""}>Right</option>
+      </select>
+      <button class="btn-icon btn-remove-lh-line" title="Remove line">&times;</button>
+    </div>
+    <div class="lh-line-options">
+      <label><input type="checkbox" class="lh-line-bold"${bold ? " checked" : ""}/> B</label>
+      <label><input type="checkbox" class="lh-line-italic"${italic ? " checked" : ""}/> I</label>
+      <label>Size: <input type="number" class="lh-line-size" value="${fontSize}" min="6" max="36" placeholder="def"/></label>
+    </div>
+  `;
+  list.appendChild(row);
+  row.querySelector(".btn-remove-lh-line").addEventListener("click", () => row.remove());
+}
+
+function escapeAttr(s) {
+  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function collectLetterheadLines() {
+  const lines = [];
+  document.querySelectorAll(".lh-line-entry").forEach((entry) => {
+    const text = entry.querySelector(".lh-line-text").value;
+    const bold = entry.querySelector(".lh-line-bold").checked;
+    const italic = entry.querySelector(".lh-line-italic").checked;
+    const sizeVal = entry.querySelector(".lh-line-size").value;
+    const alignment = entry.querySelector(".lh-line-align").value;
+    lines.push({
+      text,
+      bold,
+      italic,
+      font_size_pt: sizeVal ? parseFloat(sizeVal) : null,
+      alignment,
+    });
+  });
+  return lines;
+}
+
+async function onSaveLetterhead() {
+  const name = document.getElementById("lh-name").value.trim();
+  if (!name) {
+    document.getElementById("lh-name").classList.add("invalid");
+    document.getElementById("err-lh-name").textContent = "Name is required";
+    return;
+  }
+  document.getElementById("lh-name").classList.remove("invalid");
+  document.getElementById("err-lh-name").textContent = "";
+
+  const body = {
+    name,
+    lines: collectLetterheadLines(),
+    separator_line: document.getElementById("lh-separator").checked,
+    spacing_after_pt: parseFloat(document.getElementById("lh-spacing").value) || 12,
+  };
+
+  const editId = document.getElementById("lh-edit-id").value;
+  try {
+    if (editId) {
+      await fetch(`${API_BASE}/letterheads/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } else {
+      await fetch(`${API_BASE}/letterheads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    }
+    hideLetterheadEditor();
+    await loadLetterheads();
+    setStatus(`Letterhead "${name}" saved`);
+  } catch (err) {
+    setStatus("Failed to save letterhead");
+  }
+}
+
+// ── Citations ────────────────────────────────────────────────────────
 
 async function onCitations() {
   disableButtons(true);

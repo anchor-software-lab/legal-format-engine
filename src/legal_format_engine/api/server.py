@@ -17,16 +17,22 @@ from legal_format_engine.api.schemas import (
     FormatRequest,
     FormatResponse,
     HealthResponse,
+    LetterheadCreate,
+    LetterheadListResponse,
+    LetterheadResponse,
     SectionSummary,
     ValidateRequest,
     ValidateResponse,
 )
 from legal_format_engine.engines.citation_engine import check_citation_consistency
 from legal_format_engine.engines.pipeline import format_document
+from legal_format_engine.models.letterhead import Letterhead, LetterheadLine, LetterheadManager
+from legal_format_engine.models.metadata import DocumentMetadata
 from legal_format_engine.renderers.docx_renderer import render_docx
 from legal_format_engine.renderers.markdown_renderer import render_markdown
-from legal_format_engine.models.metadata import DocumentMetadata
 from legal_format_engine.rules.loader import load_ruleset
+
+_letterhead_mgr = LetterheadManager()
 
 app = FastAPI(
     title="Legal Format Engine API",
@@ -71,6 +77,16 @@ def _extract_text_from_upload(file: UploadFile) -> str:
         return content.decode("utf-8")
 
 
+def _resolve_letterhead(letterhead_id: str | None) -> Letterhead | None:
+    """Load a letterhead by ID, or return None."""
+    if not letterhead_id:
+        return None
+    lh = _letterhead_mgr.get(letterhead_id)
+    if not lh:
+        raise HTTPException(status_code=404, detail=f"Letterhead '{letterhead_id}' not found")
+    return lh
+
+
 def _sections_summary(doc) -> list[SectionSummary]:
     return [
         SectionSummary(
@@ -108,6 +124,8 @@ async def format_json(req: FormatRequest):
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+    letterhead = _resolve_letterhead(req.letterhead_id)
+
     doc = format_document(
         req.text, req.metadata, ruleset,
         word_count=req.word_count,
@@ -116,7 +134,7 @@ async def format_json(req: FormatRequest):
 
     if req.output_format == "docx":
         output = Path(tempfile.mktemp(suffix=".docx"))
-        path = render_docx(doc, ruleset, str(output))
+        path = render_docx(doc, ruleset, str(output), letterhead=letterhead)
         return FileResponse(
             path=str(path),
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -147,6 +165,7 @@ async def format_upload(
     output_format: str = Form("docx"),
     word_count: int | None = Form(None),
     insert_missing: bool = Form(True),
+    letterhead_id: str | None = Form(None),
 ):
     """Format an uploaded DOCX/PDF/text file.
 
@@ -164,6 +183,8 @@ async def format_upload(
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+    letterhead = _resolve_letterhead(letterhead_id)
+
     doc = format_document(
         text, meta, ruleset,
         word_count=word_count,
@@ -172,7 +193,7 @@ async def format_upload(
 
     if output_format == "docx":
         output = Path(tempfile.mktemp(suffix=".docx"))
-        path = render_docx(doc, ruleset, str(output))
+        path = render_docx(doc, ruleset, str(output), letterhead=letterhead)
         return FileResponse(
             path=str(path),
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -304,3 +325,109 @@ async def citations_upload(file: UploadFile = File(...)):
             for i in report.issues
         ],
     )
+
+
+# ── Letterheads ───────────────────────────────────────────────────────
+
+
+def _lh_to_response(lh: Letterhead) -> LetterheadResponse:
+    return LetterheadResponse(
+        id=lh.id,
+        name=lh.name,
+        lines=[
+            {"text": l.text, "bold": l.bold, "italic": l.italic,
+             "font_size_pt": l.font_size_pt, "alignment": l.alignment}
+            for l in lh.lines
+        ],
+        logo_path=lh.logo_path,
+        logo_width_inches=lh.logo_width_inches,
+        separator_line=lh.separator_line,
+        spacing_after_pt=lh.spacing_after_pt,
+    )
+
+
+@app.get("/api/letterheads", response_model=LetterheadListResponse)
+async def list_letterheads():
+    """List all saved letterhead profiles."""
+    return LetterheadListResponse(
+        letterheads=[_lh_to_response(lh) for lh in _letterhead_mgr.list()]
+    )
+
+
+@app.get("/api/letterheads/{letterhead_id}", response_model=LetterheadResponse)
+async def get_letterhead(letterhead_id: str):
+    """Get a specific letterhead by ID."""
+    lh = _letterhead_mgr.get(letterhead_id)
+    if not lh:
+        raise HTTPException(status_code=404, detail="Letterhead not found")
+    return _lh_to_response(lh)
+
+
+@app.post("/api/letterheads", response_model=LetterheadResponse, status_code=201)
+async def create_letterhead(req: LetterheadCreate):
+    """Create a new letterhead profile."""
+    lh = Letterhead(
+        name=req.name,
+        lines=[
+            LetterheadLine(
+                text=l.text, bold=l.bold, italic=l.italic,
+                font_size_pt=l.font_size_pt, alignment=l.alignment,
+            )
+            for l in req.lines
+        ],
+        logo_width_inches=req.logo_width_inches,
+        separator_line=req.separator_line,
+        spacing_after_pt=req.spacing_after_pt,
+    )
+    saved = _letterhead_mgr.save(lh)
+    return _lh_to_response(saved)
+
+
+@app.put("/api/letterheads/{letterhead_id}", response_model=LetterheadResponse)
+async def update_letterhead(letterhead_id: str, req: LetterheadCreate):
+    """Update an existing letterhead profile."""
+    existing = _letterhead_mgr.get(letterhead_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Letterhead not found")
+
+    existing.name = req.name
+    existing.lines = [
+        LetterheadLine(
+            text=l.text, bold=l.bold, italic=l.italic,
+            font_size_pt=l.font_size_pt, alignment=l.alignment,
+        )
+        for l in req.lines
+    ]
+    existing.logo_width_inches = req.logo_width_inches
+    existing.separator_line = req.separator_line
+    existing.spacing_after_pt = req.spacing_after_pt
+
+    saved = _letterhead_mgr.save(existing)
+    return _lh_to_response(saved)
+
+
+@app.delete("/api/letterheads/{letterhead_id}")
+async def delete_letterhead(letterhead_id: str):
+    """Delete a letterhead profile."""
+    if not _letterhead_mgr.delete(letterhead_id):
+        raise HTTPException(status_code=404, detail="Letterhead not found")
+    return {"deleted": True}
+
+
+@app.post("/api/letterheads/{letterhead_id}/logo")
+async def upload_letterhead_logo(letterhead_id: str, file: UploadFile = File(...)):
+    """Upload a logo image for an existing letterhead."""
+    lh = _letterhead_mgr.get(letterhead_id)
+    if not lh:
+        raise HTTPException(status_code=404, detail="Letterhead not found")
+
+    suffix = Path(file.filename or "logo.png").suffix.lower()
+    if suffix not in (".png", ".jpg", ".jpeg", ".gif", ".bmp"):
+        raise HTTPException(status_code=422, detail="Logo must be an image file")
+
+    tmp = Path(tempfile.mktemp(suffix=suffix))
+    tmp.write_bytes(file.file.read())
+    saved = _letterhead_mgr.save(lh, logo_source=tmp)
+    tmp.unlink(missing_ok=True)
+
+    return _lh_to_response(saved)

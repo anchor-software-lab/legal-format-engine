@@ -337,6 +337,103 @@ textarea.invalid {
   min-width: 70px;
 }
 
+/* ── Letterhead ───────────────────────────────────────────────────── */
+
+.letterhead-preview {
+  background: #fff;
+  border: 1px solid #edebe9;
+  border-radius: 2px;
+  padding: 10px;
+  margin: 8px 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.letterhead-preview .lh-line {
+  margin: 1px 0;
+}
+
+.letterhead-preview .lh-separator {
+  border-top: 1px solid #c8c6c4;
+  margin: 6px 20px 0;
+}
+
+.letterhead-actions {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.editor-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 10px 0 8px;
+  color: #0078d4;
+}
+
+.block-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #605e5c;
+  margin-bottom: 4px;
+}
+
+.lh-line-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+  align-items: flex-start;
+}
+
+.lh-line-row input[type="text"] {
+  flex: 1;
+}
+
+.lh-line-row select {
+  width: 70px;
+  flex: 0 0 70px;
+}
+
+.lh-line-row .btn-icon {
+  flex: 0 0 20px;
+  margin-top: 4px;
+}
+
+.lh-line-options {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.lh-line-options label {
+  font-size: 10px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lh-line-options input[type="number"] {
+  width: 48px;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.editor-actions .btn {
+  flex: 0;
+  min-width: 80px;
+}
+
 /* ── Results ──────────────────────────────────────────────────────── */
 
 #results-section {

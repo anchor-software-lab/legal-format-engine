@@ -11,7 +11,7 @@ from pathlib import Path
 from docx import Document as DocxDocument
 from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 
 from legal_format_engine.models.document import (
     Alignment,
@@ -21,6 +21,7 @@ from legal_format_engine.models.document import (
     Section,
     SignatureBlock,
 )
+from legal_format_engine.models.letterhead import Letterhead, LetterheadLine
 from legal_format_engine.rules.schema import PageFormat, Ruleset
 
 # Alignment mapping
@@ -32,13 +33,19 @@ _ALIGN_MAP = {
 }
 
 
-def render_docx(doc: LegalDocument, ruleset: Ruleset, output_path: str | Path) -> Path:
+def render_docx(
+    doc: LegalDocument,
+    ruleset: Ruleset,
+    output_path: str | Path,
+    letterhead: Letterhead | None = None,
+) -> Path:
     """Render a LegalDocument to a DOCX file.
 
     Args:
         doc: The internal document representation.
         ruleset: The active ruleset for formatting rules.
         output_path: Where to save the DOCX file.
+        letterhead: Optional letterhead to render at the top of the document.
 
     Returns:
         The Path to the saved file.
@@ -49,6 +56,9 @@ def render_docx(doc: LegalDocument, ruleset: Ruleset, output_path: str | Path) -
 
     _setup_page(docx, fmt)
     _set_default_font(docx, fmt)
+
+    if letterhead:
+        _render_letterhead(docx, letterhead, fmt)
 
     if doc.caption:
         _render_caption(docx, doc.caption, fmt)
@@ -182,3 +192,64 @@ def _add_blank_line(docx: DocxDocument, fmt: PageFormat) -> None:
     run = para.add_run("")
     run.font.name = fmt.font_name
     run.font.size = Pt(fmt.font_size_pt)
+
+
+# ── Letterhead ────────────────────────────────────────────────────────
+
+_LETTERHEAD_ALIGN = {
+    "left": WD_ALIGN_PARAGRAPH.LEFT,
+    "center": WD_ALIGN_PARAGRAPH.CENTER,
+    "right": WD_ALIGN_PARAGRAPH.RIGHT,
+}
+
+
+def _render_letterhead(docx: DocxDocument, lh: Letterhead, fmt: PageFormat) -> None:
+    """Render a letterhead at the top of the document."""
+    # Logo (if present)
+    if lh.logo_path:
+        logo = Path(lh.logo_path)
+        if logo.exists():
+            para = docx.add_paragraph()
+            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = para.add_run()
+            run.add_picture(str(logo), width=Inches(lh.logo_width_inches))
+
+    # Text lines
+    for line in lh.lines:
+        _render_letterhead_line(docx, line, fmt)
+
+    # Separator
+    if lh.separator_line:
+        para = docx.add_paragraph()
+        para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Use a bottom border on the paragraph
+        pf = para.paragraph_format
+        pf.space_before = Pt(4)
+        pf.space_after = Pt(lh.spacing_after_pt)
+        run = para.add_run("_" * 60)
+        run.font.size = Pt(6)
+        run.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+    else:
+        # Just add spacing
+        para = docx.add_paragraph()
+        para.paragraph_format.space_after = Pt(lh.spacing_after_pt)
+
+
+def _render_letterhead_line(
+    docx: DocxDocument, line: LetterheadLine, fmt: PageFormat
+) -> None:
+    """Render a single letterhead line."""
+    para = docx.add_paragraph()
+    para.alignment = _LETTERHEAD_ALIGN.get(line.alignment, WD_ALIGN_PARAGRAPH.CENTER)
+
+    # Tight spacing for letterhead
+    pf = para.paragraph_format
+    pf.space_before = Pt(0)
+    pf.space_after = Pt(0)
+    pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+
+    run = para.add_run(line.text)
+    run.font.name = fmt.font_name
+    run.font.size = Pt(line.font_size_pt or fmt.font_size_pt)
+    run.bold = line.bold
+    run.italic = line.italic
