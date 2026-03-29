@@ -1,0 +1,215 @@
+# Wisconsin Court of Appeals - Appellate Brief Rules
+# Based on Wis. Stat. Ch. 809 and Wis. Stat. Rule 809.19
+#
+# This ruleset defines the required structure, formatting, and sections
+# for a brief filed in the Wisconsin Court of Appeals.
+
+jurisdiction: wisconsin
+court_level: appellate
+document_type: brief
+
+# Page layout per Wis. Stat. Rule 809.19(8)(b)
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 12
+  line_spacing: 2.0  # double-spaced
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+# Heading formatting by level
+heading_rules:
+  - level: 1
+    case_style: upper       # ALL CAPS
+    alignment: center
+    numbering: null          # No numbering prefix for top-level headings
+    bold: true
+  - level: 2
+    case_style: title        # Title Case
+    alignment: left
+    numbering: roman         # I., II., III.
+    bold: true
+  - level: 3
+    case_style: sentence     # Sentence case
+    alignment: left
+    numbering: alpha_upper   # A., B., C.
+    bold: false
+  - level: 4
+    case_style: sentence     # Sentence case
+    alignment: left
+    numbering: arabic        # 1., 2., 3.
+    bold: false
+
+# Required sections per Wis. Stat. Rule 809.19(1)
+# Order reflects the statutory sequence
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of Issues"
+    aliases:
+      - "Statement of the Issues"
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Issues"
+      - "Questions Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: position_on_oral_argument
+    canonical_name: "Position on Oral Argument and Publication"
+    aliases:
+      - "Statement on Oral Argument and Publication"
+      - "Oral Argument and Publication"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Case History"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+    order: 8
+    required: true
+    heading_level: 1
+
+# Caption formatting rules
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  party_separator: "v."
+  party_alignment: center
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+
+# Certifications required per Wis. Stat. Rule 809.19(8)(d) and 809.19(12)
+certifications:
+  - id: form_and_length
+    title: "Certification as to Form and Length"
+    template: |
+      I hereby certify that this brief conforms to the rules contained in
+      Wis. Stat. Rule 809.19(8)(b), (bm) and (c) for a brief. The length
+      of this brief is {word_count} words.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date_filed}, I caused three copies of this
+      brief to be served upon the following parties by depositing the same
+      in the United States mail, first-class postage prepaid, addressed to:
+
+      {service_parties}
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+  - id: appendix_certification
+    title: "Certification as to Appendix"
+    template: |
+      I hereby certify that filed with this brief, either as a separate
+      document or as a part of this brief, is an appendix that complies
+      with Wis. Stat. Rule 809.19(2)(a) and that contains, at a minimum:
+      (1) a table of contents; (2) the findings or opinion of the circuit
+      court; (3) a copy of any unpublished opinion cited under
+      Wis. Stat. Rule 809.23(3)(a) or (b); and (4) portions of the record
+      essential to an understanding of the issues raised, including oral or
+      written rulings or decisions showing the circuit court's reasoning
+      regarding those issues.
+
+      I further certify that if this appeal is taken from a circuit court
+      order or judgment entered in a judicial review of an administrative
+      decision, the appendix contains the findings of fact and conclusions
+      of law, if any, and final decision of the administrative agency.
+
+      I further certify that if the record is required by law to be
+      confidential, the portions of the record included in the appendix
+      are reproduced using one or more initials or other appropriate
+      pseudonym or designation instead of full names of persons,
+      specifically combating children and parents.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+  - id: electronic_filing_certification
+    title: "Certification of Electronic Filing"
+    template: |
+      I hereby certify that I have submitted an electronic copy of this
+      brief, which complies with the requirements of Wis. Stat.
+      Rule 809.19(12). The electronic brief is identical in content and
+      format to the printed form of the brief filed as of this date.
+
+      A copy of this certificate has been served with the paper copies
+      of this brief filed with the court and served on all opposing
+      parties.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+signature_block_required: true
