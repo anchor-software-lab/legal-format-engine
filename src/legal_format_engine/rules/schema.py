@@ -31,7 +31,7 @@ class PageFormat(BaseModel):
     """Page layout and typography rules."""
 
     font_name: str = "Times New Roman"
-    font_size_pt: int = 12
+    font_size_pt: float = 12
     line_spacing: float = 2.0
     margin_top_inches: float = 1.0
     margin_bottom_inches: float = 1.0
@@ -47,19 +47,31 @@ class CaptionRule(BaseModel):
     court_line_style: str = "upper"  # casing for the court name line
     court_line_alignment: str = "center"
     case_number_alignment: str = "right"
+    case_number_prefix: str = "Case No."
     party_separator: str = "v."
+    party_name_style: str = "upper"
+    party_role_style: str = "title"
     party_alignment: str = "center"
+    party_role_indented: bool = False
     document_title_style: str = "upper"
     document_title_alignment: str = "center"
     include_district: bool = True
     include_appeal_from: bool = True
+    appeal_from_style: str = "sentence"
+    appeal_from_alignment: str = "center"
+
+
+class SignatureBlock(BaseModel):
+    """Signature block formatting rules."""
+
+    template: str = ""
 
 
 class CertificationRule(BaseModel):
     """A required certification block."""
 
     id: str
-    title: str
+    title: str | None = None
     template: str
 
 
@@ -74,6 +86,7 @@ class Ruleset(BaseModel):
     required_sections: list[RequiredSection] = []
     caption_rule: CaptionRule = CaptionRule()
     certifications: list[CertificationRule] = []
+    signature_block: SignatureBlock | None = None
     signature_block_required: bool = True
 
     def get_heading_rule(self, level: int) -> HeadingRule | None:

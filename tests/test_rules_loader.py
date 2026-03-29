@@ -49,3 +49,68 @@ class TestLoadRuleset:
     def test_missing_ruleset(self):
         with pytest.raises(FileNotFoundError):
             load_ruleset("nonexistent", "court", "type")
+
+
+class TestSPDRuleset:
+    """Tests for the Wisconsin SPD appellate brief variant."""
+
+    def test_load_spd_variant(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        assert rs.jurisdiction == "wisconsin"
+        assert rs.document_type == "brief"
+
+    def test_spd_margins(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        assert rs.page_format.margin_top_inches == 1.25
+        assert rs.page_format.margin_left_inches == 2.0
+
+    def test_spd_font_size(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        assert rs.page_format.font_size_pt == 10
+
+    def test_spd_combined_case_and_facts(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        ids = [s.id for s in rs.required_sections]
+        assert "statement_of_case_and_facts" in ids
+        # SPD combines case and facts; should not have separate entries
+        assert "statement_of_case" not in ids
+        assert "statement_of_facts" not in ids
+
+    def test_spd_issues_presented(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        issues = next(s for s in rs.required_sections if s.id == "statement_of_issues")
+        assert issues.canonical_name == "Issues Presented"
+
+    def test_spd_section_order(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        ids = [s.id for s in sorted(rs.required_sections, key=lambda s: s.order)]
+        expected = [
+            "table_of_contents",
+            "table_of_authorities",
+            "statement_of_issues",
+            "position_on_oral_argument",
+            "statement_of_case_and_facts",
+            "argument",
+            "conclusion",
+            "certifications",
+        ]
+        assert ids == expected
+
+    def test_spd_certifications(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        cert_ids = [c.id for c in rs.certifications]
+        assert "form_and_length" in cert_ids
+        assert "appendix_certification" in cert_ids
+
+    def test_spd_heading_level_1_centered(self):
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        h1 = rs.get_heading_rule(1)
+        assert h1.alignment == "center"
+        assert h1.bold is True
+
+    def test_variant_fallback(self):
+        """Unknown variant falls back to generic ruleset."""
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="nonexistent")
+        assert rs.jurisdiction == "wisconsin"
+        # Falls back to generic which has 1.0" margins
+        assert rs.page_format.margin_top_inches == 1.0

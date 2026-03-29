@@ -1,48 +1,68 @@
 # Wisconsin State Public Defender - Appellate Brief Format
-# House style used by SPD appellate attorneys
+# Derived from actual filed SPD briefs (Christopherson BIC, 2025AP002377-CR)
 #
-# This ruleset captures the specific formatting conventions of the
-# Wisconsin State Public Defender's Office for appellate briefs,
-# which builds on the statutory requirements of Wis. Stat. Ch. 809
-# with office-specific conventions.
+# SPD house style conventions as used by the Office of the State
+# Public Defender, Appellate Division, Madison, Wisconsin.
 #
-# IMPORTANT: This ruleset will be refined from actual filed briefs.
-# Upload reference briefs to reference/briefs/ and run the analysis tool.
+# Notable SPD conventions vs. generic Wisconsin appellate:
+# - Margins: 1.25" top/bottom, 2.0" left/right (not 1" all around)
+# - Font size: 10pt (not 12pt)
+# - "Statement of the Case and Facts" combined (not separate sections)
+# - "Issues Presented" (not "Statement of the Issues")
+# - Section headings: bold, centered, title case (not ALL CAPS for L2)
+# - Argument headings: ALL CAPS for top-level arguments (L2 within Argument)
+# - Sub-argument headings: title case, bold, centered
+# - Certifications combined into single "Certifications" section
+# - Caption: party names left-aligned, not centered
 
 jurisdiction: wisconsin
 court_level: appellate
 document_type: brief
 
-# Page layout per Wis. Stat. Rule 809.19(8)(b) + SPD conventions
+# Page layout - SPD house style
+# These values are derived from the Christopherson brief
 page_format:
   font_name: "Times New Roman"
-  font_size_pt: 12
+  font_size_pt: 10
   line_spacing: 2.0  # double-spaced
-  margin_top_inches: 1.0
-  margin_bottom_inches: 1.0
-  margin_left_inches: 1.0
-  margin_right_inches: 1.0
+  margin_top_inches: 1.25
+  margin_bottom_inches: 1.25
+  margin_left_inches: 2.0
+  margin_right_inches: 2.0
   page_width_inches: 8.5
   page_height_inches: 11.0
 
 # Heading formatting - SPD house style
-# Level 1: ALL CAPS, CENTERED, BOLD (major section headings)
-# Level 2: Roman numeral, bold, left-aligned (argument sub-headings)
-# Level 3: Capital letter, bold, left-aligned (argument sub-sub-headings)
-# Level 4: Arabic numeral, left-aligned (fine-grained points)
+# Derived from Christopherson brief structure:
+#
+# Level 1: Major sections - bold, centered, title/mixed case
+#          e.g., "Table of Contents", "Issues Presented", "Argument", "Conclusion"
+#          Note: NOT all-caps for most section headings (unlike generic WI appellate)
+#
+# Level 2: Top-level argument headings - ALL CAPS, left-aligned, bold
+#          e.g., "THE CIRCUIT COURT ERRONEOUSLY ADMITTED OTHER-ACTS EVIDENCE..."
+#          Also used for narrative sub-sections within Case/Facts - bold, centered, title case
+#          e.g., "Background and Initial Allegations", "The Other-Acts Hearing"
+#
+# Level 3: Sub-argument headings - title case, bold, left-aligned
+#          e.g., "The Independent Review Doctrine Does Not Apply..."
+#          e.g., "The Other-Acts Evidence Fails the Sullivan Analysis..."
+#
+# Level 4: Sub-sub-argument headings - sentence case, left-aligned
+#          e.g., "The Circuit Court Failed to Adequately Apply..."
 heading_rules:
   - level: 1
-    case_style: upper
+    case_style: title
     alignment: center
     numbering: null
     bold: true
   - level: 2
-    case_style: title
+    case_style: upper
     alignment: left
     numbering: roman
     bold: true
   - level: 3
-    case_style: sentence
+    case_style: title
     alignment: left
     numbering: alpha_upper
     bold: true
@@ -52,8 +72,8 @@ heading_rules:
     numbering: arabic
     bold: false
 
-# Required sections per Wis. Stat. Rule 809.19(1) + SPD conventions
-# SPD typically includes all statutory sections in this order
+# Required sections - SPD appellate brief order
+# Derived from Christopherson brief structure
 required_sections:
   - id: table_of_contents
     canonical_name: "Table of Contents"
@@ -74,10 +94,10 @@ required_sections:
     heading_level: 1
 
   - id: statement_of_issues
-    canonical_name: "Statement of the Issues"
+    canonical_name: "Issues Presented"
     aliases:
+      - "Statement of the Issues"
       - "Statement of Issues"
-      - "Issues Presented"
       - "Issues Presented for Review"
       - "Issues"
       - "Questions Presented"
@@ -96,25 +116,17 @@ required_sections:
     required: true
     heading_level: 1
 
-  - id: statement_of_case
-    canonical_name: "Statement of the Case"
+  # SPD convention: Case and Facts combined into one section
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of the Case and Facts"
     aliases:
-      - "Case Statement"
+      - "Statement of the Case"
       - "Statement of Case"
-      - "Procedural History"
-      - "Case History"
-      - "Procedural Background"
-    order: 5
-    required: true
-    heading_level: 1
-
-  - id: statement_of_facts
-    canonical_name: "Statement of Facts"
-    aliases:
+      - "Statement of Facts"
+      - "Case and Facts"
+      - "Statement of Case and Facts"
       - "Facts"
-      - "Factual Background"
-      - "Statement of the Facts"
-    order: 6
+    order: 5
     required: true
     heading_level: 1
 
@@ -123,7 +135,7 @@ required_sections:
     aliases:
       - "Arguments"
       - "Discussion"
-    order: 7
+    order: 6
     required: true
     heading_level: 1
 
@@ -131,73 +143,110 @@ required_sections:
     canonical_name: "Conclusion"
     aliases:
       - "Prayer for Relief"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: certifications
+    canonical_name: "Certifications"
+    aliases:
+      - "Certification"
+      - "Certificates"
     order: 8
     required: true
     heading_level: 1
 
 # Caption formatting - SPD style
+# Derived from Christopherson brief caption block:
+#   STATE OF WISCONSIN          (centered, all caps)
+#   COURT OF APPEALS            (centered, all caps)
+#   DISTRICT II                 (centered, all caps)
+#   CASE NO. 2025AP002377 – CR  (centered, all caps)
+#   STATE OF WISCONSIN,         (left-aligned, all caps)
+#        Plaintiff-Respondent,  (indented, title case)
+#   v.                          (left-aligned)
+#   JEFFREY JAMES CHRISTOPHERSON, (left-aligned, all caps)
+#        Defendant-Appellant.   (indented, title case)
+#   On an Appeal from...        (centered, sentence case)
+#   BRIEF OF                    (centered, all caps)
+#   DEFENDANT-APPELLANT         (centered, all caps)
 caption_rule:
   court_line_style: upper
   court_line_alignment: center
-  case_number_alignment: right
+  case_number_alignment: center
+  case_number_prefix: "CASE NO."
   party_separator: "v."
-  party_alignment: center
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
   document_title_style: upper
   document_title_alignment: center
   include_district: true
   include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-# Certifications - SPD standard language
+# Signature block - SPD format
+# Derived from Christopherson brief:
+#   Dated this [day] day of [month], [year].
+#   Respectfully submitted,
+#   Electronically signed by
+#   Nicholas G. Smith
+#   NICHOLAS G. SMITH
+#   Assistant State Public Defender
+#   State Bar No. 1089586
+#   Office of the State Public Defender
+#   Post Office Box 7862
+#   Madison, WI  53707-7862
+#   (608) 261-5417
+#   smithn@opd.wi.gov
+#   Attorney for Defendant-Appellant
+signature_block:
+  template: |
+    Dated this {day} day of {month}, {year}.
+
+    Respectfully submitted,
+
+    Electronically signed by
+    {attorney_display_name}
+    {attorney_name_caps}
+    {attorney_title}
+    State Bar No. {bar_number}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+# Certifications - SPD combined format
+# SPD combines all certifications under one "Certifications" heading
+# Derived from exact language in Christopherson brief
 certifications:
   - id: form_and_length
-    title: "Certification as to Form and Length"
+    title: null  # No sub-heading; runs as continuous paragraphs
     template: |
-      I hereby certify that this brief conforms to the rules contained
-      in Wis. Stat. Rule 809.19(8)(b), (bm) and (c) for a brief. The
-      length of this brief is {word_count} words.
-
-      Dated this {day} day of {month}, {year}.
-
-      {signature_line}
-      {attorney_name}
-      State Bar No. {bar_number}
-      Office of the State Public Defender
-      {address}
-      {phone}
-      {email}
-
-  - id: certificate_of_service
-    title: "Certificate of Service"
-    template: |
-      I hereby certify that on {date_filed}, I caused three copies of
-      this brief to be served upon the following parties by depositing
-      the same in the United States mail, first-class postage prepaid,
-      addressed to:
-
-      {service_parties}
-
-      Dated this {day} day of {month}, {year}.
-
-      {signature_line}
-      {attorney_name}
-      State Bar No. {bar_number}
+      I hereby certify that this brief conforms to the rules
+      contained in s. 809.19(8)(b), (bm), and (c) for a brief.
+      The length of this brief is {word_count} words.
 
   - id: appendix_certification
-    title: "Certification as to Appendix"
+    title: null
     template: |
-      I hereby certify that filed with this brief, either as a
-      separate document or as a part of this brief, is an appendix
-      that complies with Wis. Stat. Rule 809.19(2)(a) and that
-      contains, at a minimum: (1) a table of contents; (2) the
-      findings or opinion of the circuit court; (3) a copy of any
-      unpublished opinion cited under Wis. Stat. Rule 809.23(3)(a)
-      or (b); and (4) portions of the record essential to an
-      understanding of the issues raised, including oral or written
-      rulings or decisions showing the circuit court's reasoning
-      regarding those issues.
+      I hereby certify that filed with this brief is an appendix
+      that complies with s. 809.19(2)(a) and that contains, at a
+      minimum: (1) a table of contents; (2) the findings or opinion
+      of the circuit court; (3) a copy of any unpublished opinion
+      cited under s. 809.23(3)(a) or (b); and (4) portions of the
+      record essential to an understanding of the issues raised,
+      including oral or written rulings or decisions showing the
+      circuit court's reasoning regarding those issues.
 
       I further certify that if this appeal is taken from a circuit
-      court order or judgment entered in a judicial review of an
+      court order or judgment entered in a judicial review or an
       administrative decision, the appendix contains the findings
       of fact and conclusions of law, if any, and final decision of
       the administrative agency.
@@ -207,31 +256,17 @@ certifications:
       appendix are reproduced using one or more initials or other
       appropriate pseudonym or designation instead of full names of
       persons, specifically including juveniles and parents of
-      juveniles.
+      juveniles, with actual names included in a sealed reference
+      list.
 
-      Dated this {day} day of {month}, {year}.
-
-      {signature_line}
-      {attorney_name}
-      State Bar No. {bar_number}
-
-  - id: electronic_filing_certification
-    title: "Certification of Electronic Filing"
+  - id: signature_repeat
+    title: null
     template: |
-      I hereby certify that I have submitted an electronic copy of
-      this brief, which complies with the requirements of Wis. Stat.
-      Rule 809.19(12). The electronic brief is identical in content
-      and format to the printed form of the brief filed as of this
-      date.
+      Signed:
 
-      A copy of this certificate has been served with the paper
-      copies of this brief filed with the court and served on all
-      opposing parties.
-
-      Dated this {day} day of {month}, {year}.
-
-      {signature_line}
-      {attorney_name}
-      State Bar No. {bar_number}
+      Electronically signed by
+      {attorney_display_name}
+      {attorney_name_caps}
+      {attorney_title}
 
 signature_block_required: true
