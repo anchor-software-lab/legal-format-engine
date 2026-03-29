@@ -1,0 +1,237 @@
+# Wisconsin State Public Defender - Appellate Brief Format
+# House style used by SPD appellate attorneys
+#
+# This ruleset captures the specific formatting conventions of the
+# Wisconsin State Public Defender's Office for appellate briefs,
+# which builds on the statutory requirements of Wis. Stat. Ch. 809
+# with office-specific conventions.
+#
+# IMPORTANT: This ruleset will be refined from actual filed briefs.
+# Upload reference briefs to reference/briefs/ and run the analysis tool.
+
+jurisdiction: wisconsin
+court_level: appellate
+document_type: brief
+
+# Page layout per Wis. Stat. Rule 809.19(8)(b) + SPD conventions
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 12
+  line_spacing: 2.0  # double-spaced
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+# Heading formatting - SPD house style
+# Level 1: ALL CAPS, CENTERED, BOLD (major section headings)
+# Level 2: Roman numeral, bold, left-aligned (argument sub-headings)
+# Level 3: Capital letter, bold, left-aligned (argument sub-sub-headings)
+# Level 4: Arabic numeral, left-aligned (fine-grained points)
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: title
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: sentence
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+# Required sections per Wis. Stat. Rule 809.19(1) + SPD conventions
+# SPD typically includes all statutory sections in this order
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of the Issues"
+    aliases:
+      - "Statement of Issues"
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Issues"
+      - "Questions Presented"
+      - "Issue Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: position_on_oral_argument
+    canonical_name: "Position on Oral Argument and Publication"
+    aliases:
+      - "Statement on Oral Argument and Publication"
+      - "Oral Argument and Publication"
+      - "Position on Oral Argument"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Case History"
+      - "Procedural Background"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+    order: 8
+    required: true
+    heading_level: 1
+
+# Caption formatting - SPD style
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  party_separator: "v."
+  party_alignment: center
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+
+# Certifications - SPD standard language
+certifications:
+  - id: form_and_length
+    title: "Certification as to Form and Length"
+    template: |
+      I hereby certify that this brief conforms to the rules contained
+      in Wis. Stat. Rule 809.19(8)(b), (bm) and (c) for a brief. The
+      length of this brief is {word_count} words.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+      Office of the State Public Defender
+      {address}
+      {phone}
+      {email}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date_filed}, I caused three copies of
+      this brief to be served upon the following parties by depositing
+      the same in the United States mail, first-class postage prepaid,
+      addressed to:
+
+      {service_parties}
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+  - id: appendix_certification
+    title: "Certification as to Appendix"
+    template: |
+      I hereby certify that filed with this brief, either as a
+      separate document or as a part of this brief, is an appendix
+      that complies with Wis. Stat. Rule 809.19(2)(a) and that
+      contains, at a minimum: (1) a table of contents; (2) the
+      findings or opinion of the circuit court; (3) a copy of any
+      unpublished opinion cited under Wis. Stat. Rule 809.23(3)(a)
+      or (b); and (4) portions of the record essential to an
+      understanding of the issues raised, including oral or written
+      rulings or decisions showing the circuit court's reasoning
+      regarding those issues.
+
+      I further certify that if this appeal is taken from a circuit
+      court order or judgment entered in a judicial review of an
+      administrative decision, the appendix contains the findings
+      of fact and conclusions of law, if any, and final decision of
+      the administrative agency.
+
+      I further certify that if the record is required by law to be
+      confidential, the portions of the record included in the
+      appendix are reproduced using one or more initials or other
+      appropriate pseudonym or designation instead of full names of
+      persons, specifically including juveniles and parents of
+      juveniles.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+  - id: electronic_filing_certification
+    title: "Certification of Electronic Filing"
+    template: |
+      I hereby certify that I have submitted an electronic copy of
+      this brief, which complies with the requirements of Wis. Stat.
+      Rule 809.19(12). The electronic brief is identical in content
+      and format to the printed form of the brief filed as of this
+      date.
+
+      A copy of this certificate has been served with the paper
+      copies of this brief filed with the court and served on all
+      opposing parties.
+
+      Dated this {day} day of {month}, {year}.
+
+      {signature_line}
+      {attorney_name}
+      State Bar No. {bar_number}
+
+signature_block_required: true
