@@ -651,6 +651,8 @@ async def ml_ingest_archive(
     document_type: str | None = Form(None),
     tags: str | None = Form(None),
     notes: str | None = Form(None),
+    author: str | None = Form(None),
+    firm: str | None = Form(None),
 ):
     """Ingest a collection of documents from an archive.
 
@@ -689,6 +691,8 @@ async def ml_ingest_archive(
             document_type=document_type,
             tags=tag_list,
             notes=notes,
+            author=author,
+            firm=firm,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
@@ -708,6 +712,8 @@ async def ml_ingest_document(
     document_type: str | None = Form(None),
     tags: str | None = Form(None),
     notes: str | None = Form(None),
+    author: str | None = Form(None),
+    firm: str | None = Form(None),
 ):
     """Ingest a document into the ML pipeline.
 
@@ -761,6 +767,8 @@ async def ml_ingest_document(
             document_type=document_type,
             tags=tag_list,
             notes=notes,
+            author=author,
+            firm=firm,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
@@ -951,3 +959,71 @@ async def ml_delete_document(doc_id: str):
 async def ml_stats():
     """Get statistics about the ML document store."""
     return _ml_pipeline.get_stats()
+
+
+# ------------------------------------------------------------------
+# Style profiles: author/firm formatting preferences
+# ------------------------------------------------------------------
+
+@app.post("/api/ml/styles/build", status_code=201)
+async def ml_build_style_profile(
+    profile_type: str = Form(...),  # "author" or "firm"
+    name: str = Form(...),
+    jurisdiction: str | None = Form(None),
+):
+    """Build a style profile from ingested documents by an author or firm.
+
+    Learns discretionary formatting preferences (things court rules don't
+    specify) from all documents tagged with this author/firm name.
+    """
+    if profile_type not in ("author", "firm"):
+        raise HTTPException(status_code=422, detail="profile_type must be 'author' or 'firm'")
+    return _ml_pipeline.build_style_profile(profile_type, name, jurisdiction)
+
+
+@app.get("/api/ml/styles")
+async def ml_list_style_profiles():
+    """List all saved style profiles."""
+    return _ml_pipeline.list_style_profiles()
+
+
+@app.get("/api/ml/styles/{profile_type}/{name}")
+async def ml_get_style_profile(profile_type: str, name: str):
+    """Get a specific style profile."""
+    profile = _ml_pipeline.get_style_profile(profile_type, name)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Style profile not found")
+    return profile
+
+
+@app.delete("/api/ml/styles/{profile_type}/{name}")
+async def ml_delete_style_profile(profile_type: str, name: str):
+    """Delete a style profile."""
+    if not _ml_pipeline.delete_style_profile(profile_type, name):
+        raise HTTPException(status_code=404, detail="Style profile not found")
+    return {"deleted": True}
+
+
+# ------------------------------------------------------------------
+# Resolve format: apply the full rule hierarchy
+# ------------------------------------------------------------------
+
+@app.get("/api/ml/resolve")
+async def ml_resolve_format(
+    jurisdiction: str = "wisconsin",
+    court_level: str = "appellate",
+    document_type: str = "brief",
+    author: str | None = None,
+    firm: str | None = None,
+):
+    """Resolve final formatting using the complete hierarchy.
+
+    Court Rules > ML Learned Patterns > Style Profile > Engine Defaults
+
+    Every formatting decision comes with provenance explaining where it
+    came from and why. Court rules ALWAYS win. ML and style profiles
+    only fill gaps where the rules are silent.
+    """
+    return _ml_pipeline.resolve_format(
+        jurisdiction, court_level, document_type, author, firm,
+    )

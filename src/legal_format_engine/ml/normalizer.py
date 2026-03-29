@@ -236,6 +236,10 @@ class NormalizedDocument(BaseModel):
     court_level: str | None = None
     document_type: str | None = None
 
+    # Attribution: who authored this document
+    author: str | None = None  # individual attorney name
+    firm: str | None = None  # law firm or organization
+
     # Quality score: how confident are we in the extracted formatting?
     # 1.0 = DOCX with explicit styles, 0.5 = PDF with estimated values
     extraction_confidence: float = 1.0
@@ -403,6 +407,8 @@ def normalize_document(
     jurisdiction: str | None = None,
     court_level: str | None = None,
     document_type: str | None = None,
+    author: str | None = None,
+    firm: str | None = None,
 ) -> NormalizedDocument:
     """Normalize any supported document format.
 
@@ -441,6 +447,8 @@ def normalize_document(
     doc.jurisdiction = jurisdiction
     doc.court_level = court_level
     doc.document_type = document_type
+    doc.author = author
+    doc.firm = firm
     return doc
 
 

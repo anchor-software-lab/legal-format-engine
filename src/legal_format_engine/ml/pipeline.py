@@ -69,6 +69,8 @@ class MLPipeline:
         document_type: str | None = None,
         tags: list[str] | None = None,
         notes: str | None = None,
+        author: str | None = None,
+        firm: str | None = None,
     ) -> NormalizedDocument:
         """Ingest a document: normalize it and store for learning.
 
@@ -83,6 +85,8 @@ class MLPipeline:
             jurisdiction=jurisdiction,
             court_level=court_level,
             document_type=document_type,
+            author=author,
+            firm=firm,
         )
 
         # Store
@@ -97,6 +101,8 @@ class MLPipeline:
         court_level: str | None = None,
         document_type: str | None = None,
         tags: list[str] | None = None,
+        author: str | None = None,
+        firm: str | None = None,
     ) -> list[NormalizedDocument]:
         """Ingest multiple documents at once."""
         results = []
@@ -108,6 +114,8 @@ class MLPipeline:
                     court_level=court_level,
                     document_type=document_type,
                     tags=tags,
+                    author=author,
+                    firm=firm,
                 )
                 results.append(doc)
             except Exception:
@@ -123,6 +131,8 @@ class MLPipeline:
         document_type: str | None = None,
         tags: list[str] | None = None,
         notes: str | None = None,
+        author: str | None = None,
+        firm: str | None = None,
     ) -> dict:
         """Ingest all documents from an archive (ZIP, RAR, Adobe Portfolio).
 
@@ -161,6 +171,8 @@ class MLPipeline:
                         document_type=document_type,
                         tags=tags,
                         notes=notes,
+                        author=author,
+                        firm=firm,
                     )
                     results.append({
                         "id": doc.id,
@@ -350,6 +362,209 @@ class MLPipeline:
             except Exception:
                 continue
         return docs
+
+    def _load_matching(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[NormalizedDocument]:
+        """Load documents matching the given filter criteria."""
+        all_docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                doc = NormalizedDocument.model_validate(doc_data)
+                stored_tags = data.get("tags", [])
+
+                # Apply filters
+                if jurisdiction and doc.jurisdiction != jurisdiction:
+                    continue
+                if court_level and doc.court_level != court_level:
+                    continue
+                if document_type and doc.document_type != document_type:
+                    continue
+                if tags and not any(t in stored_tags for t in tags):
+                    continue
+
+                all_docs.append(doc)
+            except Exception:
+                continue
+
+        return all_docs
+
+    # ------------------------------------------------------------------
+    # Style profiles: author/firm preferences
+    # ------------------------------------------------------------------
+
+    def build_style_profile(
+        self,
+        profile_type: str,
+        name: str,
+        jurisdiction: str | None = None,
+    ) -> dict:
+        """Build and save a style profile from all documents by an author/firm.
+
+        Args:
+            profile_type: "author" or "firm"
+            name: Author name or firm name
+            jurisdiction: Optional filter to specific jurisdiction
+
+        Returns:
+            The profile as a dict.
+        """
+        from legal_format_engine.ml.styles import (
+            StyleProfileStore,
+            build_style_profile,
+        )
+
+        # Load documents matching this author/firm
+        all_records = self._load_all_records()
+        matching = []
+        for doc, record in all_records:
+            attr = doc.author if profile_type == "author" else doc.firm
+            if attr and attr.lower() == name.lower():
+                if jurisdiction and doc.jurisdiction != jurisdiction:
+                    continue
+                matching.append((doc, record))
+
+        if not matching:
+            return {"error": f"No documents found for {profile_type} '{name}'"}
+
+        # Determine rule-governed fields for this jurisdiction
+        rule_governed: set[str] = set()
+        jurisdictions_seen = {doc.jurisdiction for doc, _ in matching if doc.jurisdiction}
+        for j in jurisdictions_seen:
+            try:
+                from legal_format_engine.rules.loader import load_ruleset
+                from legal_format_engine.ml.rule_hierarchy import identify_rule_governed_fields
+                ruleset = load_ruleset(j, "appellate", "brief")
+                rule_governed |= identify_rule_governed_fields(ruleset)
+            except FileNotFoundError:
+                pass
+
+        profile = build_style_profile(
+            matching, profile_type, name, rule_governed,
+        )
+
+        store = StyleProfileStore()
+        store.save(profile)
+
+        return profile.to_dict()
+
+    def get_style_profile(
+        self, profile_type: str, name: str,
+    ) -> dict | None:
+        """Load a saved style profile."""
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        profile = store.load(profile_type, name)
+        return profile.to_dict() if profile else None
+
+    def list_style_profiles(self) -> list[dict]:
+        """List all saved style profiles."""
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        return [p.to_dict() for p in store.list_all()]
+
+    def delete_style_profile(self, profile_type: str, name: str) -> bool:
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        return store.delete(profile_type, name)
+
+    # ------------------------------------------------------------------
+    # Resolve format: apply the full hierarchy
+    # ------------------------------------------------------------------
+
+    def resolve_format(
+        self,
+        jurisdiction: str,
+        court_level: str = "appellate",
+        document_type: str = "brief",
+        author: str | None = None,
+        firm: str | None = None,
+    ) -> dict:
+        """Resolve final formatting using the complete hierarchy:
+
+        Court Rules > ML Learned > Style Profile > Defaults
+
+        Returns a dict with every formatting decision and its provenance.
+        """
+        from legal_format_engine.ml.rule_hierarchy import resolve_format
+        from legal_format_engine.ml.styles import StyleProfileStore
+        from legal_format_engine.rules.loader import load_ruleset
+
+        # 1. Load court rules (mandatory)
+        try:
+            ruleset = load_ruleset(jurisdiction, court_level, document_type)
+        except FileNotFoundError:
+            return {"error": f"No ruleset for {jurisdiction}/{court_level}/{document_type}"}
+
+        # 2. ML learned patterns (optional)
+        learned = self.learn(jurisdiction, court_level, document_type)
+
+        # 3. Style profile (optional, prefer author over firm)
+        style = None
+        store = StyleProfileStore()
+        if author:
+            profile = store.load("author", author)
+            if profile:
+                style = profile
+        if style is None and firm:
+            profile = store.load("firm", firm)
+            if profile:
+                style = profile
+
+        # 4. Resolve through hierarchy
+        resolved = resolve_format(ruleset, learned, style)
+        return resolved.to_dict()
+
+    # ------------------------------------------------------------------
+    # Storage internals
+    # ------------------------------------------------------------------
+
+    def _save_normalized(
+        self,
+        doc: NormalizedDocument,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+    ) -> None:
+        """Save a NormalizedDocument to disk."""
+        record = {
+            "document": doc.model_dump(),
+            "tags": tags or [],
+            "notes": notes,
+            "stored_at": datetime.now(timezone.utc).isoformat(),
+        }
+        out_path = self._store_dir / f"{doc.id}.json"
+        out_path.write_text(json.dumps(record, indent=2, default=str))
+
+    def _load_all(self) -> list[NormalizedDocument]:
+        """Load all stored normalized documents."""
+        docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                docs.append(NormalizedDocument.model_validate(doc_data))
+            except Exception:
+                continue
+        return docs
+
+    def _load_all_records(self) -> list[tuple[NormalizedDocument, dict]]:
+        """Load all stored documents with their full storage records."""
+        results = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                doc = NormalizedDocument.model_validate(doc_data)
+                results.append((doc, data))
+            except Exception:
+                continue
+        return results
 
     def _load_matching(
         self,
