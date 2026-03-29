@@ -25,6 +25,11 @@ class RequiredSection(BaseModel):
     required: bool = True
     heading_level: int = 1
     subsections: list[RequiredSection] = []
+    # Group constraint: if set, at least one section in the same group
+    # must be present. Use for "either combined or separate" patterns.
+    # e.g., group="case_facts" means either the combined section or
+    # both separate sections satisfy the requirement.
+    group: str | None = None
 
 
 class PageFormat(BaseModel):

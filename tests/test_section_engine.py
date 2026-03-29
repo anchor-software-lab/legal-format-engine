@@ -88,3 +88,57 @@ class TestInsertMissing:
         assert len(doc.sections) > 1
         generated = [s for s in doc.sections if s.is_generated]
         assert len(generated) > 0
+
+
+class TestGroupValidation:
+    def test_combined_case_facts_satisfies_group(self):
+        from legal_format_engine.rules.loader import load_ruleset
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        doc = LegalDocument(sections=[
+            Section(id="toc", heading_text="TABLE OF CONTENTS",
+                    heading_level=HeadingLevel.LEVEL_1, content=[]),
+            Section(id="toa", heading_text="TABLE OF AUTHORITIES",
+                    heading_level=HeadingLevel.LEVEL_1, content=[]),
+            Section(id="issues", heading_text="ISSUES PRESENTED",
+                    heading_level=HeadingLevel.LEVEL_1, content=[]),
+            Section(id="oral", heading_text="POSITION ON ORAL ARGUMENT AND PUBLICATION",
+                    heading_level=HeadingLevel.LEVEL_1, content=[]),
+            Section(id="casefacts", heading_text="STATEMENT OF THE CASE AND FACTS",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Facts here.")]),
+            Section(id="arg", heading_text="ARGUMENT",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Arg.")]),
+            Section(id="conc", heading_text="CONCLUSION",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Done.")]),
+            Section(id="cert", heading_text="CERTIFICATIONS",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="I certify.")]),
+        ])
+        doc = validate_sections(doc, rs)
+        group_issues = [i for i in doc.issues if i.code == "MISSING_SECTION_GROUP"]
+        assert len(group_issues) == 0
+
+    def test_separate_case_facts_satisfies_group(self):
+        from legal_format_engine.rules.loader import load_ruleset
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        doc = LegalDocument(sections=[
+            Section(id="case", heading_text="STATEMENT OF THE CASE",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Case.")]),
+            Section(id="facts", heading_text="STATEMENT OF FACTS",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Facts.")]),
+            Section(id="arg", heading_text="ARGUMENT",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Arg.")]),
+        ])
+        doc = validate_sections(doc, rs)
+        group_issues = [i for i in doc.issues if i.code == "MISSING_SECTION_GROUP"]
+        assert len(group_issues) == 0
+
+    def test_missing_all_case_facts_flags_group(self):
+        from legal_format_engine.rules.loader import load_ruleset
+        rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
+        doc = LegalDocument(sections=[
+            Section(id="arg", heading_text="ARGUMENT",
+                    heading_level=HeadingLevel.LEVEL_1, content=[ContentBlock(text="Arg.")]),
+        ])
+        doc = validate_sections(doc, rs)
+        group_issues = [i for i in doc.issues if i.code == "MISSING_SECTION_GROUP"]
+        assert len(group_issues) == 1
+        assert "Statement of the Case" in group_issues[0].message

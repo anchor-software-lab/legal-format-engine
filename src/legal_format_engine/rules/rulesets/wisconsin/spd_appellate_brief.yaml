@@ -116,19 +116,42 @@ required_sections:
     required: true
     heading_level: 1
 
-  # SPD convention: Case and Facts combined into one section
+  # Case and Facts: SPD attorneys use either combined or separate sections.
+  # The engine accepts both formats. If combined is found, it satisfies
+  # the requirement. If separate sections are found, both are accepted.
   - id: statement_of_case_and_facts
     canonical_name: "Statement of the Case and Facts"
     aliases:
-      - "Statement of the Case"
-      - "Statement of Case"
-      - "Statement of Facts"
       - "Case and Facts"
       - "Statement of Case and Facts"
-      - "Facts"
     order: 5
-    required: true
+    required: false
     heading_level: 1
+    group: case_facts  # at least one in this group must be present
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Case History"
+      - "Procedural Background"
+    order: 5
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 6
+    required: false
+    heading_level: 1
+    group: case_facts
 
   - id: argument
     canonical_name: "Argument"

@@ -57,6 +57,9 @@ def validate_sections(doc: LegalDocument, ruleset: Ruleset) -> LegalDocument:
                 auto_fixable=True,
             ))
 
+    # Check group constraints: at least one section in each group must exist
+    _check_groups(doc, ruleset, matched_ids)
+
     # Check section order
     _check_order(doc, ruleset, aliases)
 
@@ -157,6 +160,38 @@ def _insert_at_order(
             break
 
     doc.sections.insert(insert_idx, stub)
+
+
+def _check_groups(
+    doc: LegalDocument,
+    ruleset: Ruleset,
+    matched_ids: set[str],
+) -> None:
+    """Check group constraints: at least one section in each group must exist.
+
+    Groups allow "either/or" section requirements. For example, a brief
+    can have either a combined "Statement of the Case and Facts" or
+    separate "Statement of the Case" and "Statement of Facts" sections.
+    """
+    # Collect groups
+    groups: dict[str, list[RequiredSection]] = {}
+    for req in ruleset.required_sections:
+        if req.group:
+            groups.setdefault(req.group, []).append(req)
+
+    for group_name, members in groups.items():
+        group_matched = any(m.id in matched_ids for m in members)
+        if not group_matched:
+            names = [m.canonical_name for m in members]
+            doc.issues.append(ValidationIssue(
+                severity=Severity.WARNING,
+                code="MISSING_SECTION_GROUP",
+                message=(
+                    f"At least one of these sections is required: "
+                    f"{', '.join(names)}"
+                ),
+                auto_fixable=False,
+            ))
 
 
 def _check_order(

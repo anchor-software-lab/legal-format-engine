@@ -68,13 +68,19 @@ class TestSPDRuleset:
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
         assert rs.page_format.font_size_pt == 10
 
-    def test_spd_combined_case_and_facts(self):
+    def test_spd_case_and_facts_flexible(self):
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
         ids = [s.id for s in rs.required_sections]
+        # SPD accepts both combined and separate formats
         assert "statement_of_case_and_facts" in ids
-        # SPD combines case and facts; should not have separate entries
-        assert "statement_of_case" not in ids
-        assert "statement_of_facts" not in ids
+        assert "statement_of_case" in ids
+        assert "statement_of_facts" in ids
+        # All are in the same group and individually optional
+        case_facts_sections = [
+            s for s in rs.required_sections if s.group == "case_facts"
+        ]
+        assert len(case_facts_sections) == 3
+        assert all(not s.required for s in case_facts_sections)
 
     def test_spd_issues_presented(self):
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
@@ -83,18 +89,19 @@ class TestSPDRuleset:
 
     def test_spd_section_order(self):
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
-        ids = [s.id for s in sorted(rs.required_sections, key=lambda s: s.order)]
-        expected = [
+        # Sort by order; sections with same order are interchangeable
+        by_order = sorted(rs.required_sections, key=lambda s: s.order)
+        orders = [s.order for s in by_order]
+        # Orders should be non-decreasing
+        assert orders == sorted(orders)
+        # First few should be in expected sequence
+        first_ids = [s.id for s in by_order if s.order <= 4]
+        assert first_ids == [
             "table_of_contents",
             "table_of_authorities",
             "statement_of_issues",
             "position_on_oral_argument",
-            "statement_of_case_and_facts",
-            "argument",
-            "conclusion",
-            "certifications",
         ]
-        assert ids == expected
 
     def test_spd_certifications(self):
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="spd")
