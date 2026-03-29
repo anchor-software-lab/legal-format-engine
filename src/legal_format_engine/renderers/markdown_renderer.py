@@ -66,7 +66,8 @@ def render_markdown(doc: LegalDocument) -> str:
 def _render_section(parts: list[str], section: Section, depth: int) -> None:
     """Render a single section and its subsections."""
     if section.heading_text:
-        prefix = "#" * min(depth + 1, 6)
+        level = max(section.heading_level, depth + 1)
+        prefix = "#" * min(level, 6)
         heading = section.heading_text
         if section.numbering_prefix:
             heading = f"{section.numbering_prefix} {heading}"

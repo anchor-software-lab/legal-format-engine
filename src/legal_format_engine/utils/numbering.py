@@ -100,7 +100,7 @@ def int_to_alpha_lower(n: int) -> str:
     return int_to_alpha_upper(n).lower()
 
 
-def generate_prefix(index: int, numbering_type: str | None) -> str | None:
+def generate_prefix(index: int, numbering_type: str | None) -> str:
     """Generate a numbering prefix for a given 1-based index.
 
     Args:
@@ -108,10 +108,10 @@ def generate_prefix(index: int, numbering_type: str | None) -> str | None:
         numbering_type: One of "roman", "alpha_upper", "alpha_lower", "arabic", or None.
 
     Returns:
-        The prefix string (e.g., "I.", "A.", "1.") or None.
+        The prefix string (e.g., "I.", "A.", "1.") or empty string if no numbering.
     """
     if numbering_type is None:
-        return None
+        return ""
     match numbering_type:
         case "roman":
             return f"{int_to_roman(index)}."
@@ -125,20 +125,23 @@ def generate_prefix(index: int, numbering_type: str | None) -> str | None:
             raise ValueError(f"Unknown numbering type: {numbering_type!r}")
 
 
-def strip_numbering_prefix(text: str) -> tuple[str | None, str]:
+def strip_numbering_prefix(text: str) -> tuple[str, str]:
     """Strip a leading numbering prefix from heading text.
 
     Returns:
         A tuple of (stripped_prefix, remaining_text).
+        Returns ("", text) if no prefix is found.
 
     >>> strip_numbering_prefix("I. Statement of Facts")
     ('I.', 'Statement of Facts')
     >>> strip_numbering_prefix("ARGUMENT")
-    (None, 'ARGUMENT')
+    ('', 'ARGUMENT')
     """
+    if not text:
+        return "", ""
     match = NUMBERING_PREFIX_PATTERN.match(text)
     if match:
         prefix = match.group().strip()
         remaining = text[match.end():].strip()
         return prefix, remaining
-    return None, text.strip()
+    return "", text.strip()

@@ -109,7 +109,12 @@ def fuzzy_heading_match(heading: str, candidates: dict[str, list[str]]) -> str |
     >>> fuzzy_heading_match("Facts", aliases)
     'statement_of_facts'
     """
+    if not heading or not heading.strip():
+        return None
+
     normalized = normalize_for_matching(heading)
+    if not normalized:
+        return None
 
     # First pass: exact match after normalization
     for section_id, names in candidates.items():

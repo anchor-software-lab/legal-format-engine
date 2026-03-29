@@ -17,7 +17,7 @@ class TestNormalizeHeadings:
         assert result[0].heading_text == "ARGUMENT"
         assert result[1].heading_text == "CONCLUSION"
         # Level 1 has no numbering
-        assert result[0].numbering_prefix is None
+        assert result[0].numbering_prefix == ""
 
     def test_already_correct(self, wi_appellate_ruleset):
         sections = [

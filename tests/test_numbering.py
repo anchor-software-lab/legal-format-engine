@@ -58,7 +58,7 @@ class TestGeneratePrefix:
         assert generate_prefix(10, "arabic") == "10."
 
     def test_none(self):
-        assert generate_prefix(1, None) is None
+        assert generate_prefix(1, None) == ""
 
 
 class TestStripPrefix:
@@ -74,5 +74,5 @@ class TestStripPrefix:
 
     def test_no_prefix(self):
         prefix, text = strip_numbering_prefix("ARGUMENT")
-        assert prefix is None
+        assert prefix == ""
         assert text == "ARGUMENT"
