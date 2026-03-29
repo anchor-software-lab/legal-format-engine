@@ -16,7 +16,7 @@
   </Hosts>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://localhost:3443/taskpane.html"/>
+    <SourceLocation DefaultValue="https://localhost:8443/addin/taskpane.html"/>
   </DefaultSettings>
 
   <Permissions>ReadWriteDocument</Permissions>
@@ -55,7 +55,7 @@
 
     <Resources>
       <bt:Urls>
-        <bt:Url id="TaskpaneUrl" DefaultValue="https://localhost:3443/taskpane.html"/>
+        <bt:Url id="TaskpaneUrl" DefaultValue="https://localhost:8443/addin/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Legal Format"/>
@@ -63,9 +63,9 @@
         <bt:String id="FormatDesc" DefaultValue="Format this document as a Wisconsin appellate brief."/>
       </bt:ShortStrings>
       <bt:Images>
-        <bt:Image id="Icon16" DefaultValue="https://localhost:3443/assets/icon-16.png"/>
-        <bt:Image id="Icon32" DefaultValue="https://localhost:3443/assets/icon-32.png"/>
-        <bt:Image id="Icon80" DefaultValue="https://localhost:3443/assets/icon-80.png"/>
+        <bt:Image id="Icon16" DefaultValue="https://localhost:8443/addin/assets/icon-16.png"/>
+        <bt:Image id="Icon32" DefaultValue="https://localhost:8443/addin/assets/icon-32.png"/>
+        <bt:Image id="Icon80" DefaultValue="https://localhost:8443/addin/assets/icon-80.png"/>
       </bt:Images>
     </Resources>
   </VersionOverrides>

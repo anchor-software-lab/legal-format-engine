@@ -8,6 +8,7 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from legal_format_engine.api.schemas import (
     CitationInfo,
@@ -44,14 +45,20 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://localhost:8443",
         "https://localhost:3000",
-        "https://localhost:3443",
         "null",  # Office Add-in sideloaded
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve Word Add-in static files (taskpane.html, .css, .js)
+# Looks for word-addin/src/ relative to the project root
+_addin_dir = Path(__file__).resolve().parent.parent.parent.parent / "word-addin" / "src"
+if _addin_dir.is_dir():
+    app.mount("/addin", StaticFiles(directory=str(_addin_dir), html=True), name="addin")
 
 
 def _extract_text_from_upload(file: UploadFile) -> str:

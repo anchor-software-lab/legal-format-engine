@@ -1,5 +1,6 @@
 /* global Office, Word */
 
+// API server — same origin as the Add-in static files
 const API_BASE = "https://localhost:8443/api";
 const PROFILE_KEY = "lfe_attorney_profile";
 
