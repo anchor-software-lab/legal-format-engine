@@ -63,11 +63,15 @@ def format(
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)
 
-    # Read input - support both plain text and DOCX
+    # Read input - support plain text, DOCX, and PDF
     input_path = Path(input_file)
     if input_path.suffix == ".docx":
         from legal_format_engine.parsers.docx_parser import parse_docx
         doc = parse_docx(input_path)
+        text = doc.raw_text or ""
+    elif input_path.suffix == ".pdf":
+        from legal_format_engine.parsers.pdf_parser import parse_pdf
+        doc = parse_pdf(input_path)
         text = doc.raw_text or ""
     else:
         text = input_path.read_text(encoding="utf-8")
@@ -139,6 +143,10 @@ def validate(
         from legal_format_engine.parsers.docx_parser import parse_docx
         parsed = parse_docx(input_path)
         text = parsed.raw_text or ""
+    elif input_path.suffix == ".pdf":
+        from legal_format_engine.parsers.pdf_parser import parse_pdf
+        parsed = parse_pdf(input_path)
+        text = parsed.raw_text or ""
     else:
         text = input_path.read_text(encoding="utf-8")
 
@@ -168,9 +176,72 @@ def analyze(path: str) -> None:
         analyze_directory(target)
     elif target.suffix == ".docx":
         analyze_brief(target)
+    elif target.suffix == ".pdf":
+        from legal_format_engine.parsers.pdf_parser import extract_pdf_format_profile, parse_pdf
+        profile = extract_pdf_format_profile(target)
+        doc = parse_pdf(target)
+        click.echo(f"\n{'='*70}")
+        click.echo(f"PDF Analysis: {target.name}")
+        click.echo(f"{'='*70}")
+        page = profile.get("page", {})
+        click.echo(f"  Page: {page.get('width_inches')}\" x {page.get('height_inches')}\"")
+        margins = profile.get("margins_estimated", {})
+        if margins:
+            click.echo(f"  Margins (est): L={margins.get('left_inches')}\" "
+                        f"R={margins.get('right_inches')}\" "
+                        f"T={margins.get('top_inches')}\" "
+                        f"B={margins.get('bottom_inches')}\"")
+        fonts = profile.get("fonts", {})
+        click.echo(f"  Font: {fonts.get('dominant', 'Unknown')}")
+        sizes = profile.get("font_sizes", {})
+        click.echo(f"  Size: {sizes.get('dominant_pt', '?')}pt")
+        click.echo(f"\n  Sections ({len(doc.sections)}):")
+        for s in doc.sections:
+            content_len = sum(len(b.text) for b in s.content)
+            click.echo(f"    [{s.heading_level.name}] \"{s.heading_text}\" ({content_len} chars)")
     else:
-        click.echo(f"Error: {target} is not a .docx file or directory", err=True)
+        click.echo(f"Error: {target} is not a .docx, .pdf, or directory", err=True)
         sys.exit(1)
+
+
+@main.command()
+@click.argument("input_file", type=click.Path(exists=True))
+def citations(input_file: str) -> None:
+    """Check citation consistency in a document.
+
+    Detects inconsistent case names, Id. usage, signals, and spacing.
+    """
+    from legal_format_engine.engines.citation_engine import check_citation_consistency
+
+    input_path = Path(input_file)
+    if input_path.suffix == ".docx":
+        from legal_format_engine.parsers.docx_parser import parse_docx
+        doc = parse_docx(input_path)
+        text = doc.raw_text or ""
+    elif input_path.suffix == ".pdf":
+        from legal_format_engine.parsers.pdf_parser import parse_pdf
+        doc = parse_pdf(input_path)
+        text = doc.raw_text or ""
+    else:
+        text = input_path.read_text(encoding="utf-8")
+
+    report = check_citation_consistency(text)
+
+    click.echo(f"Found {len(report.citations)} citation(s)")
+    click.echo(f"  Cases: {sum(1 for c in report.citations if c.citation_type.value == 'case')}")
+    click.echo(f"  Short cites: {sum(1 for c in report.citations if c.citation_type.value == 'short_cite')}")
+    click.echo(f"  Id.: {sum(1 for c in report.citations if c.citation_type.value == 'id')}")
+    click.echo(f"  Statutes: {len(report.statute_citations)}")
+
+    if report.issues:
+        click.echo(f"\n{len(report.issues)} issue(s):")
+        for issue in report.issues:
+            icon = {"error": "x", "warning": "!", "info": "i"}[issue.severity.value]
+            click.echo(f"  [{icon}] {issue.code}: {issue.message}")
+            if issue.suggestion:
+                click.echo(f"      Suggestion: {issue.suggestion}")
+    else:
+        click.echo("\nNo citation consistency issues found.")
 
 
 if __name__ == "__main__":
