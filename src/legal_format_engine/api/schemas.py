@@ -185,5 +185,26 @@ class AggregatePatternResponse(BaseModel):
     paragraph_indent_inches: float | None = None
 
 
+class GoogleDocUploadResponse(BaseModel):
+    """Response after uploading a Google Doc for analysis."""
+
+    id: str
+    source_filename: str
+    source_url: str
+    jurisdiction: str | None = None
+    court_level: str | None = None
+    document_type: str | None = None
+    analyzed_at: str
+    font_patterns: list[dict] = []
+    margin_pattern: dict | None = None
+    line_spacing: float | None = None
+    heading_patterns: list[dict] = []
+    section_patterns: list[dict] = []
+    paragraph_indent_inches: float | None = None
+    block_quote_indent_inches: float | None = None
+    tags: str | None = None
+    notes: str | None = None
+
+
 # Rebuild models that reference forward declarations
 ValidateResponse.model_rebuild()

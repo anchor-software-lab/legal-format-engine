@@ -20,6 +20,7 @@ from legal_format_engine.api.schemas import (
     CitationResponse,
     FormatRequest,
     FormatResponse,
+    GoogleDocUploadResponse,
     HealthResponse,
     LetterheadCreate,
     LetterheadListResponse,
@@ -29,6 +30,7 @@ from legal_format_engine.api.schemas import (
     ValidateResponse,
 )
 from legal_format_engine.analysis.brief_analyzer import analyze_brief
+from legal_format_engine.analysis.gdocs_connector import GoogleDocsConnector
 from legal_format_engine.analysis.pattern_store import PatternStore
 from legal_format_engine.engines.citation_engine import check_citation_consistency
 from legal_format_engine.engines.pipeline import format_document
@@ -550,3 +552,84 @@ async def delete_analysis(analysis_id: str):
     if not _pattern_store.delete(analysis_id):
         raise HTTPException(status_code=404, detail="Analysis not found")
     return {"deleted": True}
+
+
+# ── Google Docs Upload ─────────────────────────────────────────────────
+
+
+@app.post("/api/documents/upload-gdoc", response_model=GoogleDocUploadResponse, status_code=201)
+async def upload_google_doc(
+    url: str = Form(...),
+    jurisdiction: str | None = Form(None),
+    court_level: str | None = Form(None),
+    document_type: str | None = Form(None),
+    tags: str | None = Form(None),
+    notes: str | None = Form(None),
+):
+    """Upload a Google Doc by its share URL.
+
+    Downloads the document as DOCX via the Google Docs export URL and
+    runs the standard brief analysis pipeline on it.  Only works for
+    documents shared publicly (anyone with the link).
+    """
+    # Validate URL
+    if not GoogleDocsConnector.is_google_docs_url(url):
+        raise HTTPException(
+            status_code=422,
+            detail="Not a valid Google Docs URL. Expected a URL like "
+                   "https://docs.google.com/document/d/{DOC_ID}/edit",
+        )
+
+    # Download as DOCX
+    tmp_path: Path | None = None
+    try:
+        tmp_path = GoogleDocsConnector.download_as_docx(url)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except ConnectionError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to download Google Doc: {exc}",
+        )
+
+    # Analyze with the standard brief analyzer
+    try:
+        analysis = analyze_brief(
+            tmp_path,
+            jurisdiction=jurisdiction,
+            court_level=court_level,
+        )
+        doc_id = GoogleDocsConnector.extract_doc_id(url)
+        analysis.source_filename = f"gdoc-{doc_id}.docx"
+        _pattern_store.save(analysis)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyze Google Doc: {exc}",
+        )
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
+
+    return GoogleDocUploadResponse(
+        id=analysis.id,
+        source_filename=analysis.source_filename,
+        source_url=url,
+        jurisdiction=analysis.jurisdiction,
+        court_level=analysis.court_level,
+        document_type=document_type,
+        analyzed_at=analysis.analyzed_at,
+        font_patterns=[fp.model_dump() for fp in analysis.font_patterns],
+        margin_pattern=analysis.margin_pattern.model_dump() if analysis.margin_pattern else None,
+        line_spacing=analysis.line_spacing,
+        heading_patterns=[hp.model_dump() for hp in analysis.heading_patterns],
+        section_patterns=[sp.model_dump() for sp in analysis.section_patterns],
+        paragraph_indent_inches=analysis.paragraph_indent_inches,
+        block_quote_indent_inches=analysis.block_quote_indent_inches,
+        tags=tags,
+        notes=notes,
+    )
