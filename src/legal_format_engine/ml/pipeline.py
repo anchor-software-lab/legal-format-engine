@@ -79,14 +79,33 @@ class MLPipeline:
         """
         file_path = Path(file_path)
 
+        # Auto-detect attribution if user did not provide author/firm
+        detected_author = author
+        detected_firm = firm
+        if detected_author is None and detected_firm is None:
+            try:
+                from legal_format_engine.ml.attribution import AttributionDetector
+                detector = AttributionDetector()
+                attribution = detector.detect(file_path)
+                if attribution.author:
+                    detected_author = attribution.author
+                if attribution.firm:
+                    detected_firm = attribution.firm
+            except Exception:
+                pass  # Attribution detection is best-effort
+
+        # User-provided values always override auto-detected ones
+        final_author = author if author is not None else detected_author
+        final_firm = firm if firm is not None else detected_firm
+
         # Normalize
         doc = normalize_document(
             str(file_path),
             jurisdiction=jurisdiction,
             court_level=court_level,
             document_type=document_type,
-            author=author,
-            firm=firm,
+            author=final_author,
+            firm=final_firm,
         )
 
         # Store
