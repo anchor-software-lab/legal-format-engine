@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Legal Format Engine</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <link rel="stylesheet" href="taskpane.css" />
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Legal Format Engine</h1>
+            <p class="subtitle">Wisconsin Appellate Brief Formatter</p>
+        </header>
+
+        <!-- Case Information -->
+        <div class="section collapsible expanded" id="section-case">
+            <div class="section-header" onclick="toggleSection('section-case')">
+                <span class="section-title">Case Information</span>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <div class="field">
+                    <label>Case Number <span class="required">*</span></label>
+                    <input type="text" id="caseNumber" placeholder="2025AP1234-CR" />
+                </div>
+                <div class="field">
+                    <label>Court</label>
+                    <select id="court">
+                        <option value="court_of_appeals">Court of Appeals</option>
+                        <option value="supreme_court">Supreme Court</option>
+                        <option value="circuit_court">Circuit Court</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>District</label>
+                    <select id="district">
+                        <option value="">None</option>
+                        <option value="1">District I (Milwaukee)</option>
+                        <option value="2">District II (Waukesha)</option>
+                        <option value="3">District III (Wausau)</option>
+                        <option value="4">District IV (Madison)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>County</label>
+                    <input type="text" id="county" placeholder="Dane" />
+                </div>
+                <div class="field">
+                    <label>Judge</label>
+                    <input type="text" id="judge" placeholder="Hon. Jane Smith" />
+                </div>
+                <div class="field">
+                    <label>Document Type</label>
+                    <select id="docType">
+                        <option value="Brief of Defendant-Appellant">Brief of Defendant-Appellant</option>
+                        <option value="Brief of Plaintiff-Respondent">Brief of Plaintiff-Respondent</option>
+                        <option value="Reply Brief">Reply Brief</option>
+                        <option value="Motion">Motion</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parties -->
+        <div class="section collapsible expanded" id="section-parties">
+            <div class="section-header" onclick="toggleSection('section-parties')">
+                <span class="section-title">Parties</span>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <div id="partyList">
+                    <div class="party-row" data-index="0">
+                        <input type="text" class="party-name" placeholder="State of Wisconsin" />
+                        <select class="party-role">
+                            <option value="plaintiff">Plaintiff</option>
+                            <option value="defendant">Defendant</option>
+                            <option value="appellant">Appellant</option>
+                            <option value="respondent">Respondent</option>
+                            <option value="petitioner">Petitioner</option>
+                        </select>
+                        <input type="text" class="party-designation" placeholder="Plaintiff-Respondent" />
+                    </div>
+                    <div class="party-row" data-index="1">
+                        <input type="text" class="party-name" placeholder="John Doe" />
+                        <select class="party-role">
+                            <option value="plaintiff">Plaintiff</option>
+                            <option value="defendant" selected>Defendant</option>
+                            <option value="appellant">Appellant</option>
+                            <option value="respondent">Respondent</option>
+                            <option value="petitioner">Petitioner</option>
+                        </select>
+                        <input type="text" class="party-designation" placeholder="Defendant-Appellant" />
+                    </div>
+                </div>
+                <button class="btn-link" onclick="addParty()">+ Add Party</button>
+            </div>
+        </div>
+
+        <!-- Attorney -->
+        <div class="section collapsible" id="section-attorney">
+            <div class="section-header" onclick="toggleSection('section-attorney')">
+                <span class="section-title">Attorney</span>
+                <span id="attorney-badge" class="badge hidden">Loaded</span>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <div class="field">
+                    <label>Name <span class="required">*</span></label>
+                    <input type="text" id="attorneyName" />
+                </div>
+                <div class="field">
+                    <label>Bar Number</label>
+                    <input type="text" id="barNumber" />
+                </div>
+                <div class="field">
+                    <label>Firm</label>
+                    <input type="text" id="firm" />
+                </div>
+                <div class="field">
+                    <label>Address</label>
+                    <textarea id="address" rows="2"></textarea>
+                </div>
+                <div class="field">
+                    <label>Phone</label>
+                    <input type="text" id="phone" />
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="text" id="email" />
+                </div>
+                <button class="btn-secondary" onclick="saveAttorneyProfile()">Save as Default</button>
+            </div>
+        </div>
+
+        <!-- Letterhead -->
+        <div class="section collapsible" id="section-letterhead">
+            <div class="section-header" onclick="toggleSection('section-letterhead')">
+                <span class="section-title">Letterhead</span>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <select id="letterheadSelect">
+                    <option value="">None</option>
+                </select>
+                <button class="btn-link" onclick="showLetterheadEditor()">+ New Letterhead</button>
+                <div id="letterheadEditor" class="hidden">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" id="letterheadName" placeholder="My Firm Letterhead" />
+                    </div>
+                    <div id="letterheadLines"></div>
+                    <button class="btn-link" onclick="addLetterheadLine()">+ Add Line</button>
+                    <button class="btn-secondary" onclick="saveLetterhead()">Save Letterhead</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="section collapsible" id="section-options">
+            <div class="section-header" onclick="toggleSection('section-options')">
+                <span class="section-title">Options</span>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <div class="field">
+                    <label>Word Count</label>
+                    <input type="number" id="wordCount" placeholder="Auto-detect" />
+                </div>
+                <div class="field checkbox-field">
+                    <input type="checkbox" id="insertMissing" checked />
+                    <label for="insertMissing">Insert missing sections as stubs</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn-primary" id="btnFormat" onclick="onFormat()">Format Brief</button>
+            <button class="btn-secondary" id="btnValidate" onclick="onValidate()">Validate</button>
+            <button class="btn-secondary" id="btnCitations" onclick="onCitations()">Citations</button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <h3>Results</h3>
+            <div id="resultsList"></div>
+        </div>
+
+        <!-- Confirm Dialog -->
+        <div id="confirmDialog" class="dialog-overlay hidden">
+            <div class="dialog">
+                <h3>Confirm Format</h3>
+                <p>This will replace the entire document with the formatted version. Continue?</p>
+                <div class="dialog-actions">
+                    <button class="btn-secondary" onclick="hideConfirm()">Cancel</button>
+                    <button class="btn-primary" onclick="confirmFormat()">Format</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div id="statusBar">
+            <span id="statusText">Ready</span>
+            <span id="spinner" class="hidden"></span>
+        </div>
+    </div>
+
+    <script src="taskpane.js"></script>
+</body>
+</html>

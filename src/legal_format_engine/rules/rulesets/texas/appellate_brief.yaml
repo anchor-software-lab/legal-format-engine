@@ -1,0 +1,159 @@
+# Texas Court of Appeals - Appellate Brief
+# Derived from Tex. R. App. P. 38
+
+name: "Texas Appellate Brief"
+jurisdiction: "texas"
+court_level: "court_of_appeals"
+document_type: "appellate_brief"
+description: "Texas Court of Appeals appellate brief format"
+statute_reference: "Tex. R. App. P. 38"
+
+page_format:
+  font: "Times New Roman"
+  font_size_pt: 13
+  line_spacing: "double"
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+  first_line_indent_inches: 0.5
+  hyphenation: true
+
+page_limit: null
+word_limit: 15000
+allow_combined_case_facts: true
+
+heading_rules:
+  - level: 1
+    style: "title_case_centered"
+    bold: true
+    centered: true
+    indent_inches: 0.0
+  - level: 2
+    style: "roman_numeral"
+    bold: true
+    centered: false
+    indent_inches: 0.0
+  - level: 3
+    style: "capital_letter"
+    bold: true
+    centered: false
+    indent_inches: 0.5
+  - level: 4
+    style: "arabic_numeral"
+    bold: false
+    centered: false
+    indent_inches: 1.0
+
+section_rules:
+  - section_type: "table_of_contents"
+    title: "Table of Contents"
+    required: true
+    order: 1
+    heading_level: 1
+    aliases:
+      - "Table of Contents"
+      - "Contents"
+      - "TOC"
+
+  - section_type: "table_of_authorities"
+    title: "Table of Authorities"
+    required: true
+    order: 2
+    heading_level: 1
+    aliases:
+      - "Table of Authorities"
+      - "Authorities Cited"
+
+  - section_type: "statement_of_issues"
+    title: "Issues Presented"
+    required: true
+    order: 3
+    heading_level: 1
+    aliases:
+      - "Issues Presented"
+      - "Statement of the Issues"
+      - "Statement of Issues"
+      - "Issues"
+      - "Questions Presented"
+
+  - section_type: "statement_of_case"
+    title: "Statement of the Case"
+    required: false
+    order: 4
+    heading_level: 1
+    aliases:
+      - "Statement of the Case"
+      - "Procedural History"
+
+  - section_type: "statement_of_facts"
+    title: "Statement of Facts"
+    required: false
+    order: 5
+    heading_level: 1
+    aliases:
+      - "Statement of Facts"
+      - "Facts"
+      - "Factual Background"
+
+  - section_type: "argument"
+    title: "Argument"
+    required: true
+    order: 6
+    heading_level: 1
+    aliases:
+      - "Argument"
+      - "Arguments"
+
+  - section_type: "prayer"
+    title: "Prayer"
+    required: true
+    order: 7
+    heading_level: 1
+    aliases:
+      - "Prayer"
+      - "Prayer for Relief"
+
+  - section_type: "conclusion"
+    title: "Conclusion"
+    required: true
+    order: 8
+    heading_level: 1
+    aliases:
+      - "Conclusion"
+      - "Summary"
+
+  - section_type: "certifications"
+    title: "Certifications"
+    required: true
+    order: 9
+    heading_level: 1
+    aliases:
+      - "Certifications"
+      - "Certification"
+
+certification_templates:
+  - cert_type: "form_length"
+    title: null
+    template: >-
+      I hereby certify that this brief conforms to the rules contained in Tex.
+      R. App. P. 38 for a brief. The length of this brief is {word_count} words.
+    required: true
+
+  - cert_type: "electronic_filing"
+    title: null
+    template: >-
+      I hereby certify that the text of the electronic copy of this brief is
+      identical to the text of the paper copy of the brief.
+    required: true
+
+  - cert_type: "service"
+    title: null
+    template: >-
+      I hereby certify that on this date I have served a copy of this brief upon
+      all parties required to be served by depositing the same in the United
+      States mail, first-class postage prepaid, addressed to counsel of record.
+    required: true
+

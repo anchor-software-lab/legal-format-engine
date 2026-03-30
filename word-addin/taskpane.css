@@ -1,0 +1,131 @@
+/* Legal Format Engine - Word Add-in Styles */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    font-size: 13px;
+    color: #323130;
+    background: #faf9f8;
+    overflow-y: auto;
+}
+
+#app { padding: 12px; }
+
+header {
+    background: #0078d4;
+    color: white;
+    padding: 16px 12px;
+    margin: -12px -12px 12px;
+    border-bottom: 2px solid #005a9e;
+}
+header h1 { font-size: 16px; font-weight: 600; }
+header .subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+/* Collapsible Sections */
+.section { background: white; border: 1px solid #edebe9; border-radius: 4px; margin-bottom: 8px; }
+.section-header {
+    display: flex; align-items: center; padding: 10px 12px;
+    cursor: pointer; user-select: none;
+}
+.section-header:hover { background: #f3f2f1; }
+.section-title { flex: 1; font-weight: 600; font-size: 13px; }
+.chevron { font-size: 10px; color: #605e5c; transition: transform 0.2s; }
+.collapsible .section-body { display: none; padding: 0 12px 12px; }
+.collapsible.expanded .section-body { display: block; }
+.collapsible.expanded .chevron { transform: rotate(0deg); }
+.collapsible:not(.expanded) .chevron { transform: rotate(-90deg); }
+
+/* Fields */
+.field { margin-bottom: 8px; }
+.field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px; color: #605e5c; }
+.field input, .field select, .field textarea {
+    width: 100%; padding: 6px 8px; border: 1px solid #c8c6c4;
+    border-radius: 3px; font-size: 13px; font-family: inherit;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: #0078d4; box-shadow: 0 0 0 1px #0078d4;
+}
+.field input.error, .field select.error { border-color: #d13438; }
+.field .error-msg { color: #d13438; font-size: 11px; margin-top: 2px; }
+.required { color: #d13438; }
+.checkbox-field { display: flex; align-items: center; gap: 6px; }
+.checkbox-field label { margin-bottom: 0; }
+
+/* Party rows */
+.party-row { display: flex; gap: 4px; margin-bottom: 6px; align-items: center; }
+.party-row input, .party-row select { flex: 1; }
+.party-row .btn-remove { flex: 0 0 24px; background: none; border: none; color: #d13438; cursor: pointer; font-size: 16px; }
+
+/* Badges */
+.badge {
+    font-size: 10px; padding: 2px 6px; border-radius: 10px;
+    background: #107c10; color: white; margin-left: 6px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: #0078d4; color: white; border: none; padding: 8px 16px;
+    border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer;
+    width: 100%; margin-bottom: 6px;
+}
+.btn-primary:hover { background: #106ebe; }
+.btn-primary:disabled { background: #c8c6c4; cursor: default; }
+.btn-secondary {
+    background: white; color: #323130; border: 1px solid #c8c6c4;
+    padding: 6px 12px; border-radius: 3px; font-size: 12px; cursor: pointer;
+}
+.btn-secondary:hover { background: #f3f2f1; }
+.btn-link { background: none; border: none; color: #0078d4; cursor: pointer; font-size: 12px; padding: 4px 0; }
+.btn-link:hover { text-decoration: underline; }
+
+.actions { margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.actions .row { display: flex; gap: 6px; }
+
+/* Results */
+#results { margin-top: 12px; }
+#results h3 { font-size: 13px; margin-bottom: 8px; }
+.issue-card {
+    padding: 8px 10px; margin-bottom: 6px; border-radius: 3px;
+    border-left: 3px solid; font-size: 12px;
+}
+.issue-card.error { border-color: #d13438; background: #fde7e9; }
+.issue-card.warning { border-color: #ffaa44; background: #fff4ce; }
+.issue-card.info { border-color: #0078d4; background: #deecf9; }
+.issue-code { font-weight: 600; font-size: 11px; opacity: 0.7; }
+
+/* Dialog */
+.dialog-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+}
+.dialog {
+    background: white; padding: 20px; border-radius: 6px;
+    max-width: 300px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.dialog h3 { margin-bottom: 8px; }
+.dialog p { font-size: 13px; color: #605e5c; margin-bottom: 16px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Status bar */
+#statusBar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 6px 12px; background: #f3f2f1; border-top: 1px solid #edebe9;
+    font-size: 11px; display: flex; align-items: center; gap: 6px;
+}
+#spinner {
+    width: 12px; height: 12px; border: 2px solid #c8c6c4;
+    border-top-color: #0078d4; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Letterhead editor */
+.letterhead-line {
+    display: flex; gap: 4px; margin-bottom: 4px; align-items: center;
+}
+.letterhead-line input { flex: 1; }
+.letterhead-line select { width: 60px; }
+.letterhead-line .btn-remove { flex: 0 0 20px; }
+
+.hidden { display: none !important; }

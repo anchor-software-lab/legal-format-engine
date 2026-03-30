@@ -1,0 +1,202 @@
+# United States Court of Appeals for the Second Circuit - Appellate Brief
+# Derived from Fed. R. App. P. 32 and 2d Cir. R. 32.1
+# Covers Connecticut, New York, Vermont
+
+name: "Second Circuit Appellate Brief"
+jurisdiction: "federal"
+court_level: "circuit_court"
+document_type: "appellate_brief"
+description: "United States Court of Appeals for the Second Circuit appellate brief format"
+statute_reference: "Fed. R. App. P. 32; 2d Cir. R. 32.1"
+
+page_format:
+  font: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: "double"
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+  first_line_indent_inches: 0.5
+  hyphenation: false
+
+page_limit: null
+word_limit: 14000
+allow_combined_case_facts: false
+
+heading_rules:
+  - level: 1
+    style: "title_case_centered"
+    bold: true
+    centered: true
+    indent_inches: 0.0
+  - level: 2
+    style: "roman_numeral"
+    bold: true
+    centered: false
+    indent_inches: 0.0
+  - level: 3
+    style: "capital_letter"
+    bold: true
+    centered: false
+    indent_inches: 0.5
+  - level: 4
+    style: "arabic_numeral"
+    bold: false
+    centered: false
+    indent_inches: 1.0
+
+section_rules:
+  - section_type: "corporate_disclosure"
+    title: "Corporate Disclosure Statement"
+    required: false
+    order: 1
+    heading_level: 1
+    aliases:
+      - "Corporate Disclosure Statement"
+      - "Disclosure Statement"
+
+  - section_type: "table_of_contents"
+    title: "Table of Contents"
+    required: true
+    order: 2
+    heading_level: 1
+    aliases:
+      - "Table of Contents"
+      - "Contents"
+      - "TOC"
+
+  - section_type: "table_of_authorities"
+    title: "Table of Authorities"
+    required: true
+    order: 3
+    heading_level: 1
+    aliases:
+      - "Table of Authorities"
+      - "Authorities Cited"
+
+  - section_type: "jurisdictional_statement"
+    title: "Jurisdictional Statement"
+    required: true
+    order: 4
+    heading_level: 1
+    aliases:
+      - "Jurisdictional Statement"
+      - "Jurisdiction"
+      - "Statement of Jurisdiction"
+
+  - section_type: "statement_of_issues"
+    title: "Statement of Issues"
+    required: true
+    order: 5
+    heading_level: 1
+    aliases:
+      - "Statement of Issues"
+      - "Statement of the Issues"
+      - "Issues Presented"
+      - "Questions Presented"
+
+  - section_type: "statement_of_case"
+    title: "Statement of the Case"
+    required: true
+    order: 6
+    heading_level: 1
+    aliases:
+      - "Statement of the Case"
+      - "Procedural History"
+
+  - section_type: "statement_of_facts"
+    title: "Statement of Facts"
+    required: true
+    order: 7
+    heading_level: 1
+    aliases:
+      - "Statement of Facts"
+      - "Facts"
+      - "Factual Background"
+
+  - section_type: "standard_of_review"
+    title: "Standard of Review"
+    required: true
+    order: 8
+    heading_level: 1
+    aliases:
+      - "Standard of Review"
+      - "Standards of Review"
+
+  - section_type: "summary_of_argument"
+    title: "Summary of Argument"
+    required: true
+    order: 9
+    heading_level: 1
+    aliases:
+      - "Summary of Argument"
+      - "Summary of the Argument"
+
+  - section_type: "argument"
+    title: "Argument"
+    required: true
+    order: 10
+    heading_level: 1
+    aliases:
+      - "Argument"
+      - "Arguments"
+
+  - section_type: "conclusion"
+    title: "Conclusion"
+    required: true
+    order: 11
+    heading_level: 1
+    aliases:
+      - "Conclusion"
+      - "Prayer for Relief"
+
+  - section_type: "certifications"
+    title: "Certifications"
+    required: true
+    order: 12
+    heading_level: 1
+    aliases:
+      - "Certifications"
+      - "Certification"
+
+  - section_type: "special_appendix"
+    title: "Special Appendix"
+    required: false
+    order: 13
+    heading_level: 1
+    aliases:
+      - "Special Appendix"
+      - "SPA"
+
+certification_templates:
+  - cert_type: "form_length"
+    title: null
+    template: >-
+      I certify that this brief complies with the type-volume limitation of
+      Federal Rule of Appellate Procedure 32(a)(7)(B) because this brief
+      contains {word_count} words, excluding the parts of the brief exempted
+      by Federal Rule of Appellate Procedure 32(f).
+    required: true
+
+  - cert_type: "type_style"
+    title: null
+    template: >-
+      I certify that this brief complies with the typeface requirements of
+      Federal Rule of Appellate Procedure 32(a)(5) and the type-style
+      requirements of Federal Rule of Appellate Procedure 32(a)(6) because
+      this brief has been prepared in a proportionally spaced typeface using
+      {software} in {font_size}-point {font_name}.
+    required: true
+
+  - cert_type: "service"
+    title: null
+    template: >-
+      I hereby certify that on {date}, I electronically filed the foregoing
+      brief with the Clerk of Court for the United States Court of Appeals
+      for the Second Circuit by using the CM/ECF system. I certify that all
+      participants in the case are registered CM/ECF users and that service
+      will be accomplished by the CM/ECF system.
+    required: true

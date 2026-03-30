@@ -1,9 +1,5 @@
 # Legal Format Engine - Development Context
 
-## Previous Session Transcript
-Full conversation history is at `docs/transcripts/session-2026-03-30-initial-build.jsonl`
-Read this JSONL file to understand all design decisions, user requirements, and implementation history.
-
 ## Architecture Summary
 Rules-based legal document formatting engine. Five layers:
 1. **Input** - accepts pasted text, DOCX, PDF uploads
@@ -18,37 +14,30 @@ Rules-based legal document formatting engine. Five layers:
 - Rule hierarchy: Court Rules > ML Learned Patterns > Style Profiles > Defaults
 - Author/firm attribution auto-detected from signature blocks, metadata, letterhead
 - Firm database: 160+ firms pre-loaded with fuzzy matching
+- Archive ingestion: ZIP, RAR, Adobe Portfolio
 
 ## Key Design Decisions
 - Court rules ALWAYS win over ML-learned preferences
 - ML only fills discretionary gaps (indent depth, block quote style, etc.)
-- DOCX output must match real filed briefs exactly (see reference/briefs/)
-- Wisconsin appellate brief is the starting market (derived from actual SPD filings)
+- DOCX output must match real filed briefs exactly
+- Wisconsin appellate brief is the starting market (derived from actual filed briefs)
 - 64 jurisdiction rulesets (50 states + 14 federal courts)
 - Word Add-in is the primary distribution channel
 
 ## GitHub Organization
 - Org: `anchor-software-lab` (the software company)
 - Repo: `anchor-software-lab/legal-format-engine`
-- Development branch: `claude/legal-rules-engine-T9ZP3`
+- Development branch: `claude/recreate-code-from-transcript-GFS1h`
 
-## What's Working (514 tests)
+## What's Built
 - Caption engine, heading normalizer, section validator/reorderer
 - Boilerplate generator (signature blocks, certifications)
 - DOCX/PDF/plain text parsers
-- DOCX/Markdown renderers with proper formatting (first-line indent, caption layout, hyphenation)
-- Wisconsin appellate brief ruleset (derived from real Christopherson brief)
-- 63 additional jurisdiction rulesets
+- DOCX/Markdown renderers with proper formatting
+- Wisconsin appellate brief ruleset + 63 additional jurisdictions
 - ML pipeline (normalize, extract, learn, synthesize)
 - Firm database + auto-attribution
 - Archive ingestion (ZIP, RAR, Adobe Portfolio)
 - FastAPI server + Word Add-in
 - Letterhead system
-
-## What Needs Work Next
-- More DOCX formatting refinements (Century Schoolbook font, block quote indentation)
-- Upload more reference briefs to refine ML
-- Citation consistency engine improvements
-- Cloud deployment (Railway/Render/Azure)
-- Microsoft Store submission path
-- anchor-filings-website repo needs real website content
+- Style profiles with rule hierarchy enforcement
