@@ -1,0 +1,33 @@
+{
+  "jurisdiction": "wisconsin",
+  "court_level": "appellate",
+  "document_type": "brief",
+  "document_title": "Brief of Defendant-Appellant",
+  "case": {
+    "case_number": "2024AP001234-CR",
+    "court_name": "Court of Appeals of Wisconsin",
+    "district": "District II",
+    "county_of_origin": "Waukesha County",
+    "circuit_court_case_number": "2023CF000567",
+    "judge_name": "Jane Smith",
+    "parties": [
+      {
+        "name": "State of Wisconsin",
+        "role": "plaintiff-respondent"
+      },
+      {
+        "name": "John A. Christopherson",
+        "role": "defendant-appellant"
+      }
+    ]
+  },
+  "attorney": {
+    "name": "Nicholas Smith",
+    "bar_number": "1234567",
+    "firm": "Smith Law Office",
+    "address": "123 Main Street, Milwaukee, WI 53202",
+    "phone": "(414) 555-0100",
+    "email": "nick@smithlaw.com"
+  },
+  "date_filed": "2025-03-15"
+}

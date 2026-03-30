@@ -1,229 +1,223 @@
-"""Section engine - validates, reorders, and inserts required sections."""
+"""Section validation and reordering engine.
+
+Validates that required sections exist, are in correct order,
+and handles missing/unknown sections.
+"""
 
 from __future__ import annotations
-from typing import Optional
 
-from legal_format_engine.models.document import ContentBlock, Section
-from legal_format_engine.models.section import Ruleset, SectionRule
-from legal_format_engine.utils.text import fuzzy_heading_match, normalize_heading
-
-
-class ValidationIssue:
-    """Represents a document validation issue."""
-
-    def __init__(self, code: str, severity: str, message: str, section: str = ""):
-        self.code = code
-        self.severity = severity  # "error", "warning", "info"
-        self.message = message
-        self.section = section
-
-    def to_dict(self) -> dict:
-        return {
-            "code": self.code,
-            "severity": self.severity,
-            "message": self.message,
-            "section": self.section,
-        }
+from legal_format_engine.models.document import (
+    ContentBlock,
+    HeadingLevel,
+    LegalDocument,
+    Section,
+    Severity,
+    ValidationIssue,
+)
+from legal_format_engine.rules.schema import RequiredSection, Ruleset
+from legal_format_engine.utils.text import fuzzy_heading_match, normalize_for_matching
 
 
-def validate_sections(
-    sections: list[Section],
-    ruleset: Ruleset,
-) -> list[ValidationIssue]:
-    """Validate document sections against ruleset rules.
+def validate_sections(doc: LegalDocument, ruleset: Ruleset) -> LegalDocument:
+    """Validate that required sections exist in the document.
 
-    Checks for:
-    - Missing required sections
-    - Section order violations
-    - Unknown sections
-    - Group constraints (e.g., combined vs separate case/facts)
+    Adds ValidationIssue entries for missing required sections
+    and unknown sections.
+
+    Args:
+        doc: The document to validate.
+        ruleset: The active ruleset.
+
+    Returns:
+        The document with issues populated.
     """
-    issues: list[ValidationIssue] = []
+    aliases = ruleset.get_section_aliases()
+    matched_ids: set[str] = set()
 
-    # Build alias map for fuzzy matching
-    alias_map = _build_alias_map(ruleset)
-
-    # Identify each section's type
-    identified: list[tuple[Section, str | None]] = []
-    for section in sections:
-        section_type = fuzzy_heading_match(section.heading, alias_map)
-        identified.append((section, section_type))
-
-    found_types = {st for _, st in identified if st is not None}
-
-    # Check required sections
-    for rule in ruleset.section_rules:
-        if rule.required and rule.section_type not in found_types:
-            # Check if part of a group
-            if rule.group:
-                continue  # Handle groups separately below
-            issues.append(ValidationIssue(
-                code="MISSING_SECTION",
-                severity="error",
-                message=f"Missing required section: {rule.title or rule.section_type}",
-                section=rule.section_type,
+    for section in doc.sections:
+        match = fuzzy_heading_match(section.heading_text, aliases)
+        if match:
+            matched_ids.add(match)
+        elif section.heading_text and section.id != "preamble":
+            doc.issues.append(ValidationIssue(
+                severity=Severity.INFO,
+                code="UNKNOWN_SECTION",
+                message=f"Section '{section.heading_text}' does not match any known section type.",
+                section_id=section.id,
             ))
 
-    # Check group constraints
-    issues.extend(_check_groups(ruleset, found_types))
+    # Check for missing required sections
+    for req in ruleset.required_sections:
+        if req.required and req.id not in matched_ids:
+            doc.issues.append(ValidationIssue(
+                severity=Severity.WARNING,
+                code="MISSING_SECTION",
+                message=f"Required section '{req.canonical_name}' is missing.",
+                section_id=req.id,
+                auto_fixable=True,
+            ))
+
+    # Check group constraints: at least one section in each group must exist
+    _check_groups(doc, ruleset, matched_ids)
 
     # Check section order
-    order_issues = _check_order(identified, ruleset)
-    issues.extend(order_issues)
+    _check_order(doc, ruleset, aliases)
 
-    # Flag unknown sections
-    for section, section_type in identified:
-        if section_type is None and section.heading.strip():
-            issues.append(ValidationIssue(
-                code="UNKNOWN_SECTION",
-                severity="info",
-                message=f"Unknown section: '{section.heading}'",
-                section="",
+    return doc
+
+
+def reorder_sections(doc: LegalDocument, ruleset: Ruleset) -> LegalDocument:
+    """Reorder sections to match the canonical order defined in the ruleset.
+
+    Matched sections are placed in rule order. Unmatched sections
+    are appended at the end (never discarded).
+
+    Args:
+        doc: The document to reorder.
+        ruleset: The active ruleset.
+
+    Returns:
+        The document with sections reordered.
+    """
+    aliases = ruleset.get_section_aliases()
+    rule_order = {req.id: req.order for req in ruleset.required_sections}
+
+    # Map each section to its rule id (if matched)
+    matched: dict[str, Section] = {}
+    unmatched: list[Section] = []
+
+    for section in doc.sections:
+        match = fuzzy_heading_match(section.heading_text, aliases)
+        if match and match not in matched:
+            matched[match] = section
+        else:
+            unmatched.append(section)
+
+    # Build reordered list: matched sections in rule order, then unmatched
+    ordered: list[Section] = []
+    for req in sorted(ruleset.required_sections, key=lambda r: r.order):
+        if req.id in matched:
+            ordered.append(matched[req.id])
+
+    ordered.extend(unmatched)
+    doc.sections = ordered
+
+    return doc
+
+
+def insert_missing_sections(doc: LegalDocument, ruleset: Ruleset) -> LegalDocument:
+    """Insert stub sections for any missing required sections.
+
+    Stubs are inserted at the correct position with empty content
+    and marked as generated.
+
+    Args:
+        doc: The document to modify.
+        ruleset: The active ruleset.
+
+    Returns:
+        The document with stubs inserted.
+    """
+    aliases = ruleset.get_section_aliases()
+    existing_ids: set[str] = set()
+
+    for section in doc.sections:
+        match = fuzzy_heading_match(section.heading_text, aliases)
+        if match:
+            existing_ids.add(match)
+
+    for req in ruleset.required_sections:
+        if req.required and req.id not in existing_ids:
+            stub = Section(
+                id=req.id,
+                heading_text=req.canonical_name.upper(),
+                heading_level=HeadingLevel(req.heading_level),
+                content=[ContentBlock(text=f"[{req.canonical_name} - TO BE COMPLETED]")],
+                is_generated=True,
+            )
+            # Insert at the correct position
+            _insert_at_order(doc, stub, req.order, ruleset)
+
+    return doc
+
+
+def _insert_at_order(
+    doc: LegalDocument,
+    stub: Section,
+    target_order: int,
+    ruleset: Ruleset,
+) -> None:
+    """Insert a stub section at the correct position based on rule order."""
+    aliases = ruleset.get_section_aliases()
+    rule_order = {req.id: req.order for req in ruleset.required_sections}
+
+    insert_idx = len(doc.sections)  # default: append at end
+
+    for i, section in enumerate(doc.sections):
+        match = fuzzy_heading_match(section.heading_text, aliases)
+        if match and rule_order.get(match, 0) > target_order:
+            insert_idx = i
+            break
+
+    doc.sections.insert(insert_idx, stub)
+
+
+def _check_groups(
+    doc: LegalDocument,
+    ruleset: Ruleset,
+    matched_ids: set[str],
+) -> None:
+    """Check group constraints: at least one section in each group must exist.
+
+    Groups allow "either/or" section requirements. For example, a brief
+    can have either a combined "Statement of the Case and Facts" or
+    separate "Statement of the Case" and "Statement of Facts" sections.
+    """
+    # Collect groups
+    groups: dict[str, list[RequiredSection]] = {}
+    for req in ruleset.required_sections:
+        if req.group:
+            groups.setdefault(req.group, []).append(req)
+
+    for group_name, members in groups.items():
+        group_matched = any(m.id in matched_ids for m in members)
+        if not group_matched:
+            names = [m.canonical_name for m in members]
+            doc.issues.append(ValidationIssue(
+                severity=Severity.WARNING,
+                code="MISSING_SECTION_GROUP",
+                message=(
+                    f"At least one of these sections is required: "
+                    f"{', '.join(names)}"
+                ),
+                auto_fixable=False,
             ))
-
-    return issues
-
-
-def _check_groups(ruleset: Ruleset, found_types: set[str]) -> list[ValidationIssue]:
-    """Check group constraints - at least one member of each required group must be present."""
-    issues = []
-    groups: dict[str, list[SectionRule]] = {}
-    for rule in ruleset.section_rules:
-        if rule.group:
-            groups.setdefault(rule.group, []).append(rule)
-
-    for group_name, group_rules in groups.items():
-        # Check if any required group has at least one member present
-        has_required = any(r.required or True for r in group_rules)  # Groups imply at least one needed
-        has_member = any(r.section_type in found_types for r in group_rules)
-        if not has_member and has_required:
-            member_names = [r.title or r.section_type for r in group_rules]
-            issues.append(ValidationIssue(
-                code="MISSING_GROUP",
-                severity="error",
-                message=f"At least one of these sections is required: {', '.join(member_names)}",
-                section=group_name,
-            ))
-    return issues
-
-
-def _build_alias_map(ruleset: Ruleset) -> dict[str, list[str]]:
-    """Build a mapping of section_type -> list of aliases for fuzzy matching."""
-    alias_map: dict[str, list[str]] = {}
-    for rule in ruleset.section_rules:
-        aliases = list(rule.aliases)
-        if rule.title:
-            aliases.append(rule.title)
-        alias_map[rule.section_type] = aliases
-    return alias_map
 
 
 def _check_order(
-    identified: list[tuple[Section, str | None]],
+    doc: LegalDocument,
     ruleset: Ruleset,
-) -> list[ValidationIssue]:
-    """Check that identified sections are in the correct order."""
-    issues = []
-    order_map = {r.section_type: r.order for r in ruleset.section_rules}
+    aliases: dict[str, list[str]],
+) -> None:
+    """Check if sections are in the correct order and add warnings if not."""
+    rule_order = {req.id: req.order for req in ruleset.required_sections}
+    section_orders: list[tuple[str, int]] = []
 
-    prev_order = -1
-    prev_name = ""
-    for section, section_type in identified:
-        if section_type is None:
-            continue
-        order = order_map.get(section_type, 999)
-        if order < prev_order:
-            issues.append(ValidationIssue(
-                code="ORDER_VIOLATION",
-                severity="warning",
-                message=f"'{section.heading}' appears after '{prev_name}' but should come before it",
-                section=section_type,
+    for section in doc.sections:
+        match = fuzzy_heading_match(section.heading_text, aliases)
+        if match and match in rule_order:
+            section_orders.append((match, rule_order[match]))
+
+    # Check if the order values are monotonically increasing
+    for i in range(1, len(section_orders)):
+        if section_orders[i][1] < section_orders[i - 1][1]:
+            doc.issues.append(ValidationIssue(
+                severity=Severity.WARNING,
+                code="WRONG_ORDER",
+                message=(
+                    f"Section '{section_orders[i][0]}' appears before "
+                    f"'{section_orders[i - 1][0]}' but should come after it."
+                ),
+                auto_fixable=True,
             ))
-        prev_order = order
-        prev_name = section.heading
-
-    return issues
-
-
-def reorder_sections(
-    sections: list[Section],
-    ruleset: Ruleset,
-) -> list[Section]:
-    """Reorder sections to match the ruleset's expected order."""
-    alias_map = _build_alias_map(ruleset)
-    order_map = {r.section_type: r.order for r in ruleset.section_rules}
-
-    identified: list[tuple[Section, str | None]] = []
-    for section in sections:
-        section_type = fuzzy_heading_match(section.heading, alias_map)
-        identified.append((section, section_type))
-
-    def sort_key(item: tuple[Section, str | None]) -> int:
-        _, st = item
-        if st is None:
-            return 999
-        return order_map.get(st, 999)
-
-    identified.sort(key=sort_key)
-    return [section for section, _ in identified]
-
-
-def insert_missing_sections(
-    sections: list[Section],
-    ruleset: Ruleset,
-) -> list[Section]:
-    """Insert stub sections for any required sections that are missing."""
-    alias_map = _build_alias_map(ruleset)
-    found_types = set()
-    for section in sections:
-        st = fuzzy_heading_match(section.heading, alias_map)
-        if st:
-            found_types.add(st)
-
-    # Check groups
-    groups: dict[str, list[SectionRule]] = {}
-    for rule in ruleset.section_rules:
-        if rule.group:
-            groups.setdefault(rule.group, []).append(rule)
-
-    satisfied_groups = set()
-    for group_name, group_rules in groups.items():
-        if any(r.section_type in found_types for r in group_rules):
-            satisfied_groups.add(group_name)
-
-    new_sections = list(sections)
-
-    # First pass: insert stubs for required non-group sections
-    for rule in ruleset.section_rules:
-        if not rule.required:
-            continue
-        if rule.group:
-            continue  # Handle groups separately
-        if rule.section_type in found_types:
-            continue
-        stub = Section(
-            section_type=rule.section_type,
-            heading=rule.title or rule.section_type.replace("_", " ").title(),
-            heading_level=rule.heading_level,
-            content=[ContentBlock(text="[SECTION CONTENT NEEDED]", is_body_text=True)],
-            is_stub=True,
-        )
-        new_sections.append(stub)
-
-    # Second pass: insert stubs for unsatisfied groups
-    for group_name, group_rules in groups.items():
-        if group_name in satisfied_groups:
-            continue
-        # Insert the first member of the group as a stub
-        first_rule = group_rules[0]
-        stub = Section(
-            section_type=first_rule.section_type,
-            heading=first_rule.title or first_rule.section_type.replace("_", " ").title(),
-            heading_level=first_rule.heading_level,
-            content=[ContentBlock(text="[SECTION CONTENT NEEDED]", is_body_text=True)],
-            is_stub=True,
-        )
-        new_sections.append(stub)
-        satisfied_groups.add(group_name)
-
-    return reorder_sections(new_sections, ruleset)
+            break  # One order warning is enough to flag the problem

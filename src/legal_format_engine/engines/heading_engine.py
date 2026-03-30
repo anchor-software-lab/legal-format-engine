@@ -1,93 +1,104 @@
-"""Heading engine - normalizes heading styles, capitalization, and numbering."""
+"""Heading normalization engine.
+
+Applies case, numbering, and alignment rules to section headings.
+"""
 
 from __future__ import annotations
 
-from legal_format_engine.models.document import Section
-from legal_format_engine.models.section import HeadingLevel, HeadingRule, Ruleset
-from legal_format_engine.utils.text import (
-    is_all_caps,
-    to_all_caps,
-    to_sentence_case,
-    to_title_case,
-)
-from legal_format_engine.utils.numbering import (
-    generate_prefix,
-    strip_numbering_prefix,
-)
+from legal_format_engine.models.document import Alignment, HeadingLevel, Section
+from legal_format_engine.rules.schema import HeadingRule, Ruleset
+from legal_format_engine.utils.numbering import generate_prefix, strip_numbering_prefix
+from legal_format_engine.utils.text import to_sentence_case, to_title_case, to_upper
 
 
-def normalize_headings(
-    sections: list[Section],
-    ruleset: Ruleset,
-) -> list[Section]:
-    """Normalize all heading styles according to ruleset rules.
+def normalize_headings(sections: list[Section], ruleset: Ruleset) -> list[Section]:
+    """Normalize all headings in a section list according to rules.
 
-    Applies correct capitalization and numbering to each section heading.
+    Applies case transformation, regenerates numbering prefixes,
+    and sets alignment based on the ruleset's heading rules.
+
+    Args:
+        sections: List of sections to normalize.
+        ruleset: The active ruleset with heading rules.
+
+    Returns:
+        The same sections with headings normalized (mutated in place and returned).
     """
-    heading_rules_map: dict[int, HeadingRule] = {
-        hr.level: hr for hr in ruleset.heading_rules
-    }
+    _normalize_level(sections, HeadingLevel.LEVEL_1, ruleset)
 
-    counters: dict[int, int] = {}
-    return [
-        _normalize_section(s, heading_rules_map, counters)
-        for s in sections
-    ]
+    for section in sections:
+        if section.subsections:
+            _normalize_level(section.subsections, HeadingLevel.LEVEL_2, ruleset)
+            for sub in section.subsections:
+                if sub.subsections:
+                    _normalize_level(sub.subsections, HeadingLevel.LEVEL_3, ruleset)
+                    for subsub in sub.subsections:
+                        if subsub.subsections:
+                            _normalize_level(
+                                subsub.subsections, HeadingLevel.LEVEL_4, ruleset
+                            )
 
-
-def _normalize_section(
-    section: Section,
-    heading_rules_map: dict[int, HeadingRule],
-    counters: dict[int, int],
-) -> Section:
-    """Normalize a single section heading and recurse into subsections."""
-    level = section.heading_level
-    rule = heading_rules_map.get(level)
-
-    if rule:
-        # Strip existing prefix
-        clean = strip_numbering_prefix(section.heading)
-
-        # Apply capitalization
-        section.heading = _apply_case(clean, rule.style)
-
-        # Apply numbering
-        numbering_type = _style_to_numbering(rule.style)
-        if numbering_type:
-            counters[level] = counters.get(level, 0) + 1
-            prefix = generate_prefix(counters[level], numbering_type)
-            section.numbering_prefix = prefix
-        else:
-            section.numbering_prefix = None
-
-    # Recurse into subsections, reset lower-level counters
-    sub_counters: dict[int, int] = {}
-    section.subsections = [
-        _normalize_section(sub, heading_rules_map, sub_counters)
-        for sub in section.subsections
-    ]
-
-    return section
+    return sections
 
 
-def _apply_case(text: str, style: HeadingLevel) -> str:
-    """Apply the correct case transformation for a heading style."""
-    if style in (HeadingLevel.ALL_CAPS_CENTERED, HeadingLevel.ALL_CAPS_LEFT):
-        return to_all_caps(text)
-    elif style in (HeadingLevel.TITLE_CASE_CENTERED, HeadingLevel.TITLE_CASE_LEFT):
-        return to_title_case(text)
-    elif style == HeadingLevel.SENTENCE_CASE:
-        return to_sentence_case(text)
-    else:
-        # roman_numeral, capital_letter, arabic_numeral keep title case
-        return to_title_case(text)
+def _normalize_level(
+    sections: list[Section],
+    level: HeadingLevel,
+    ruleset: Ruleset,
+) -> None:
+    """Normalize headings at a specific level among siblings."""
+    rule = ruleset.get_heading_rule(level)
+    if not rule:
+        return
+
+    for i, section in enumerate(sections):
+        # Strip any existing numbering prefix
+        _, bare_text = strip_numbering_prefix(section.heading_text)
+
+        # Apply case transformation
+        normalized = _apply_case(bare_text, rule.case_style)
+
+        # Generate new numbering prefix
+        prefix = generate_prefix(i + 1, rule.numbering)
+
+        section.heading_text = normalized
+        section.heading_level = level
+        section.numbering_prefix = prefix
 
 
-def _style_to_numbering(style: HeadingLevel) -> str | None:
-    """Map heading style to numbering type."""
-    mapping = {
-        HeadingLevel.ROMAN_NUMERAL: "roman",
-        HeadingLevel.CAPITAL_LETTER: "alpha",
-        HeadingLevel.ARABIC_NUMERAL: "arabic",
-    }
-    return mapping.get(style)
+def _apply_case(text: str, case_style: str) -> str:
+    """Apply a case transformation to heading text.
+
+    Args:
+        text: The heading text (without numbering prefix).
+        case_style: One of "upper", "title", "sentence".
+
+    Returns:
+        Transformed text.
+    """
+    match case_style:
+        case "upper":
+            return to_upper(text)
+        case "title":
+            return to_title_case(text)
+        case "sentence":
+            return to_sentence_case(text)
+        case _:
+            return text
+
+
+def normalize_single_heading(text: str, rule: HeadingRule, index: int = 0) -> tuple[str, str | None]:
+    """Normalize a single heading string.
+
+    Args:
+        text: Raw heading text.
+        rule: The heading rule to apply.
+        index: 0-based position among siblings (for numbering).
+
+    Returns:
+        Tuple of (normalized_text, numbering_prefix).
+    """
+    _, bare = strip_numbering_prefix(text)
+    normalized = _apply_case(bare, rule.case_style)
+    prefix = generate_prefix(index + 1, rule.numbering)
+    return normalized, prefix

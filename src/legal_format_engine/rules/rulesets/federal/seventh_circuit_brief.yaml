@@ -1,0 +1,238 @@
+# United States Court of Appeals for the Seventh Circuit - Appellate Brief
+# Based on FRAP Rule 28, 32 and Seventh Circuit Rule 32
+# See also Circuit Rules 26.1, 28, 30, 31
+#
+# Key conventions:
+# - Follows FRAP Rule 32 with specific Seventh Circuit requirements
+# - Font: 14pt proportional serif (e.g., Times New Roman) or 12pt monospaced
+# - Margins: 1 inch on all sides
+# - Line spacing: Double-spaced
+# - Word limit: 13,000 words for principal briefs
+# - Circuit Rule 26.1: Detailed disclosure statement required
+# - Specific cover page requirements (Circuit Rule 32(c))
+# - Short appendix required containing judgment/order appealed from
+# - Circuit Rule 28(b): Jurisdictional statement must include statutory basis
+
+jurisdiction: federal
+court_level: seventh_circuit
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14.0
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: corporate_disclosure
+    canonical_name: "Disclosure Statement"
+    aliases:
+      - "Corporate Disclosure Statement"
+      - "Rule 26.1 Disclosure Statement"
+      - "Circuit Rule 26.1 Disclosure Statement"
+    order: 1
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 2
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Authorities Cited"
+      - "Authorities Cited"
+    order: 3
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: jurisdictional_statement
+    canonical_name: "Jurisdictional Statement"
+    aliases:
+      - "Jurisdiction"
+      - "Statement of Jurisdiction"
+      - "Basis for Jurisdiction"
+      - "Statement of Appellate Jurisdiction"
+    order: 4
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: statement_of_issues
+    canonical_name: "Statement of the Issues"
+    aliases:
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Questions Presented"
+      - "Statement of Issues"
+      - "Issues on Appeal"
+    order: 5
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+    order: 6
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 7
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
+    aliases:
+      - "Summary of the Argument"
+      - "Summary"
+    order: 8
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 9
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+    order: 10
+    required: true
+    heading_level: 1
+    group: null
+
+  - id: short_appendix
+    canonical_name: "Short Appendix"
+    aliases:
+      - "Required Short Appendix"
+      - "Appendix"
+      - "Circuit Rule 30(a) Appendix"
+      - "Statutory Appendix"
+    order: 11
+    required: true
+    heading_level: 1
+    group: null
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    /s/ {attorney_name}
+    {attorney_name_caps}
+    {attorney_title}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Counsel for {party_role}
+
+    Dated: {date}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      This brief complies with the type-volume limitation of
+      Federal Rule of Appellate Procedure 32(a)(7)(B) because
+      this brief contains {word_count} words, excluding the parts
+      of the brief exempted by Federal Rule of Appellate Procedure
+      32(f).
+
+      This brief complies with the typeface requirements of Federal
+      Rule of Appellate Procedure 32(a)(5) and the type-style
+      requirements of Federal Rule of Appellate Procedure 32(a)(6)
+      because this brief has been prepared in a proportionally
+      spaced typeface using {software} in {font_size}-point
+      {font_name}.
+
+      /s/ {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I electronically filed
+      the foregoing with the Clerk of the Court for the United
+      States Court of Appeals for the Seventh Circuit by using
+      the CM/ECF system. I certify that all participants in the
+      case are registered CM/ECF users and that service will be
+      accomplished by the CM/ECF system.
+
+      /s/ {attorney_name}
+
+signature_block_required: true

@@ -1,94 +1,97 @@
-"""Core document data models."""
+"""Internal document representation models."""
 
 from __future__ import annotations
-from enum import Enum
-from typing import Optional
-from pydantic import BaseModel, Field
+
+from enum import IntEnum, StrEnum
+
+from pydantic import BaseModel
 
 
-class PartyRole(str, Enum):
-    PLAINTIFF = "plaintiff"
-    DEFENDANT = "defendant"
-    APPELLANT = "appellant"
-    RESPONDENT = "respondent"
-    PETITIONER = "petitioner"
-    INTERVENOR = "intervenor"
-    AMICUS = "amicus"
+class HeadingLevel(IntEnum):
+    """Heading hierarchy levels."""
+
+    LEVEL_1 = 1  # ALL CAPS CENTERED
+    LEVEL_2 = 2  # Roman numeral, title case
+    LEVEL_3 = 3  # Capital letter, sentence case
+    LEVEL_4 = 4  # Arabic numeral, sentence case
 
 
-class Party(BaseModel):
-    name: str
-    role: PartyRole
-    designation: Optional[str] = None  # e.g. "Plaintiff-Respondent"
+class Alignment(StrEnum):
+    """Text alignment options."""
 
-
-class Attorney(BaseModel):
-    name: str
-    bar_number: Optional[str] = None
-    firm: Optional[str] = None
-    address: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    is_lead: bool = False
-
-
-class CaseMetadata(BaseModel):
-    case_name: str
-    case_number: str
-    court_name: Optional[str] = None
-    district: Optional[str] = None
-    county: Optional[str] = None
-    judge: Optional[str] = None
-    parties: list[Party] = Field(default_factory=list)
-    attorneys: list[Attorney] = Field(default_factory=list)
-
-
-class DocumentMetadata(BaseModel):
-    jurisdiction: str = "wisconsin"
-    court_level: str = "court_of_appeals"
-    document_type: str = "appellate_brief"
-    document_title: Optional[str] = None
-    variant: Optional[str] = None
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
+    JUSTIFY = "justify"
 
 
 class ContentBlock(BaseModel):
+    """A paragraph or block of body text."""
+
     text: str
-    style: Optional[str] = None
     bold: bool = False
     italic: bool = False
-    centered: bool = False
-    font_size_pt: Optional[float] = None
-    is_heading: bool = False
-    heading_level: int = 0
-    is_body_text: bool = False
-    is_caption: bool = False
-    is_page_break: bool = False
-    numbering_prefix: Optional[str] = None
+    underline: bool = False
+    alignment: Alignment = Alignment.JUSTIFY
+    is_body_text: bool = False  # True for body paragraphs that get first-line indent
+    is_caption: bool = False  # True for caption lines (single-spaced)
+    indent_inches: float = 0.0  # left indent override
 
 
 class Section(BaseModel):
-    section_type: str
-    heading: str
-    heading_level: int = 1
-    content: list[ContentBlock] = Field(default_factory=list)
-    subsections: list["Section"] = Field(default_factory=list)
-    numbering_prefix: Optional[str] = None
-    order_index: Optional[int] = None
-    is_stub: bool = False
+    """A document section with heading and content."""
+
+    id: str
+    heading_text: str
+    heading_level: HeadingLevel
+    numbering_prefix: str | None = None
+    content: list[ContentBlock] = []
+    subsections: list[Section] = []
+    is_generated: bool = False
 
 
-class DocumentModel(BaseModel):
-    metadata: DocumentMetadata
-    case_metadata: Optional[CaseMetadata] = None
-    caption: Optional["CaptionBlock"] = None
-    sections: list[Section] = Field(default_factory=list)
-    certifications: list[Section] = Field(default_factory=list)
-    signature_block: Optional[Section] = None
-    format_profile: Optional[dict] = None
+class CaptionBlock(BaseModel):
+    """The formatted caption at the top of the document."""
+
+    lines: list[ContentBlock]
 
 
-# Avoid circular import
-from legal_format_engine.models.caption import CaptionBlock  # noqa: E402
+class SignatureBlock(BaseModel):
+    """Attorney signature block."""
 
-DocumentModel.model_rebuild()
-Section.model_rebuild()
+    attorney_name: str
+    bar_number: str
+    firm: str | None = None
+    address: str
+    phone: str
+    email: str
+
+
+class Severity(StrEnum):
+    """Validation issue severity levels."""
+
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+
+
+class ValidationIssue(BaseModel):
+    """A single validation finding."""
+
+    severity: Severity
+    code: str
+    message: str
+    section_id: str | None = None
+    auto_fixable: bool = False
+
+
+class LegalDocument(BaseModel):
+    """Top-level internal representation of a legal document."""
+
+    metadata: dict | None = None
+    caption: CaptionBlock | None = None
+    sections: list[Section] = []
+    signature_block: SignatureBlock | None = None
+    certifications: list[Section] = []
+    issues: list[ValidationIssue] = []
+    raw_text: str | None = None

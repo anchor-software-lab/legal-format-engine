@@ -1,150 +1,207 @@
-# Illinois Appellate Court - Appellate Brief
-# Derived from Ill. S. Ct. R. 341
+# Illinois Appellate Court - Appellate Brief Format
+# Based on Ill. S. Ct. R. 341, 342, and 343
+# Formatting requirements per Illinois Supreme Court Rules.
+#
+# Key conventions:
+# - Margins: 1" all sides (or 1.5" left for binding)
+# - Font: Times New Roman 12pt, double-spaced
+# - "Points and Authorities" section within table of contents
+# - Word limit: none by default; page limit 50 pages (main brief)
+# - Certificate of compliance with type-volume may be needed if using word limit option
 
-name: "Illinois Appellate Brief"
-jurisdiction: "illinois"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "Illinois Appellate Court appellate brief format"
-statute_reference: "Ill. S. Ct. R. 341"
+jurisdiction: illinois
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
+  font_name: "Times New Roman"
   font_size_pt: 12
-  line_spacing: "double"
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
   margin_left_inches: 1.0
   margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 14000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: points_and_authorities
+    canonical_name: "Points and Authorities"
     aliases:
+      - "Table of Contents and Points and Authorities"
       - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
     aliases:
-      - "Table of Authorities"
+      - "Table of Cases and Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented for Review"
-    required: true
-    order: 3
+      - "Cases Cited"
+    order: 2
+    required: false
     heading_level: 1
+
+  - id: nature_of_action
+    canonical_name: "Nature of the Action"
     aliases:
-      - "Issues Presented for Review"
-      - "Issues Presented"
+      - "Nature of the Case"
+      - "Nature of Action"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: issues_presented
+    canonical_name: "Issues Presented for Review"
+    aliases:
       - "Statement of the Issues"
+      - "Statement of Issues"
+      - "Issues Presented"
       - "Issues"
       - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
     order: 4
+    required: true
     heading_level: 1
-    aliases:
-      - "Statement of the Case"
-      - "Procedural History"
 
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
-    heading_level: 1
+  - id: jurisdictional_statement
+    canonical_name: "Jurisdictional Statement"
     aliases:
-      - "Statement of Facts"
+      - "Statement of Jurisdiction"
+      - "Jurisdiction"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
-    required: true
+      - "Statement of the Facts"
     order: 6
+    required: true
     heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
     aliases:
-      - "Argument"
       - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
-    required: true
+      - "Discussion"
     order: 7
+    required: true
     heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
     aliases:
-      - "Conclusion"
       - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
-    required: true
+      - "Relief Requested"
     order: 8
+    required: true
     heading_level: 1
+
+  - id: certificate_of_compliance
+    canonical_name: "Certificate of Compliance"
     aliases:
-      - "Certifications"
-      - "Certification"
-
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in Ill.
-      S. Ct. R. 341 for a brief. The length of this brief is {word_count} words.
+      - "Certification of Compliance"
+    order: 9
     required: true
+    heading_level: 1
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+      - "Certificate of Filing and Service"
+    order: 10
     required: true
+    heading_level: 1
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {attorney_name}
+    ARDC No. {bar_number}
+
+    {firm_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I certify that this brief conforms to the requirements
+      of Rules 341(a) and 341(b). The length of this brief,
+      excluding the pages or words contained in the Rule
+      341(d) cover, the Rule 341(h)(1) table of contents and
+      statement of points and authorities, the Rule 341(c)
+      certificate of compliance, the certificate of service,
+      and those matters to be appended to the brief under
+      Rule 342(a), is {page_count} pages.
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I, {attorney_name}, an attorney, certify that on {date},
+      I caused to be served the foregoing brief upon all
+      counsel of record by [method of service].
+
+      Under penalties as provided by law pursuant to Section
+      1-109 of the Code of Civil Procedure, I certify that the
+      statements set forth in this certificate are true and
+      correct.
+
+      {attorney_name}
+
+signature_block_required: true

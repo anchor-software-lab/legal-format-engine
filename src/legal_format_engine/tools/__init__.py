@@ -1,1 +1,1 @@
-"""Analysis tools."""
+"""Development and analysis tools."""

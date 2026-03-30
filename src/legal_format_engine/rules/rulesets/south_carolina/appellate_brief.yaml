@@ -1,151 +1,171 @@
-# South Carolina Court of Appeals - Appellate Brief
-# Derived from S.C. App. Ct. R. 208
+# South Carolina Court of Appeals - Appellate Brief Format
+# Based on SCACR Rule 208 and Rule 211
+# Key conventions:
+# - Font: 12-point proportional (or 10-point monospaced)
+# - Margins: 1" all sides
+# - Double-spaced
+# - Word limit: 8,750 words
+# - "Statement of the Issues on Appeal" required
 
-name: "South Carolina Appellate Brief"
-jurisdiction: "south_carolina"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "South Carolina Court of Appeals appellate brief format"
-statute_reference: "S.C. App. Ct. R. 208"
+jurisdiction: south_carolina
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
-  font_size_pt: 14
-  line_spacing: "double"
+  font_name: "Times New Roman"
+  font_size_pt: 12.0
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
   margin_left_inches: 1.0
   margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 14000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
     aliases:
-      - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
     aliases:
-      - "Table of Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
+      - "Table of Cases and Authorities"
+    order: 2
     required: true
-    order: 3
     heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of the Issues on Appeal"
     aliases:
-      - "Issues Presented"
+      - "Issues on Appeal"
       - "Statement of the Issues"
-      - "Statement of Issues"
-      - "Issues"
+      - "Issues Presented"
       - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
-    order: 4
+    order: 3
+    required: true
     heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
     aliases:
-      - "Statement of the Case"
+      - "Case Statement"
       - "Procedural History"
-
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
+      - "Procedural Background"
+    order: 4
+    required: true
     heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
     aliases:
-      - "Statement of Facts"
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
+      - "Statement of the Facts"
+    order: 5
     required: true
+    heading_level: 1
+
+  - id: standard_of_review
+    canonical_name: "Standard of Review"
+    aliases:
+      - "Standards of Review"
     order: 6
+    required: true
     heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
     aliases:
-      - "Argument"
       - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
-    required: true
+      - "Discussion"
     order: 7
+    required: true
     heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
     aliases:
-      - "Conclusion"
       - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
-    required: true
+      - "Relief Requested"
     order: 8
+    required: true
     heading_level: 1
-    aliases:
-      - "Certifications"
-      - "Certification"
 
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in S.C.
-      App. Ct. R. 208 for a brief. The length of this brief is {word_count}
-      words.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "Appellate Case No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+    {attorney_name_caps}
+    S.C. Bar No. {bar_number}
 
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I certify that this brief complies with the type-volume
+      limitation of SCACR Rule 211(b). This brief contains
+      {word_count} words, excluding the parts of the brief
+      exempted by SCACR Rule 211(b).
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I certify that on {date}, a copy of this brief was served
+      on all counsel of record by {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

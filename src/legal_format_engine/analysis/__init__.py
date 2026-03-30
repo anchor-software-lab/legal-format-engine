@@ -1,1 +1,1 @@
-"""Document analysis modules."""
+"""Brief analysis and pattern learning package."""

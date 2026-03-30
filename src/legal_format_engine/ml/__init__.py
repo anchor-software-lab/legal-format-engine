@@ -1,23 +1,13 @@
-"""Machine learning pipeline for legal document formatting."""
+"""Machine learning pipeline for legal document formatting.
 
-from legal_format_engine.ml.normalizer import normalize_document, NormalizedDocument
-from legal_format_engine.ml.features import extract_features, FeatureVector
-from legal_format_engine.ml.learner import learn_patterns, LearnedPatterns
-from legal_format_engine.ml.synthesizer import synthesize_ruleset, recommend_changes
-from legal_format_engine.ml.pipeline import MLPipeline
-from legal_format_engine.ml.attribution import detect_attribution
-from legal_format_engine.ml.firm_database import FirmDatabase
-
-__all__ = [
-    "normalize_document",
-    "NormalizedDocument",
-    "extract_features",
-    "FeatureVector",
-    "learn_patterns",
-    "LearnedPatterns",
-    "synthesize_ruleset",
-    "recommend_changes",
-    "MLPipeline",
-    "detect_attribution",
-    "FirmDatabase",
-]
+This package provides:
+- normalizer: Converts any document format to a canonical representation
+- features: Extracts numerical/categorical feature vectors from normalized docs
+- learner: Statistical pattern learning with outlier rejection
+- synthesizer: Generates formatting specifications from learned patterns
+- attribution: Auto-detect author/firm from uploaded documents
+- firm_database: Reference database of law firms with fuzzy matching
+- archive: Extract documents from ZIP, RAR, and Adobe Portfolio archives
+- styles: Per-author/firm style profiles
+- rule_hierarchy: Court rules > ML learned > style profiles > defaults
+"""

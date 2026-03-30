@@ -1,159 +1,188 @@
-# Texas Court of Appeals - Appellate Brief
-# Derived from Tex. R. App. P. 38
+# Texas Court of Appeals - Appellate Brief Format
+# Based on Tex. R. App. P. 9 and 38
+# Key conventions:
+# - Font: 13-point proportional or 10-point monospaced (Courier)
+# - Margins: 1" top/bottom, 1" left/right (1.5" left for binding)
+# - Double-spaced (or 1.5)
+# - Word limit: 15,000 words for appellant's brief
+# - Identity of parties and counsel required
 
-name: "Texas Appellate Brief"
-jurisdiction: "texas"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "Texas Court of Appeals appellate brief format"
-statute_reference: "Tex. R. App. P. 38"
+jurisdiction: texas
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
-  font_size_pt: 13
-  line_spacing: "double"
+  font_name: "Times New Roman"
+  font_size_pt: 13.0
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
   margin_left_inches: 1.0
   margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 15000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: identity_of_parties
+    canonical_name: "Identity of Parties and Counsel"
     aliases:
-      - "Table of Contents"
-      - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+      - "Parties and Counsel"
+      - "Identity of Parties"
+      - "List of Parties"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Index of Authorities"
     aliases:
       - "Table of Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
-    required: true
+      - "Table of Cases and Authorities"
     order: 3
+    required: true
     heading_level: 1
-    aliases:
-      - "Issues Presented"
-      - "Statement of the Issues"
-      - "Statement of Issues"
-      - "Issues"
-      - "Questions Presented"
 
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
-    order: 4
-    heading_level: 1
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
     aliases:
-      - "Statement of the Case"
+      - "Case Statement"
+      - "Nature of the Case"
       - "Procedural History"
-
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
+    order: 4
+    required: true
     heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Issues Presented"
     aliases:
-      - "Statement of Facts"
+      - "Statement of the Issues"
+      - "Issues on Appeal"
+      - "Questions Presented"
+      - "Points of Error"
+      - "Issues Presented for Review"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
-    required: true
+      - "Statement of the Facts"
     order: 6
-    heading_level: 1
-    aliases:
-      - "Argument"
-      - "Arguments"
-
-  - section_type: "prayer"
-    title: "Prayer"
     required: true
+    heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of the Argument"
+    aliases:
+      - "Summary of Argument"
+      - "Summary"
     order: 7
-    heading_level: 1
-    aliases:
-      - "Prayer"
-      - "Prayer for Relief"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
     required: true
-    order: 8
     heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: prayer
+    canonical_name: "Prayer"
     aliases:
       - "Conclusion"
-      - "Summary"
-
-  - section_type: "certifications"
-    title: "Certifications"
-    required: true
+      - "Prayer for Relief"
+      - "Relief Requested"
     order: 9
+    required: true
     heading_level: 1
-    aliases:
-      - "Certifications"
-      - "Certification"
 
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in Tex.
-      R. App. P. 38 for a brief. The length of this brief is {word_count} words.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+    {attorney_name_caps}
+    State Bar No. {bar_number}
 
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {fax}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      Pursuant to Tex. R. App. P. 9.4, I hereby certify that
+      this brief contains {word_count} words. This is a
+      computer-generated document created in {word_processor}
+      using {font_name} {font_size}-point typeface for the body
+      and {footnote_size}-point typeface for footnotes.
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I certify that on {date}, a true and correct copy of the
+      foregoing was served on all parties through {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

@@ -1,150 +1,197 @@
-# Michigan Court of Appeals - Appellate Brief
-# Derived from Mich. Ct. R. 7.212
+# Michigan Court of Appeals - Appellate Brief Format
+# Based on Mich. Ct. R. 7.212 and 7.215
+# Formatting requirements per Michigan Court Rules.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 12pt, double-spaced
+# - Word limit: 16,000 words (appellant's brief) or 50 pages
+# - "Jurisdictional Statement" required
+# - "Index of Authorities" and "Statement of Questions Presented"
+# - Certificate of compliance required
 
-name: "Michigan Appellate Brief"
-jurisdiction: "michigan"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "Michigan Court of Appeals appellate brief format"
-statute_reference: "Mich. Ct. R. 7.212"
+jurisdiction: michigan
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
-  font_size_pt: 14
-  line_spacing: "double"
+  font_name: "Times New Roman"
+  font_size_pt: 12
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
   margin_left_inches: 1.0
   margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 16000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
     aliases:
-      - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+      - "Index"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: index_of_authorities
+    canonical_name: "Index of Authorities"
     aliases:
       - "Table of Authorities"
+      - "Table of Cases and Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
+      - "Cases Cited"
+    order: 2
     required: true
-    order: 3
     heading_level: 1
+
+  - id: jurisdictional_statement
+    canonical_name: "Statement of Jurisdiction"
     aliases:
+      - "Jurisdictional Statement"
+      - "Jurisdiction"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_questions
+    canonical_name: "Statement of Questions Presented"
+    aliases:
+      - "Questions Presented"
       - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Issues"
       - "Statement of the Issues"
       - "Statement of Issues"
-      - "Issues"
-      - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
     order: 4
+    required: true
     heading_level: 1
-    aliases:
-      - "Statement of the Case"
-      - "Procedural History"
 
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
-    heading_level: 1
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
     aliases:
-      - "Statement of Facts"
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
+      - "Statement of the Facts"
+    order: 5
     required: true
-    order: 6
     heading_level: 1
+
+  - id: standard_of_review
+    canonical_name: "Standard of Review"
     aliases:
-      - "Argument"
-      - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
+      - "Standards of Review"
+      - "Standard of Appellate Review"
+    order: 6
     required: true
-    order: 7
     heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion and Relief Requested"
     aliases:
       - "Conclusion"
       - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
-    required: true
+      - "Relief Requested"
     order: 8
+    required: true
     heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
     aliases:
-      - "Certifications"
-      - "Certification"
-
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in Mich.
-      Ct. R. 7.212 for a brief. The length of this brief is {word_count} words.
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 9
     required: true
+    heading_level: 1
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v"
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name} (P{bar_number})
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief complies with the
+      type-volume limitation of MCR 7.212(B). Excluding the
+      items listed in MCR 7.212(B), this brief contains
+      {word_count} words.
+
+      I further certify that this brief complies with the
+      requirements of MCR 7.212(B) regarding typeface and
+      type size (Times New Roman, 12-point).
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I served a copy of
+      this brief upon all parties or their counsel of record
+      by [method of service].
+
+      {attorney_name}
+
+signature_block_required: true

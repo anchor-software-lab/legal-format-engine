@@ -1,100 +1,114 @@
-"""Boilerplate engine - generates signature blocks and certifications."""
+"""Boilerplate block generation engine.
+
+Generates signature blocks, certifications, and other standard blocks.
+"""
 
 from __future__ import annotations
-from typing import Optional
 
-from legal_format_engine.models.document import Attorney, ContentBlock, Section
-from legal_format_engine.models.section import CertificationTemplate, Ruleset
+from datetime import date
+
+from legal_format_engine.models.document import (
+    Alignment,
+    ContentBlock,
+    HeadingLevel,
+    Section,
+    SignatureBlock,
+)
+from legal_format_engine.models.metadata import DocumentMetadata
+from legal_format_engine.rules.schema import CertificationRule
 
 
-def generate_signature_block(
-    attorney: Attorney,
-    date: Optional[str] = None,
-) -> Section:
-    """Generate a signature block section."""
-    lines: list[ContentBlock] = []
+def generate_signature_block(metadata: DocumentMetadata) -> SignatureBlock:
+    """Generate a signature block from attorney metadata.
 
-    lines.append(ContentBlock(text="Respectfully submitted,", is_body_text=True))
-    lines.append(ContentBlock(text=""))
+    Args:
+        metadata: Document metadata containing attorney info.
 
-    if date:
-        lines.append(ContentBlock(text=f"Dated: {date}", is_body_text=True))
-        lines.append(ContentBlock(text=""))
-
-    lines.append(ContentBlock(
-        text=f"Electronically signed by {attorney.name}",
-        is_body_text=True,
-    ))
-    lines.append(ContentBlock(text=f"_________________________", is_body_text=True))
-    lines.append(ContentBlock(text=attorney.name, bold=True, is_body_text=True))
-
-    if attorney.bar_number:
-        lines.append(ContentBlock(text=f"Bar No. {attorney.bar_number}", is_body_text=True))
-
-    if attorney.firm:
-        lines.append(ContentBlock(text=attorney.firm, is_body_text=True))
-
-    if attorney.address:
-        for line in attorney.address.split("\n"):
-            lines.append(ContentBlock(text=line.strip(), is_body_text=True))
-
-    if attorney.phone:
-        lines.append(ContentBlock(text=f"Phone: {attorney.phone}", is_body_text=True))
-
-    if attorney.email:
-        lines.append(ContentBlock(text=f"Email: {attorney.email}", is_body_text=True))
-
-    return Section(
-        section_type="signature_block",
-        heading="",
-        heading_level=0,
-        content=lines,
+    Returns:
+        A populated SignatureBlock.
+    """
+    return SignatureBlock(
+        attorney_name=metadata.attorney.name,
+        bar_number=metadata.attorney.bar_number,
+        firm=metadata.attorney.firm,
+        address=metadata.attorney.address,
+        phone=metadata.attorney.phone,
+        email=metadata.attorney.email,
     )
 
 
 def generate_certifications(
-    ruleset: Ruleset,
-    attorney: Attorney,
-    word_count: Optional[int] = None,
+    metadata: DocumentMetadata,
+    rules: list[CertificationRule],
+    word_count: int | None = None,
+    service_parties: str | None = None,
 ) -> list[Section]:
-    """Generate certification sections from ruleset templates."""
-    certifications = []
+    """Generate certification sections from templates.
 
-    for template in ruleset.certification_templates:
-        if not template.required:
-            continue
+    Args:
+        metadata: Document metadata for template substitution.
+        rules: List of certification rules with templates.
+        word_count: Optional word count for compliance certification.
+        service_parties: Optional formatted list of served parties.
 
-        text = template.template
-        if word_count is not None:
-            text = text.replace("{word_count}", str(word_count))
+    Returns:
+        List of generated Section objects for each certification.
+    """
+    sections: list[Section] = []
+    filed = metadata.date_filed or date.today()
 
-        lines: list[ContentBlock] = []
+    template_vars = _build_template_vars(metadata, filed, word_count, service_parties)
 
-        # Title if present
-        if template.title:
-            lines.append(ContentBlock(
-                text=template.title.upper(),
-                bold=True,
-                centered=True,
-                is_heading=True,
-            ))
-
-        lines.append(ContentBlock(text=text, is_body_text=True))
-        lines.append(ContentBlock(text=""))
-
-        # Signature line
-        lines.append(ContentBlock(
-            text=f"_________________________",
-            is_body_text=True,
-        ))
-        lines.append(ContentBlock(text=attorney.name, is_body_text=True))
-
+    for rule in rules:
+        text = _render_template(rule.template, template_vars)
         section = Section(
-            section_type=f"certification_{template.cert_type}",
-            heading=template.title or "",
-            heading_level=1 if template.title else 0,
-            content=lines,
+            id=rule.id,
+            heading_text=(rule.title or rule.id.replace("_", " ")).upper(),
+            heading_level=HeadingLevel.LEVEL_1,
+            content=[ContentBlock(text=text, alignment=Alignment.JUSTIFY, is_body_text=True)],
+            is_generated=True,
         )
-        certifications.append(section)
+        sections.append(section)
 
-    return certifications
+    return sections
+
+
+def _build_template_vars(
+    metadata: DocumentMetadata,
+    filed: date,
+    word_count: int | None,
+    service_parties: str | None,
+) -> dict[str, str]:
+    """Build the template variable dictionary for certification rendering."""
+    return {
+        "attorney_name": metadata.attorney.name,
+        "bar_number": metadata.attorney.bar_number,
+        "firm": metadata.attorney.firm or "",
+        "address": metadata.attorney.address,
+        "phone": metadata.attorney.phone,
+        "email": metadata.attorney.email,
+        "date_filed": filed.strftime("%B %d, %Y"),
+        "day": str(filed.day),
+        "month": filed.strftime("%B"),
+        "year": str(filed.year),
+        "word_count": str(word_count) if word_count else "[WORD COUNT]",
+        "service_parties": service_parties or "[SERVICE PARTIES]",
+        "signature_line": "____________________________",
+        "case_number": metadata.case.case_number,
+    }
+
+
+def _render_template(template: str, variables: dict[str, str]) -> str:
+    """Render a template string by substituting variables.
+
+    Uses Python str.format_map with a defaulting dict so missing
+    keys produce placeholder text instead of errors.
+    """
+    return template.format_map(_DefaultDict(variables))
+
+
+class _DefaultDict(dict):
+    """Dict that returns bracketed key name for missing keys."""
+
+    def __missing__(self, key: str) -> str:
+        return f"[{key.upper()}]"

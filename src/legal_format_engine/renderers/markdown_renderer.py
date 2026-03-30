@@ -1,70 +1,85 @@
-"""Markdown renderer - outputs documents as Markdown for preview/debug."""
+"""Markdown renderer for legal documents.
+
+Produces clean Markdown output for debugging and previewing.
+"""
 
 from __future__ import annotations
 
-from legal_format_engine.models.document import DocumentModel, Section, ContentBlock
-from legal_format_engine.models.caption import CaptionBlock
+from legal_format_engine.models.document import LegalDocument, Section
 
 
-def render_markdown(doc: DocumentModel) -> str:
-    """Render a DocumentModel as Markdown."""
+def render_markdown(doc: LegalDocument) -> str:
+    """Render a LegalDocument as Markdown text.
+
+    Args:
+        doc: The internal document representation.
+
+    Returns:
+        Markdown-formatted string.
+    """
     parts: list[str] = []
 
     # Caption
     if doc.caption:
-        parts.append(_render_caption(doc.caption))
+        for line in doc.caption.lines:
+            if line.text:
+                if line.bold:
+                    parts.append(f"**{line.text}**")
+                else:
+                    parts.append(line.text)
+            else:
+                parts.append("")
+        parts.append("")
+        parts.append("---")
         parts.append("")
 
     # Sections
     for section in doc.sections:
-        parts.append(_render_section(section))
-        parts.append("")
-
-    # Certifications
-    for cert in doc.certifications:
-        parts.append(_render_section(cert))
-        parts.append("")
+        _render_section(parts, section, depth=0)
 
     # Signature block
     if doc.signature_block:
-        parts.append(_render_section(doc.signature_block))
+        parts.append("")
+        parts.append("---")
+        parts.append("")
+        sig = doc.signature_block
+        parts.append("Respectfully submitted,")
+        parts.append("")
+        parts.append(f"**{sig.attorney_name}**  ")
+        parts.append(f"State Bar No. {sig.bar_number}  ")
+        if sig.firm:
+            parts.append(f"{sig.firm}  ")
+        parts.append(f"{sig.address}  ")
+        parts.append(f"Phone: {sig.phone}  ")
+        parts.append(f"Email: {sig.email}")
+
+    # Certifications
+    for cert in doc.certifications:
+        parts.append("")
+        parts.append("---")
+        parts.append("")
+        _render_section(parts, cert, depth=0)
 
     return "\n".join(parts)
 
 
-def _render_caption(caption: CaptionBlock) -> str:
-    lines = []
-    for block in caption.lines:
-        if block.bold:
-            lines.append(f"**{block.text}**")
-        else:
-            lines.append(block.text)
-    return "\n".join(lines)
-
-
-def _render_section(section: Section) -> str:
-    parts = []
-
-    if section.heading:
-        level = min(section.heading_level, 4) if section.heading_level > 0 else 1
-        prefix = "#" * level
-        heading_text = section.heading
+def _render_section(parts: list[str], section: Section, depth: int) -> None:
+    """Render a single section and its subsections."""
+    if section.heading_text:
+        level = max(section.heading_level, depth + 1)
+        prefix = "#" * min(level, 6)
+        heading = section.heading_text
         if section.numbering_prefix:
-            heading_text = f"{section.numbering_prefix} {heading_text}"
-        parts.append(f"{prefix} {heading_text}")
+            heading = f"{section.numbering_prefix} {heading}"
+        parts.append(f"{prefix} {heading}")
         parts.append("")
 
     for block in section.content:
-        if not block.text:
-            parts.append("")
-        elif block.bold:
-            parts.append(f"**{block.text}**")
-        elif block.italic:
-            parts.append(f"*{block.text}*")
-        else:
+        if block.text:
             parts.append(block.text)
+        else:
+            parts.append("")
+    parts.append("")
 
     for sub in section.subsections:
-        parts.append(_render_section(sub))
-
-    return "\n".join(parts)
+        _render_section(parts, sub, depth + 1)

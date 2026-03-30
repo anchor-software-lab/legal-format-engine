@@ -1,151 +1,178 @@
-# Washington Court of Appeals - Appellate Brief
-# Derived from Wash. R. App. P. 10.4
+# Washington Court of Appeals - Appellate Brief Format
+# Based on RAP 10.3 and 10.4 (Washington Rules of Appellate Procedure)
+# Key conventions:
+# - Font: 12-point proportional
+# - Margins: 2" left, 1.5" right, 1" top/bottom (for court use)
+# - Double-spaced
+# - Word limit: 12,000 words for opening brief
+# - "Assignments of Error" required with specific format
 
-name: "Washington Appellate Brief"
-jurisdiction: "washington"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "Washington Court of Appeals appellate brief format"
-statute_reference: "Wash. R. App. P. 10.4"
+jurisdiction: washington
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
-  font_size_pt: 14
-  line_spacing: "double"
+  font_name: "Times New Roman"
+  font_size_pt: 12.0
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
-  margin_left_inches: 1.0
-  margin_right_inches: 1.0
+  margin_left_inches: 2.0
+  margin_right_inches: 1.5
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 12000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
     aliases:
-      - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
     aliases:
-      - "Table of Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
+      - "Table of Cases and Authorities"
+    order: 2
     required: true
-    order: 3
     heading_level: 1
+
+  - id: introduction
+    canonical_name: "Introduction"
     aliases:
+      - "Preliminary Statement"
+    order: 3
+    required: false
+    heading_level: 1
+
+  - id: assignments_of_error
+    canonical_name: "Assignments of Error"
+    aliases:
+      - "Errors Assigned"
       - "Issues Presented"
       - "Statement of the Issues"
-      - "Statement of Issues"
-      - "Issues"
-      - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
     order: 4
+    required: true
     heading_level: 1
-    aliases:
-      - "Statement of the Case"
-      - "Procedural History"
 
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
-    heading_level: 1
+  - id: statement_of_issues
+    canonical_name: "Issues Pertaining to Assignments of Error"
     aliases:
-      - "Statement of Facts"
+      - "Issues Presented"
+      - "Questions Presented"
+      - "Issues on Appeal"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Procedural History"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
-    required: true
-    order: 6
-    heading_level: 1
-    aliases:
-      - "Argument"
-      - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
-    required: true
+      - "Statement of the Facts"
     order: 7
-    heading_level: 1
-    aliases:
-      - "Conclusion"
-      - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
     required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
     order: 8
+    required: true
     heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
     aliases:
-      - "Certifications"
-      - "Certification"
-
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in Wash.
-      R. App. P. 10.4 for a brief. The length of this brief is {word_count}
-      words.
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 9
     required: true
+    heading_level: 1
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
+    {attorney_name_caps}
+    WSBA No. {bar_number}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I certify that this brief contains {word_count} words in
+      compliance with RAP 10.4(b), exclusive of appendices, title
+      page, table of contents, and table of authorities.
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I certify that on {date}, I caused a copy of this brief
+      to be served upon all counsel of record by {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

@@ -1,1 +1,1 @@
-"""Formatting engines."""
+"""Document formatting engines."""

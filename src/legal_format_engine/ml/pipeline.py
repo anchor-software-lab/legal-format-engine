@@ -1,393 +1,641 @@
-"""ML Pipeline orchestrator - ties all ML components together."""
+"""ML Pipeline orchestrator: end-to-end document processing and learning.
+
+This is the single entry point for the ML system. It coordinates:
+1. Document ingestion (any format)
+2. Normalization (strip format quirks)
+3. Feature extraction
+4. Storage of normalized documents
+5. Learning from stored documents
+6. Synthesizing formatting specs
+
+Usage:
+    pipeline = MLPipeline()
+
+    # Ingest a document
+    result = pipeline.ingest("brief.docx", jurisdiction="wisconsin")
+
+    # Learn from all Wisconsin documents
+    learned = pipeline.learn(jurisdiction="wisconsin")
+
+    # Get a suggested ruleset
+    ruleset = pipeline.suggest_ruleset(jurisdiction="wisconsin")
+
+    # Compare against existing ruleset
+    recs = pipeline.recommend(jurisdiction="wisconsin")
+
+    # Ingest an archive (ZIP, RAR, Adobe Portfolio)
+    results = pipeline.ingest_archive("briefs.zip", jurisdiction="wisconsin")
+"""
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Optional
+
 import json
-import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
-from legal_format_engine.ml.normalizer import NormalizedDocument, normalize_document
-from legal_format_engine.ml.features import FeatureVector, extract_features
-from legal_format_engine.ml.learner import LearnedPatterns, learn_patterns
-from legal_format_engine.ml.synthesizer import synthesize_ruleset, recommend_changes
-from legal_format_engine.ml.attribution import detect_attribution, detect_from_docx_metadata
-from legal_format_engine.ml.firm_database import FirmDatabase
-from legal_format_engine.ml.style_profiles import StyleProfile, build_style_profile, resolve_format
-from legal_format_engine.ml.archive import extract_archive, SUPPORTED_EXTENSIONS
+from legal_format_engine.ml.normalizer import (
+    NormalizedDocument,
+    normalize_document,
+)
+from legal_format_engine.ml.features import DocumentFeatures, extract_features
+from legal_format_engine.ml.learner import FormatLearner, LearnedFormat
+from legal_format_engine.ml.synthesizer import (
+    FormatRecommendation,
+    diff_against_ruleset,
+    synthesize_ruleset,
+)
 
-STORAGE_DIR = Path.home() / ".legal-format-engine" / "ml_documents"
+
+_DEFAULT_STORE_DIR = Path.home() / ".legal-format-engine" / "ml_documents"
 
 
 class MLPipeline:
-    """Main ML pipeline orchestrator."""
+    """End-to-end ML pipeline for legal document formatting."""
 
-    def __init__(self, storage_dir: Optional[Path] = None):
-        self.storage_dir = storage_dir or STORAGE_DIR
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
-        self.firm_db = FirmDatabase()
-        self._documents: list[dict] = []
-        self._load_index()
+    def __init__(self, store_dir: Path | None = None):
+        self._store_dir = store_dir or _DEFAULT_STORE_DIR
+        self._store_dir.mkdir(parents=True, exist_ok=True)
 
-    def _load_index(self):
-        """Load document index from storage."""
-        index_path = self.storage_dir / "index.json"
-        if index_path.exists():
-            self._documents = json.loads(index_path.read_text())
-
-    def _save_index(self):
-        """Save document index to storage."""
-        index_path = self.storage_dir / "index.json"
-        index_path.write_text(json.dumps(self._documents, indent=2))
+    # ------------------------------------------------------------------
+    # Ingest: normalize and store a document
+    # ------------------------------------------------------------------
 
     def ingest(
         self,
-        data: bytes,
-        filename: str,
-        jurisdiction: Optional[str] = None,
-        court_level: Optional[str] = None,
-        document_type: Optional[str] = None,
-        author: Optional[str] = None,
-        firm: Optional[str] = None,
-    ) -> dict:
-        """Ingest a document for ML processing.
+        file_path: str | Path,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+        author: str | None = None,
+        firm: str | None = None,
+    ) -> NormalizedDocument:
+        """Ingest a document: normalize it and store for learning.
 
-        1. Detect format and parse
-        2. Extract format profile
-        3. Auto-detect attribution if not provided
-        4. Normalize firm name via database
-        5. Store normalized representation
+        Accepts: .docx, .pdf, .doc, .html, .rtf
+        Returns the NormalizedDocument.
         """
-        ext = Path(filename).suffix.lower()
+        file_path = Path(file_path)
 
-        # Check if it's an archive
-        if ext in (".zip", ".rar") or (ext == ".pdf" and self._looks_like_portfolio(data)):
-            return self.ingest_archive(data, filename, jurisdiction, author, firm)
+        # Auto-detect attribution if user did not provide author/firm
+        detected_author = author
+        detected_firm = firm
+        if detected_author is None and detected_firm is None:
+            try:
+                from legal_format_engine.ml.attribution import AttributionDetector
+                detector = AttributionDetector()
+                attribution = detector.detect(file_path)
+                if attribution.author:
+                    detected_author = attribution.author
+                if attribution.firm:
+                    detected_firm = attribution.firm
+            except Exception:
+                pass  # Attribution detection is best-effort
 
-        # Parse and extract profile
-        profile = self._extract_profile(data, ext, filename)
+        # Normalize firm name via the firm database
+        if detected_firm and firm is None:
+            try:
+                from legal_format_engine.ml.firm_database import FirmDatabase
+                db = FirmDatabase()
+                detected_firm = db.normalize_name(detected_firm)
+            except Exception:
+                pass  # Firm normalization is best-effort
 
-        # Auto-detect attribution
-        if not author or not firm:
-            text = self._extract_text(data, ext)
-            if text:
-                attr = detect_attribution(text)
-                if not author and attr.author:
-                    author = attr.author
-                if not firm and attr.firm:
-                    firm = attr.firm
-
-        # Normalize firm via database
-        if firm:
-            match = self.firm_db.lookup(firm)
-            if match:
-                firm = match.canonical_name
-
-        # Build profile dict
-        profile_dict = {
-            "fonts": [{"font_name": f.font_name, "font_size_pt": f.font_size_pt}
-                      for f in (profile.fonts if hasattr(profile, 'fonts') else [])],
-            "margins": {
-                "top_inches": profile.margins.top_inches,
-                "bottom_inches": profile.margins.bottom_inches,
-                "left_inches": profile.margins.left_inches,
-                "right_inches": profile.margins.right_inches,
-            } if hasattr(profile, 'margins') and profile.margins else {},
-            "headings": [{"text": h.text, "level": h.level, "bold": h.bold}
-                        for h in (profile.headings if hasattr(profile, 'headings') else [])],
-            "jurisdiction": jurisdiction,
-            "court_level": court_level,
-            "document_type": document_type,
-        }
+        # User-provided values always override auto-detected ones
+        final_author = author if author is not None else detected_author
+        final_firm = firm if firm is not None else detected_firm
 
         # Normalize
-        normalized = normalize_document(
-            profile_dict,
-            source_format=ext.lstrip("."),
-            file_name=filename,
-            author=author,
-            firm=firm,
+        doc = normalize_document(
+            str(file_path),
+            jurisdiction=jurisdiction,
+            court_level=court_level,
+            document_type=document_type,
+            author=final_author,
+            firm=final_firm,
         )
 
         # Store
-        doc_id = hashlib.md5(data).hexdigest()[:12]
-        doc_record = {
-            "id": doc_id,
-            "filename": filename,
-            "format": ext,
-            "jurisdiction": jurisdiction,
-            "court_level": court_level,
-            "document_type": document_type,
-            "author": author,
-            "firm": firm,
-            "ingested_at": datetime.utcnow().isoformat(),
-            "normalized": {
-                "font_name": normalized.font_name,
-                "font_size_pt": normalized.font_size_pt,
-                "margin_top": normalized.margin_top,
-                "margin_bottom": normalized.margin_bottom,
-                "margin_left": normalized.margin_left,
-                "margin_right": normalized.margin_right,
-                "line_spacing": normalized.line_spacing,
-                "confidence": normalized.confidence,
-            },
-        }
+        self._save_normalized(doc, tags=tags, notes=notes)
 
-        # Save raw file
-        (self.storage_dir / f"{doc_id}{ext}").write_bytes(data)
+        return doc
 
-        self._documents.append(doc_record)
-        self._save_index()
-
-        return {"id": doc_id, "filename": filename, "author": author, "firm": firm}
+    def ingest_batch(
+        self,
+        file_paths: list[str | Path],
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+        author: str | None = None,
+        firm: str | None = None,
+    ) -> list[NormalizedDocument]:
+        """Ingest multiple documents at once."""
+        results = []
+        for fp in file_paths:
+            try:
+                doc = self.ingest(
+                    fp,
+                    jurisdiction=jurisdiction,
+                    court_level=court_level,
+                    document_type=document_type,
+                    tags=tags,
+                    author=author,
+                    firm=firm,
+                )
+                results.append(doc)
+            except Exception:
+                # Skip failed documents but don't stop batch
+                continue
+        return results
 
     def ingest_archive(
         self,
-        data: bytes,
-        filename: str,
-        jurisdiction: Optional[str] = None,
-        author: Optional[str] = None,
-        firm: Optional[str] = None,
-    ) -> list[dict]:
-        """Ingest all documents from an archive."""
-        extracted = extract_archive(data, filename)
-        results = []
-        for name, file_data in extracted:
-            r = self.ingest(
-                data=file_data,
-                filename=name,
-                jurisdiction=jurisdiction,
-                author=author,
-                firm=firm,
-            )
-            if isinstance(r, dict):
-                results.append(r)
-            elif isinstance(r, list):
-                results.extend(r)
-        return results
+        archive_path: str | Path,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+        author: str | None = None,
+        firm: str | None = None,
+    ) -> dict:
+        """Ingest all documents from an archive (ZIP, RAR, Adobe Portfolio).
 
-    def learn(self, jurisdiction: Optional[str] = None) -> dict:
-        """Run the learner on stored documents."""
-        docs = self._documents
-        if jurisdiction:
-            docs = [d for d in docs if d.get("jurisdiction") == jurisdiction]
+        Extracts the archive, filters to supported document types, and
+        ingests each one through the full normalization pipeline.
+
+        Returns a summary dict with processed/failed counts and details.
+        """
+        from legal_format_engine.ml.archive import (
+            cleanup_extraction,
+            extract_archive,
+            is_archive,
+        )
+
+        archive_path = Path(archive_path)
+        if not archive_path.exists():
+            raise FileNotFoundError(f"Archive not found: {archive_path}")
+
+        # Extract files from archive
+        extracted_dir = None
+        try:
+            extracted_files = extract_archive(archive_path)
+            # The extraction creates a temp dir; infer it from the first file
+            if extracted_files:
+                extracted_dir = extracted_files[0].parent
+
+            results = []
+            errors = []
+
+            for file_path in extracted_files:
+                try:
+                    doc = self.ingest(
+                        file_path,
+                        jurisdiction=jurisdiction,
+                        court_level=court_level,
+                        document_type=document_type,
+                        tags=tags,
+                        notes=notes,
+                        author=author,
+                        firm=firm,
+                    )
+                    results.append({
+                        "id": doc.id,
+                        "source_filename": file_path.name,
+                        "source_format": doc.source_format,
+                        "extraction_confidence": doc.extraction_confidence,
+                        "primary_font": doc.primary_font.family if doc.primary_font else None,
+                        "font_size_pt": doc.primary_font.size_pt if doc.primary_font else None,
+                    })
+                except Exception as exc:
+                    errors.append({
+                        "filename": file_path.name,
+                        "error": str(exc),
+                    })
+
+            return {
+                "archive_filename": archive_path.name,
+                "total_files_found": len(extracted_files),
+                "processed": len(results),
+                "failed": len(errors),
+                "results": results,
+                "errors": errors,
+            }
+
+        finally:
+            if extracted_dir is not None:
+                cleanup_extraction(extracted_dir)
+
+    # ------------------------------------------------------------------
+    # Learn: run the learner on stored documents
+    # ------------------------------------------------------------------
+
+    def learn(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> LearnedFormat:
+        """Learn formatting patterns from stored documents matching the filter.
+
+        Returns a LearnedFormat with confidence-weighted patterns.
+        """
+        docs = self._load_matching(jurisdiction, court_level, document_type, tags)
 
         if not docs:
-            return {"message": "No documents to learn from", "document_count": 0}
-
-        # Build feature vectors from stored normalized data
-        vectors = []
-        for doc in docs:
-            n = doc.get("normalized", {})
-            fv = FeatureVector(
-                source_format=doc.get("format", "").lstrip("."),
-                confidence=n.get("confidence", 0.5),
-                author=doc.get("author"),
-                firm=doc.get("firm"),
-                jurisdiction=doc.get("jurisdiction"),
+            return LearnedFormat(
+                jurisdiction=jurisdiction,
+                court_level=court_level,
+                document_type=document_type,
             )
-            if n.get("font_size_pt"):
-                fv.font_size = (n["font_size_pt"], n.get("confidence", 0.5))
-            if n.get("margin_top"):
-                fv.margin_top = (n["margin_top"], n.get("confidence", 0.5))
-            if n.get("margin_bottom"):
-                fv.margin_bottom = (n["margin_bottom"], n.get("confidence", 0.5))
-            if n.get("margin_left"):
-                fv.margin_left = (n["margin_left"], n.get("confidence", 0.5))
-            if n.get("margin_right"):
-                fv.margin_right = (n["margin_right"], n.get("confidence", 0.5))
-            if n.get("line_spacing"):
-                fv.line_spacing = (n["line_spacing"], n.get("confidence", 0.5))
-            if n.get("font_name"):
-                fv.font_name = (n["font_name"], n.get("confidence", 0.5))
-            vectors.append(fv)
 
-        patterns = learn_patterns(vectors)
-        return {
-            "document_count": patterns.document_count,
-            "font_name": patterns.font_name,
-            "font_size_pt": patterns.font_size_pt,
-            "margin_top": patterns.margin_top,
-            "margin_bottom": patterns.margin_bottom,
-            "margin_left": patterns.margin_left,
-            "margin_right": patterns.margin_right,
-            "line_spacing": patterns.line_spacing,
-            "first_line_indent": patterns.first_line_indent,
-        }
+        # Extract features from each normalized document
+        features_list = [extract_features(doc) for doc in docs]
 
-    def suggest_ruleset(self, jurisdiction: str = "wisconsin") -> str:
-        """Generate a YAML ruleset from learned patterns."""
-        learned = self.learn(jurisdiction)
-        patterns = LearnedPatterns(
-            font_name=learned.get("font_name"),
-            font_size_pt=learned.get("font_size_pt"),
-            margin_top=learned.get("margin_top"),
-            margin_bottom=learned.get("margin_bottom"),
-            margin_left=learned.get("margin_left"),
-            margin_right=learned.get("margin_right"),
-            line_spacing=learned.get("line_spacing"),
-            first_line_indent=learned.get("first_line_indent"),
-            document_count=learned.get("document_count", 0),
-            jurisdiction=jurisdiction,
-        )
-        return synthesize_ruleset(patterns)
+        # Run the learner
+        learner = FormatLearner()
+        learner.add_all(features_list)
+        return learner.learn()
 
-    def recommend(self, jurisdiction: str = "wisconsin") -> list[dict]:
-        """Compare ML patterns against existing ruleset."""
-        learned = self.learn(jurisdiction)
-        patterns = LearnedPatterns(
-            font_name=learned.get("font_name"),
-            font_size_pt=learned.get("font_size_pt"),
-            margin_top=learned.get("margin_top"),
-            margin_bottom=learned.get("margin_bottom"),
-            margin_left=learned.get("margin_left"),
-            margin_right=learned.get("margin_right"),
-            document_count=learned.get("document_count", 0),
-            first_line_indent=learned.get("first_line_indent"),
-        )
-        return recommend_changes(patterns, jurisdiction)
+    # ------------------------------------------------------------------
+    # Synthesize: generate formatting specs
+    # ------------------------------------------------------------------
 
-    def list_documents(self) -> list[dict]:
-        return self._documents
+    def suggest_ruleset(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str = "appellate",
+        document_type: str = "brief",
+        tags: list[str] | None = None,
+    ) -> dict:
+        """Generate a suggested YAML-compatible ruleset from learned patterns."""
+        learned = self.learn(jurisdiction, court_level, document_type, tags)
+        return synthesize_ruleset(learned, jurisdiction, court_level, document_type)
 
-    def stats(self) -> dict:
-        jurisdictions = {}
-        formats = {}
-        firms = {}
-        for d in self._documents:
-            j = d.get("jurisdiction", "unknown")
+    def recommend(
+        self,
+        jurisdiction: str,
+        court_level: str = "appellate",
+        document_type: str = "brief",
+        tags: list[str] | None = None,
+    ) -> list[dict]:
+        """Compare learned patterns against existing ruleset and recommend changes.
+
+        Returns a list of recommendation dicts.
+        """
+        # Load existing ruleset
+        existing = self._load_existing_ruleset(jurisdiction, court_level, document_type)
+        if not existing:
+            return []
+
+        # Learn patterns
+        learned = self.learn(jurisdiction, court_level, document_type, tags)
+
+        # Diff
+        recs = diff_against_ruleset(learned, existing)
+        return [r.to_dict() for r in recs]
+
+    # ------------------------------------------------------------------
+    # Query stored documents
+    # ------------------------------------------------------------------
+
+    def list_documents(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[dict]:
+        """List stored normalized documents matching a filter."""
+        docs = self._load_matching(jurisdiction, court_level, tags=tags)
+        return [
+            {
+                "id": d.id,
+                "source_filename": d.source_filename,
+                "source_format": d.source_format,
+                "jurisdiction": d.jurisdiction,
+                "court_level": d.court_level,
+                "document_type": d.document_type,
+                "extraction_confidence": d.extraction_confidence,
+                "normalized_at": d.normalized_at,
+                "primary_font": d.primary_font.family if d.primary_font else None,
+                "font_size": d.primary_font.size_pt if d.primary_font else None,
+            }
+            for d in docs
+        ]
+
+    def get_document(self, doc_id: str) -> NormalizedDocument | None:
+        """Load a specific normalized document by ID."""
+        doc_path = self._store_dir / f"{doc_id}.json"
+        if not doc_path.exists():
+            return None
+        data = json.loads(doc_path.read_text())
+        return NormalizedDocument.model_validate(data.get("document", data))
+
+    def delete_document(self, doc_id: str) -> bool:
+        """Delete a stored document."""
+        doc_path = self._store_dir / f"{doc_id}.json"
+        if doc_path.exists():
+            doc_path.unlink()
+            return True
+        return False
+
+    def get_stats(self) -> dict:
+        """Get statistics about stored documents."""
+        docs = self._load_all()
+        jurisdictions: dict[str, int] = {}
+        formats: dict[str, int] = {}
+        for d in docs:
+            j = d.jurisdiction or "untagged"
             jurisdictions[j] = jurisdictions.get(j, 0) + 1
-            f = d.get("format", "unknown")
-            formats[f] = formats.get(f, 0) + 1
-            firm = d.get("firm", "unknown")
-            if firm:
-                firms[firm] = firms.get(firm, 0) + 1
+            formats[d.source_format] = formats.get(d.source_format, 0) + 1
+
         return {
-            "total_documents": len(self._documents),
+            "total_documents": len(docs),
             "by_jurisdiction": jurisdictions,
             "by_format": formats,
-            "by_firm": firms,
         }
 
-    def list_styles(self) -> list[dict]:
-        """List learned style profiles by author/firm."""
-        authors = {}
-        firms = {}
-        for d in self._documents:
-            if d.get("author"):
-                authors.setdefault(d["author"], []).append(d)
-            if d.get("firm"):
-                firms.setdefault(d["firm"], []).append(d)
+    # ------------------------------------------------------------------
+    # Storage internals
+    # ------------------------------------------------------------------
 
-        styles = []
-        for name, docs in {**authors, **firms}.items():
-            styles.append({
-                "identifier": name,
-                "document_count": len(docs),
-            })
-        return styles
-
-    def get_style(self, identifier: str) -> Optional[dict]:
-        """Get a specific style profile."""
-        docs = [d for d in self._documents if d.get("author") == identifier or d.get("firm") == identifier]
-        if not docs:
-            return None
-        return {
-            "identifier": identifier,
-            "document_count": len(docs),
-            "documents": [{"id": d["id"], "filename": d["filename"]} for d in docs],
+    def _save_normalized(
+        self,
+        doc: NormalizedDocument,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+    ) -> None:
+        """Save a NormalizedDocument to disk."""
+        record = {
+            "document": doc.model_dump(),
+            "tags": tags or [],
+            "notes": notes,
+            "stored_at": datetime.now(timezone.utc).isoformat(),
         }
+        out_path = self._store_dir / f"{doc.id}.json"
+        out_path.write_text(json.dumps(record, indent=2, default=str))
+
+    def _load_all(self) -> list[NormalizedDocument]:
+        """Load all stored normalized documents."""
+        docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                docs.append(NormalizedDocument.model_validate(doc_data))
+            except Exception:
+                continue
+        return docs
+
+    def _load_matching(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[NormalizedDocument]:
+        """Load documents matching the given filter criteria."""
+        all_docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                doc = NormalizedDocument.model_validate(doc_data)
+                stored_tags = data.get("tags", [])
+
+                # Apply filters
+                if jurisdiction and doc.jurisdiction != jurisdiction:
+                    continue
+                if court_level and doc.court_level != court_level:
+                    continue
+                if document_type and doc.document_type != document_type:
+                    continue
+                if tags and not any(t in stored_tags for t in tags):
+                    continue
+
+                all_docs.append(doc)
+            except Exception:
+                continue
+
+        return all_docs
+
+    # ------------------------------------------------------------------
+    # Style profiles: author/firm preferences
+    # ------------------------------------------------------------------
+
+    def build_style_profile(
+        self,
+        profile_type: str,
+        name: str,
+        jurisdiction: str | None = None,
+    ) -> dict:
+        """Build and save a style profile from all documents by an author/firm.
+
+        Args:
+            profile_type: "author" or "firm"
+            name: Author name or firm name
+            jurisdiction: Optional filter to specific jurisdiction
+
+        Returns:
+            The profile as a dict.
+        """
+        from legal_format_engine.ml.styles import (
+            StyleProfileStore,
+            build_style_profile,
+        )
+
+        # Load documents matching this author/firm
+        all_records = self._load_all_records()
+        matching = []
+        for doc, record in all_records:
+            attr = doc.author if profile_type == "author" else doc.firm
+            if attr and attr.lower() == name.lower():
+                if jurisdiction and doc.jurisdiction != jurisdiction:
+                    continue
+                matching.append((doc, record))
+
+        if not matching:
+            return {"error": f"No documents found for {profile_type} '{name}'"}
+
+        # Determine rule-governed fields for this jurisdiction
+        rule_governed: set[str] = set()
+        jurisdictions_seen = {doc.jurisdiction for doc, _ in matching if doc.jurisdiction}
+        for j in jurisdictions_seen:
+            try:
+                from legal_format_engine.rules.loader import load_ruleset
+                from legal_format_engine.ml.rule_hierarchy import identify_rule_governed_fields
+                ruleset = load_ruleset(j, "appellate", "brief")
+                rule_governed |= identify_rule_governed_fields(ruleset)
+            except FileNotFoundError:
+                pass
+
+        profile = build_style_profile(
+            matching, profile_type, name, rule_governed,
+        )
+
+        store = StyleProfileStore()
+        store.save(profile)
+
+        return profile.to_dict()
+
+    def get_style_profile(
+        self, profile_type: str, name: str,
+    ) -> dict | None:
+        """Load a saved style profile."""
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        profile = store.load(profile_type, name)
+        return profile.to_dict() if profile else None
+
+    def list_style_profiles(self) -> list[dict]:
+        """List all saved style profiles."""
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        return [p.to_dict() for p in store.list_all()]
+
+    def delete_style_profile(self, profile_type: str, name: str) -> bool:
+        from legal_format_engine.ml.styles import StyleProfileStore
+        store = StyleProfileStore()
+        return store.delete(profile_type, name)
+
+    # ------------------------------------------------------------------
+    # Resolve format: apply the full hierarchy
+    # ------------------------------------------------------------------
 
     def resolve_format(
         self,
-        jurisdiction: str = "wisconsin",
-        document_type: str = "appellate_brief",
-        author: Optional[str] = None,
-        firm: Optional[str] = None,
+        jurisdiction: str,
+        court_level: str = "appellate",
+        document_type: str = "brief",
+        author: str | None = None,
+        firm: str | None = None,
     ) -> dict:
-        """Resolve final format using rule hierarchy."""
-        from legal_format_engine.rules.base import load_ruleset
+        """Resolve final formatting using the complete hierarchy:
 
+        Court Rules > ML Learned > Style Profile > Defaults
+
+        Returns a dict with every formatting decision and its provenance.
+        """
+        from legal_format_engine.ml.rule_hierarchy import resolve_format
+        from legal_format_engine.ml.styles import StyleProfileStore
+        from legal_format_engine.rules.loader import load_ruleset
+
+        # 1. Load court rules (mandatory)
         try:
-            ruleset = load_ruleset(jurisdiction, document_type)
-            court_rules = {
-                "font": ruleset.page_format.font,
-                "font_size_pt": ruleset.page_format.font_size_pt,
-                "margin_top_inches": ruleset.page_format.margin_top_inches,
-                "margin_bottom_inches": ruleset.page_format.margin_bottom_inches,
-                "margin_left_inches": ruleset.page_format.margin_left_inches,
-                "margin_right_inches": ruleset.page_format.margin_right_inches,
-                "line_spacing": ruleset.page_format.line_spacing,
-            }
+            ruleset = load_ruleset(jurisdiction, court_level, document_type)
         except FileNotFoundError:
-            court_rules = {}
+            return {"error": f"No ruleset for {jurisdiction}/{court_level}/{document_type}"}
 
-        ml_patterns = self.learn(jurisdiction)
-        ml_dict = {
-            "first_line_indent_inches": ml_patterns.get("first_line_indent"),
-        }
+        # 2. ML learned patterns (optional)
+        learned = self.learn(jurisdiction, court_level, document_type)
 
+        # 3. Style profile (optional, prefer author over firm)
         style = None
-        defaults = {
-            "font": "Times New Roman",
-            "font_size_pt": 12,
-            "margin_top_inches": 1.0,
-            "margin_bottom_inches": 1.0,
-            "margin_left_inches": 1.0,
-            "margin_right_inches": 1.0,
-            "line_spacing": "double",
-            "first_line_indent_inches": 0.5,
+        store = StyleProfileStore()
+        if author:
+            profile = store.load("author", author)
+            if profile:
+                style = profile
+        if style is None and firm:
+            profile = store.load("firm", firm)
+            if profile:
+                style = profile
+
+        # 4. Resolve through hierarchy
+        resolved = resolve_format(ruleset, learned, style)
+        return resolved.to_dict()
+
+    # ------------------------------------------------------------------
+    # Storage internals
+    # ------------------------------------------------------------------
+
+    def _save_normalized(
+        self,
+        doc: NormalizedDocument,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+    ) -> None:
+        """Save a NormalizedDocument to disk."""
+        record = {
+            "document": doc.model_dump(),
+            "tags": tags or [],
+            "notes": notes,
+            "stored_at": datetime.now(timezone.utc).isoformat(),
         }
+        out_path = self._store_dir / f"{doc.id}.json"
+        out_path.write_text(json.dumps(record, indent=2, default=str))
 
-        return resolve_format(court_rules, ml_dict, style, defaults)
+    def _load_all(self) -> list[NormalizedDocument]:
+        """Load all stored normalized documents."""
+        docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                docs.append(NormalizedDocument.model_validate(doc_data))
+            except Exception:
+                continue
+        return docs
 
-    def _extract_profile(self, data: bytes, ext: str, filename: str):
-        """Extract format profile from file data."""
-        if ext == ".docx":
-            import tempfile, os
-            with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as f:
-                f.write(data)
-                f.flush()
-                from legal_format_engine.parsers.docx_parser import extract_format_profile
-                profile = extract_format_profile(f.name)
-                os.unlink(f.name)
-                return profile
-        elif ext == ".pdf":
-            import tempfile, os
-            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
-                f.write(data)
-                f.flush()
-                from legal_format_engine.parsers.pdf_parser import extract_format_profile
-                profile = extract_format_profile(f.name)
-                os.unlink(f.name)
-                return profile
+    def _load_all_records(self) -> list[tuple[NormalizedDocument, dict]]:
+        """Load all stored documents with their full storage records."""
+        results = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                doc = NormalizedDocument.model_validate(doc_data)
+                results.append((doc, data))
+            except Exception:
+                continue
+        return results
 
-        # Fallback: empty profile
-        from legal_format_engine.models.patterns import FormatProfile
-        return FormatProfile()
+    def _load_matching(
+        self,
+        jurisdiction: str | None = None,
+        court_level: str | None = None,
+        document_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[NormalizedDocument]:
+        """Load documents matching the given filter criteria."""
+        all_docs = []
+        for f in self._store_dir.glob("*.json"):
+            try:
+                data = json.loads(f.read_text())
+                doc_data = data.get("document", data)
+                doc = NormalizedDocument.model_validate(doc_data)
+                stored_tags = data.get("tags", [])
 
-    def _extract_text(self, data: bytes, ext: str) -> Optional[str]:
-        """Extract text from file data."""
-        if ext == ".docx":
-            from legal_format_engine.parsers.docx_parser import parse_docx_bytes
-            doc = parse_docx_bytes(data)
-            parts = []
-            for s in doc.sections:
-                parts.append(s.heading)
-                for b in s.content:
-                    parts.append(b.text)
-            return "\n".join(parts)
-        elif ext in (".txt", ".html", ".htm"):
-            return data.decode("utf-8", errors="replace")
-        return None
+                # Apply filters
+                if jurisdiction and doc.jurisdiction != jurisdiction:
+                    continue
+                if court_level and doc.court_level != court_level:
+                    continue
+                if document_type and doc.document_type != document_type:
+                    continue
+                if tags and not any(t in stored_tags for t in tags):
+                    continue
 
-    def _looks_like_portfolio(self, data: bytes) -> bool:
-        """Check if PDF might be an Adobe Portfolio."""
+                all_docs.append(doc)
+            except Exception:
+                continue
+
+        return all_docs
+
+    def _load_existing_ruleset(
+        self,
+        jurisdiction: str,
+        court_level: str,
+        document_type: str,
+    ) -> dict | None:
+        """Load an existing YAML ruleset as a dict for comparison."""
         try:
-            import fitz
-            doc = fitz.open(stream=data, filetype="pdf")
-            has_files = doc.embfile_count() > 0
-            doc.close()
-            return has_files
-        except Exception:
-            return False
+            from legal_format_engine.rules.loader import load_ruleset
+            ruleset = load_ruleset(jurisdiction, court_level, document_type)
+            return ruleset.model_dump()
+        except FileNotFoundError:
+            return None

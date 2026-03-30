@@ -1,76 +1,191 @@
-"""ML Feature Extractor - converts normalized documents into weighted feature vectors."""
+"""Feature extraction: converts NormalizedDocuments into numerical vectors.
+
+The learner works on feature vectors, not raw document objects. This module
+extracts consistent, comparable features from NormalizedDocuments.
+
+Features are grouped into categories:
+- Typography: font family (categorical), font size, line spacing
+- Layout: margins (4 values), indentation
+- Headings: per-level style features (case, alignment, bold, numbering)
+- Structure: section presence/absence, section ordering
+
+Each feature has a weight reflecting extraction confidence. PDF-derived
+margins get lower weight than DOCX-derived margins because they're estimated.
+"""
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Optional
 
+from dataclasses import dataclass, field
 from legal_format_engine.ml.normalizer import NormalizedDocument
 
 
 @dataclass
-class FeatureVector:
-    """Weighted feature vector for ML learning."""
-    # Numerical features (value, weight)
-    font_size: Optional[tuple[float, float]] = None
-    margin_top: Optional[tuple[float, float]] = None
-    margin_bottom: Optional[tuple[float, float]] = None
-    margin_left: Optional[tuple[float, float]] = None
-    margin_right: Optional[tuple[float, float]] = None
-    line_spacing: Optional[tuple[float, float]] = None
-    first_line_indent: Optional[tuple[float, float]] = None
-
-    # Categorical features (value, weight)
-    font_name: Optional[tuple[str, float]] = None
-
-    # Complex features
-    heading_styles: list[dict] = field(default_factory=list)
-    section_names: list[str] = field(default_factory=list)
-
-    # Metadata
-    source_format: str = "unknown"
-    confidence: float = 1.0
-    author: Optional[str] = None
-    firm: Optional[str] = None
-    jurisdiction: Optional[str] = None
+class FeatureValue:
+    """A single feature with its value and confidence weight."""
+    name: str
+    value: float | str  # numerical or categorical
+    weight: float = 1.0  # 0-1, reflects extraction confidence
+    source: str = ""  # which document this came from
 
 
-def extract_features(doc: NormalizedDocument) -> FeatureVector:
-    """Extract weighted features from a normalized document.
+@dataclass
+class DocumentFeatures:
+    """Complete feature vector extracted from a NormalizedDocument."""
+    document_id: str
+    source_filename: str
+    jurisdiction: str | None = None
+    court_level: str | None = None
+    document_type: str | None = None
+    extraction_confidence: float = 1.0
 
-    PDF features get lower weight (0.6) than DOCX (1.0).
+    # Typography features
+    font_family: FeatureValue | None = None
+    font_size_pt: FeatureValue | None = None
+    line_spacing: FeatureValue | None = None
+
+    # Layout features
+    margin_top: FeatureValue | None = None
+    margin_bottom: FeatureValue | None = None
+    margin_left: FeatureValue | None = None
+    margin_right: FeatureValue | None = None
+    body_indent: FeatureValue | None = None
+    block_quote_indent: FeatureValue | None = None
+
+    # Heading features (per level)
+    heading_features: dict[int, HeadingFeatures] = field(default_factory=dict)
+
+    # Section order features
+    section_ids: list[str] = field(default_factory=list)
+    section_count: int = 0
+
+
+@dataclass
+class HeadingFeatures:
+    """Features for a single heading level."""
+    level: int
+    case_style: FeatureValue | None = None  # categorical: "upper", "title", "sentence"
+    alignment: FeatureValue | None = None  # categorical: "center", "left"
+    bold: FeatureValue | None = None  # 1.0 or 0.0
+    font_size_pt: FeatureValue | None = None
+    numbering: FeatureValue | None = None  # categorical or None
+
+
+def extract_features(doc: NormalizedDocument) -> DocumentFeatures:
+    """Extract a feature vector from a NormalizedDocument.
+
+    The extraction_confidence of the source document is used to weight
+    all derived features. PDF features get lower weight than DOCX features.
     """
-    w = doc.confidence  # Base weight from format confidence
+    base_weight = doc.extraction_confidence
 
-    fv = FeatureVector(
-        source_format=doc.source_format,
-        confidence=doc.confidence,
-        author=doc.author,
-        firm=doc.firm,
+    features = DocumentFeatures(
+        document_id=doc.id,
+        source_filename=doc.source_filename,
         jurisdiction=doc.jurisdiction,
+        court_level=doc.court_level,
+        document_type=doc.document_type,
+        extraction_confidence=base_weight,
     )
 
-    if doc.font_size_pt is not None:
-        fv.font_size = (doc.font_size_pt, w)
-
-    if doc.margin_top is not None:
-        fv.margin_top = (doc.margin_top, w)
-    if doc.margin_bottom is not None:
-        fv.margin_bottom = (doc.margin_bottom, w)
-    if doc.margin_left is not None:
-        fv.margin_left = (doc.margin_left, w)
-    if doc.margin_right is not None:
-        fv.margin_right = (doc.margin_right, w)
+    # Typography
+    if doc.primary_font:
+        features.font_family = FeatureValue(
+            name="font_family",
+            value=doc.primary_font.family,
+            weight=base_weight,
+            source=doc.source_filename,
+        )
+        features.font_size_pt = FeatureValue(
+            name="font_size_pt",
+            value=doc.primary_font.size_pt,
+            weight=base_weight,
+            source=doc.source_filename,
+        )
 
     if doc.line_spacing is not None:
-        fv.line_spacing = (doc.line_spacing, w)
+        features.line_spacing = FeatureValue(
+            name="line_spacing",
+            value=doc.line_spacing,
+            weight=base_weight,
+            source=doc.source_filename,
+        )
 
-    if doc.first_line_indent is not None:
-        fv.first_line_indent = (doc.first_line_indent, w)
+    # Layout — margins from PDFs get reduced weight
+    if doc.margins:
+        margin_weight = base_weight
+        if doc.margins.source_quality == "estimated":
+            margin_weight *= 0.6  # PDF margins are noisy
 
-    if doc.font_name:
-        fv.font_name = (doc.font_name, w)
+        for side in ("top", "bottom", "left", "right"):
+            setattr(features, f"margin_{side}", FeatureValue(
+                name=f"margin_{side}",
+                value=getattr(doc.margins, side),
+                weight=margin_weight,
+                source=doc.source_filename,
+            ))
 
-    fv.heading_styles = doc.heading_styles
-    fv.section_names = doc.section_names
+    # Indentation
+    if doc.body_first_line_indent is not None:
+        features.body_indent = FeatureValue(
+            name="body_indent",
+            value=doc.body_first_line_indent,
+            weight=base_weight,
+            source=doc.source_filename,
+        )
 
-    return fv
+    if doc.block_quote_indent is not None:
+        features.block_quote_indent = FeatureValue(
+            name="block_quote_indent",
+            value=doc.block_quote_indent,
+            weight=base_weight,
+            source=doc.source_filename,
+        )
+
+    # Heading features (per level)
+    for heading in doc.heading_styles:
+        hf = HeadingFeatures(level=heading.level)
+
+        heading_weight = base_weight
+        if heading.sample_count and heading.sample_count < 3:
+            heading_weight *= 0.5  # few samples = less confidence
+
+        hf.case_style = FeatureValue(
+            name=f"heading_{heading.level}_case",
+            value=heading.case_style,
+            weight=heading_weight,
+            source=doc.source_filename,
+        )
+        hf.alignment = FeatureValue(
+            name=f"heading_{heading.level}_alignment",
+            value=heading.alignment,
+            weight=heading_weight,
+            source=doc.source_filename,
+        )
+        hf.bold = FeatureValue(
+            name=f"heading_{heading.level}_bold",
+            value=1.0 if heading.bold else 0.0,
+            weight=heading_weight,
+            source=doc.source_filename,
+        )
+        if heading.font_size_pt is not None:
+            hf.font_size_pt = FeatureValue(
+                name=f"heading_{heading.level}_font_size",
+                value=heading.font_size_pt,
+                weight=heading_weight,
+                source=doc.source_filename,
+            )
+        if heading.numbering is not None:
+            hf.numbering = FeatureValue(
+                name=f"heading_{heading.level}_numbering",
+                value=heading.numbering,
+                weight=heading_weight,
+                source=doc.source_filename,
+            )
+
+        features.heading_features[heading.level] = hf
+
+    # Section structure
+    features.section_ids = [s.id for s in doc.sections]
+    features.section_count = len(doc.sections)
+
+    return features

@@ -1,139 +1,229 @@
-"""Caption engine - generates formatted caption blocks from case metadata."""
+"""Caption generation engine.
+
+Generates jurisdiction-specific caption blocks from case metadata.
+"""
 
 from __future__ import annotations
-from typing import Optional
 
-from legal_format_engine.models.document import CaseMetadata, ContentBlock
-from legal_format_engine.models.caption import CaptionBlock
-from legal_format_engine.models.section import Ruleset
-
-
-DISTRICT_MAP = {
-    "1": "District I",
-    "2": "District II",
-    "3": "District III",
-    "4": "District IV",
-}
+from legal_format_engine.models.document import Alignment, CaptionBlock, ContentBlock
+from legal_format_engine.models.metadata import DocumentMetadata, PartyRole
+from legal_format_engine.rules.schema import CaptionRule
 
 
-def generate_caption(
-    case_meta: CaseMetadata,
-    doc_title: str,
-    ruleset: Optional[Ruleset] = None,
-) -> CaptionBlock:
-    """Generate a full caption block from case metadata.
+def _caption_line(text: str, bold: bool = False, italic: bool = False,
+                  underline: bool = False, alignment: Alignment = Alignment.CENTER) -> ContentBlock:
+    """Create a caption content block (single-spaced)."""
+    return ContentBlock(
+        text=text, bold=bold, italic=italic, underline=underline,
+        alignment=alignment, is_caption=True,
+    )
 
-    Returns a CaptionBlock with court name, parties, case number, and document title.
+
+def _horizontal_rule(alignment: Alignment = Alignment.CENTER) -> ContentBlock:
+    """Create a horizontal rule line for the caption page."""
+    return ContentBlock(
+        text="\u2500" * 50,  # box-drawing horizontal line
+        alignment=alignment, is_caption=True,
+    )
+
+
+def generate_caption(metadata: DocumentMetadata, rule: CaptionRule) -> CaptionBlock:
+    """Generate a formatted caption block from metadata and rules.
+
+    Produces a Wisconsin-style appellate caption with:
+    - Court name line (centered, all caps)
+    - District line
+    - Case number with horizontal rules
+    - Party block with separator
+    - Appeal-from line
+    - Document title
+
+    Args:
+        metadata: Full document metadata including case info.
+        rule: Caption formatting rules.
+
+    Returns:
+        A CaptionBlock containing formatted lines.
     """
     lines: list[ContentBlock] = []
 
-    # Court name
-    court_name = case_meta.court_name or _default_court_name(ruleset)
-    lines.append(ContentBlock(
-        text=court_name.upper(),
+    # Court name line
+    court_name = metadata.case.court_name
+    if rule.court_line_style == "upper":
+        court_name = court_name.upper()
+    lines.append(_caption_line(
+        text=court_name,
         bold=True,
-        centered=True,
-        is_caption=True,
+        alignment=Alignment(rule.court_line_alignment),
     ))
 
-    # Horizontal rule
-    lines.append(ContentBlock(
-        text="─" * 50,
-        centered=True,
-        is_caption=True,
-    ))
-
-    # District if applicable
-    if case_meta.district:
-        district_text = DISTRICT_MAP.get(case_meta.district, case_meta.district)
-        lines.append(ContentBlock(
-            text=district_text,
-            centered=True,
-            is_caption=True,
+    # District line (if applicable)
+    if rule.include_district and metadata.case.district:
+        lines.append(_caption_line(text=""))  # blank spacer
+        lines.append(_caption_line(
+            text=metadata.case.district.upper(),
+            bold=True,
+            alignment=Alignment(rule.court_line_alignment),
         ))
 
-    # Parties
-    party_lines = _format_parties(case_meta)
-    lines.extend(party_lines)
-
-    # Horizontal rule
-    lines.append(ContentBlock(
-        text="─" * 50,
-        centered=True,
-        is_caption=True,
-    ))
+    # Blank spacer
+    lines.append(_caption_line(text=""))
 
     # Case number
-    if case_meta.case_number:
-        lines.append(ContentBlock(
-            text=f"Case No. {case_meta.case_number}",
-            centered=True,
-            bold=True,
-            is_caption=True,
-        ))
-
-    # Horizontal rule
-    lines.append(ContentBlock(
-        text="─" * 50,
-        centered=True,
-        is_caption=True,
+    prefix = rule.case_number_prefix or "Case No."
+    lines.append(_caption_line(
+        text=f"{prefix} {metadata.case.case_number}",
+        bold=True,
+        alignment=Alignment(rule.case_number_alignment),
     ))
 
+    # ── Horizontal rule before parties ──
+    lines.append(_caption_line(text=""))
+    lines.append(_horizontal_rule())
+
+    # Party block
+    _add_party_lines(lines, metadata, rule)
+
+    # "v." separator and second party are added by _add_party_lines
+
+    # ── Horizontal rule after parties ──
+    lines.append(_caption_line(text=""))
+    lines.append(_horizontal_rule())
+
+    # Appeal from line (if applicable)
+    if rule.include_appeal_from and metadata.case.county_of_origin:
+        lines.append(_caption_line(text=""))
+        appeal_parts = [f"On an Appeal from a Judgment of Conviction,"]
+        appeal_loc = f"Entered in the {metadata.case.county_of_origin} Circuit Court"
+        if metadata.case.judge_name:
+            appeal_loc += f", the\nHonorable {metadata.case.judge_name}, Presiding"
+        appeal_parts.append(appeal_loc)
+        for part in appeal_parts:
+            lines.append(_caption_line(
+                text=part,
+                italic=True,
+                alignment=Alignment(rule.appeal_from_alignment),
+            ))
+        lines.append(_caption_line(text=""))
+        lines.append(_horizontal_rule())
+
     # Document title
-    if doc_title:
-        lines.append(ContentBlock(
-            text=doc_title.upper(),
-            bold=True,
-            centered=True,
-            is_caption=True,
+    lines.append(_caption_line(text=""))
+    doc_title = metadata.document_title
+    if rule.document_title_style == "upper":
+        doc_title = doc_title.upper()
+    # Split multi-word titles like "BRIEF OF DEFENDANT-APPELLANT" onto separate lines
+    title_words = doc_title.split()
+    if len(title_words) > 3:
+        mid = len(title_words) // 2
+        line1 = " ".join(title_words[:mid])
+        line2 = " ".join(title_words[mid:])
+        lines.append(_caption_line(text=line1, bold=True,
+                                   alignment=Alignment(rule.document_title_alignment)))
+        lines.append(_caption_line(text=line2, bold=True,
+                                   alignment=Alignment(rule.document_title_alignment)))
+    else:
+        lines.append(_caption_line(
+            text=doc_title, bold=True,
+            alignment=Alignment(rule.document_title_alignment),
         ))
 
-    caption = CaptionBlock(
-        court_name=court_name,
-        district=case_meta.district,
-        case_number=case_meta.case_number,
-        document_title=doc_title,
-        lines=lines,
-    )
+    # ── Horizontal rule after title ──
+    lines.append(_caption_line(text=""))
+    lines.append(_horizontal_rule())
 
-    return caption
+    return CaptionBlock(lines=lines)
 
 
-def _default_court_name(ruleset: Optional[Ruleset]) -> str:
-    if ruleset and ruleset.jurisdiction == "wisconsin":
-        if ruleset.court_level == "court_of_appeals":
-            return "STATE OF WISCONSIN COURT OF APPEALS"
-        elif ruleset.court_level == "supreme_court":
-            return "SUPREME COURT OF WISCONSIN"
-        elif ruleset.court_level == "circuit_court":
-            return "CIRCUIT COURT OF WISCONSIN"
-    return "COURT"
-
-
-def _format_parties(case_meta: CaseMetadata) -> list[ContentBlock]:
-    """Format party names with roles and v. separator."""
-    lines = []
-    parties = case_meta.parties
-
+def _add_party_lines(
+    lines: list[ContentBlock],
+    metadata: DocumentMetadata,
+    rule: CaptionRule,
+) -> None:
+    """Add party name lines with separator to the caption."""
+    parties = metadata.case.parties
     if not parties:
-        return lines
+        return
 
-    for i, party in enumerate(parties):
-        designation = party.designation or f"{party.role.value.title()}"
-        name_line = party.name.upper() + ","
-        lines.append(ContentBlock(
-            text=name_line,
-            is_caption=True,
+    party_align = Alignment(rule.party_alignment)
+
+    # First party (typically State/Plaintiff)
+    first_party = parties[0]
+    lines.append(_caption_line(text=""))
+    name = first_party.name.upper() if rule.party_name_style == "upper" else first_party.name
+    lines.append(_caption_line(
+        text=name + ",",
+        bold=True,
+        alignment=party_align,
+    ))
+
+    role_text = _format_role_label(first_party.role)
+    if rule.party_role_style == "title":
+        role_text = role_text.title()
+    # Indent role if configured
+    if rule.party_role_indented:
+        lines.append(_caption_line(
+            text=role_text + ".",
+            alignment=party_align,
+            italic=True,
         ))
-        lines.append(ContentBlock(
-            text=f"        {designation},",
-            is_caption=True,
+    else:
+        lines.append(_caption_line(
+            text=role_text + ".",
+            alignment=party_align,
         ))
 
-        if i < len(parties) - 1:
-            lines.append(ContentBlock(
-                text="    v.",
-                is_caption=True,
+    # Separator
+    lines.append(_caption_line(text=""))
+    lines.append(_caption_line(
+        text=rule.party_separator,
+        alignment=party_align,
+    ))
+    lines.append(_caption_line(text=""))
+
+    # Second party (typically Defendant)
+    if len(parties) > 1:
+        second_party = parties[1]
+        name2 = second_party.name.upper() if rule.party_name_style == "upper" else second_party.name
+        lines.append(_caption_line(
+            text=name2 + ",",
+            bold=True,
+            alignment=party_align,
+        ))
+        role_text2 = _format_role_label(second_party.role)
+        if rule.party_role_style == "title":
+            role_text2 = role_text2.title()
+        if rule.party_role_indented:
+            lines.append(_caption_line(
+                text=role_text2 + ".",
+                alignment=party_align,
+                italic=True,
+            ))
+        else:
+            lines.append(_caption_line(
+                text=role_text2 + ".",
+                alignment=party_align,
             ))
 
-    return lines
+    # Additional parties (rare but possible)
+    for party in parties[2:]:
+        lines.append(_caption_line(text=""))
+        name_extra = party.name.upper() if rule.party_name_style == "upper" else party.name
+        lines.append(_caption_line(
+            text=name_extra + ",",
+            bold=True,
+            alignment=party_align,
+        ))
+        lines.append(_caption_line(
+            text=_format_role_label(party.role) + ".",
+            alignment=party_align,
+        ))
+
+
+def _format_role_label(role: PartyRole) -> str:
+    """Format a party role enum into a display label.
+
+    >>> _format_role_label(PartyRole.DEFENDANT_APPELLANT)
+    'Defendant-Appellant'
+    """
+    return role.value.replace("-", "-").title()

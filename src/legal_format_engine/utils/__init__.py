@@ -1,1 +1,1 @@
-"""Utility functions."""
+"""Utility functions for text processing and numbering."""

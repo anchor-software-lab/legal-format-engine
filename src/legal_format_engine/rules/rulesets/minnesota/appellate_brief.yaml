@@ -1,151 +1,200 @@
-# Minnesota Court of Appeals - Appellate Brief
-# Derived from Minn. R. Civ. App. P. 128.02
+# Minnesota Court of Appeals - Appellate Brief Format
+# Based on Minn. R. Civ. App. P. 128.02, 132.01
+# Formatting requirements per Minnesota Rules of Civil Appellate Procedure.
+#
+# Key conventions:
+# - Margins: 1" top/bottom, 1.5" left/right
+# - Font: Times New Roman 14pt, double-spaced
+# - Word limit: 14,000 words (principal brief)
+# - "Legal Issues" section required
+# - Certificate of compliance and length required
 
-name: "Minnesota Appellate Brief"
-jurisdiction: "minnesota"
-court_level: "court_of_appeals"
-document_type: "appellate_brief"
-description: "Minnesota Court of Appeals appellate brief format"
-statute_reference: "Minn. R. Civ. App. P. 128.02"
+jurisdiction: minnesota
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
+  font_name: "Times New Roman"
   font_size_pt: 14
-  line_spacing: "double"
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
-  margin_left_inches: 1.0
-  margin_right_inches: 1.0
+  margin_left_inches: 1.5
+  margin_right_inches: 1.5
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 14000
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: upper
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
     aliases:
-      - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+      - "Index"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
     aliases:
-      - "Table of Authorities"
+      - "Table of Cases and Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
+      - "Cases Cited"
+    order: 2
     required: true
-    order: 3
     heading_level: 1
+
+  - id: legal_issues
+    canonical_name: "Legal Issues"
     aliases:
-      - "Issues Presented"
       - "Statement of the Issues"
       - "Statement of Issues"
+      - "Issues Presented"
+      - "Issues Presented for Review"
       - "Issues"
       - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
-    order: 4
+      - "Statement of Legal Issues"
+    order: 3
+    required: true
     heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
     aliases:
-      - "Statement of the Case"
+      - "Case Statement"
+      - "Statement of Case"
       - "Procedural History"
-
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
+      - "Procedural Background"
+    order: 4
+    required: true
     heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of the Facts"
     aliases:
       - "Statement of Facts"
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
+    order: 5
     required: true
-    order: 6
     heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
     aliases:
-      - "Argument"
       - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
+      - "Discussion"
+    order: 6
     required: true
-    order: 7
     heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
     aliases:
-      - "Conclusion"
       - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
+      - "Relief Requested"
+    order: 7
     required: true
-    order: 8
     heading_level: 1
+
+  - id: addendum
+    canonical_name: "Addendum"
     aliases:
-      - "Certifications"
-      - "Certification"
+      - "Appendix"
+      - "Statutory Addendum"
+    order: 8
+    required: false
+    heading_level: 1
 
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in Minn.
-      R. Civ. App. P. 128.02 for a brief. The length of this brief is
-      {word_count} words.
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 9
     required: true
+    heading_level: 1
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: title
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name}
+    Attorney Reg. No. {bar_number}
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+    Dated: {date}
+
+certifications:
+  - id: certificate_of_length
+    title: "Certificate of Brief Length"
+    template: |
+      I hereby certify that this brief conforms to the
+      requirements of Minn. R. Civ. App. P. 132.01, subds.
+      1 and 3. The length of this brief is {word_count} words.
+
+      This brief was prepared with Microsoft Word using
+      Times New Roman, 14-point proportionally spaced font.
+
+      Dated: {date}
+
+      {attorney_name}
+      Attorney for {party_role}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I served this brief
+      by [method of service] upon all parties to this appeal.
+
+      {attorney_name}
+
+signature_block_required: true

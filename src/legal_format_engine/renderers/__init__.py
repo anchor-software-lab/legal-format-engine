@@ -1,1 +1,1 @@
-"""Document renderers."""
+"""Output renderers for legal documents."""

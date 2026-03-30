@@ -1,151 +1,173 @@
-# New Hampshire Supreme Court - Appellate Brief
-# Derived from N.H. Sup. Ct. R. 16
+# New Hampshire Supreme Court - Appellate Brief Format
+# Based on N.H. Sup. Ct. R. 16 and 26
+# Key conventions:
+# - Font: 13-point proportional serif
+# - Margins: 1" all sides
+# - Double-spaced body text
+# - Word limit: 9,500 words
 
-name: "New Hampshire Appellate Brief"
-jurisdiction: "new_hampshire"
-court_level: "supreme_court"
-document_type: "appellate_brief"
-description: "New Hampshire Supreme Court appellate brief format"
-statute_reference: "N.H. Sup. Ct. R. 16"
+jurisdiction: new_hampshire
+court_level: appellate
+document_type: brief
 
 page_format:
-  font: "Times New Roman"
-  font_size_pt: 14
-  line_spacing: "double"
+  font_name: "Times New Roman"
+  font_size_pt: 13.0
+  line_spacing: 2.0
   margin_top_inches: 1.0
   margin_bottom_inches: 1.0
   margin_left_inches: 1.0
   margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
-  first_line_indent_inches: 0.5
-  hyphenation: true
-
-page_limit: null
-word_limit: 9500
-allow_combined_case_facts: true
 
 heading_rules:
   - level: 1
-    style: "title_case_centered"
+    case_style: upper
+    alignment: center
+    numbering: null
     bold: true
-    centered: true
-    indent_inches: 0.0
   - level: 2
-    style: "roman_numeral"
+    case_style: title
+    alignment: left
+    numbering: roman
     bold: true
-    centered: false
-    indent_inches: 0.0
   - level: 3
-    style: "capital_letter"
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
     bold: true
-    centered: false
-    indent_inches: 0.5
   - level: 4
-    style: "arabic_numeral"
+    case_style: sentence
+    alignment: left
+    numbering: arabic
     bold: false
-    centered: false
-    indent_inches: 1.0
 
-section_rules:
-  - section_type: "table_of_contents"
-    title: "Table of Contents"
-    required: true
-    order: 1
-    heading_level: 1
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
     aliases:
-      - "Table of Contents"
       - "Contents"
-      - "TOC"
-
-  - section_type: "table_of_authorities"
-    title: "Table of Authorities"
+    order: 1
     required: true
-    order: 2
     heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
     aliases:
-      - "Table of Authorities"
+      - "Table of Cases and Authorities"
       - "Authorities Cited"
-
-  - section_type: "statement_of_issues"
-    title: "Issues Presented"
+    order: 2
     required: true
-    order: 3
     heading_level: 1
+
+  - id: questions_presented
+    canonical_name: "Questions Presented"
     aliases:
       - "Issues Presented"
+      - "Issues on Appeal"
       - "Statement of the Issues"
-      - "Statement of Issues"
-      - "Issues"
-      - "Questions Presented"
-
-  - section_type: "statement_of_case"
-    title: "Statement of the Case"
-    required: false
-    order: 4
+      - "Issues Presented for Review"
+    order: 3
+    required: true
     heading_level: 1
+
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of the Case and Facts"
     aliases:
       - "Statement of the Case"
-      - "Procedural History"
-
-  - section_type: "statement_of_facts"
-    title: "Statement of Facts"
-    required: false
-    order: 5
-    heading_level: 1
-    aliases:
+      - "Case and Facts"
       - "Statement of Facts"
       - "Facts"
       - "Factual Background"
-
-  - section_type: "argument"
-    title: "Argument"
+      - "Procedural History"
+    order: 4
     required: true
-    order: 6
     heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
     aliases:
-      - "Argument"
+      - "Summary of the Argument"
+      - "Summary"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
       - "Arguments"
-
-  - section_type: "conclusion"
-    title: "Conclusion"
+      - "Discussion"
+    order: 6
     required: true
-    order: 7
     heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
     aliases:
-      - "Conclusion"
       - "Prayer for Relief"
-
-  - section_type: "certifications"
-    title: "Certifications"
+      - "Relief Requested"
+    order: 7
     required: true
-    order: 8
     heading_level: 1
+
+  - id: request_for_oral_argument
+    canonical_name: "Request for Oral Argument"
     aliases:
-      - "Certifications"
-      - "Certification"
+      - "Oral Argument Statement"
+      - "Oral Argument Request"
+    order: 8
+    required: false
+    heading_level: 1
 
-certification_templates:
-  - cert_type: "form_length"
-    title: null
-    template: >-
-      I hereby certify that this brief conforms to the rules contained in N.H.
-      Sup. Ct. R. 16 for a brief. The length of this brief is {word_count}
-      words.
-    required: true
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: title
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
 
-  - cert_type: "electronic_filing"
-    title: null
-    template: >-
-      I hereby certify that the text of the electronic copy of this brief is
-      identical to the text of the paper copy of the brief.
-    required: true
+signature_block:
+  template: |
+    Respectfully submitted,
 
-  - cert_type: "service"
-    title: null
-    template: >-
-      I hereby certify that on this date I have served a copy of this brief upon
-      all parties required to be served by depositing the same in the United
-      States mail, first-class postage prepaid, addressed to counsel of record.
-    required: true
+    {attorney_name_caps}
+    N.H. Bar No. {bar_number}
 
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_word_count
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that pursuant to New Hampshire Supreme Court
+      Rule 16(11), the foregoing brief contains {word_count} words,
+      which is within the word limit set by the Court.
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, a copy of the foregoing
+      brief was served upon all counsel of record by
+      {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true
