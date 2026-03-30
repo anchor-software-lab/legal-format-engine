@@ -35,7 +35,29 @@ logger = logging.getLogger(__name__)
 # Wisconsin-specific URLs
 _WI_EFILING_HELP = "https://efilinghelp.zendesk.com/hc/en-us/articles/25044580029965"
 _WI_CIRCUIT_EFILING = "https://www.wicourts.gov/ecourts/efilecircuit.htm"
+_WI_CIRCUIT_TECH = "https://www.wicourts.gov/ecourts/efilecircuit/tech.htm"
 _WI_APPELLATE_EFILING = "https://www.wicourts.gov/ecourts/efileappellate.htm"
+
+# Wisconsin-specific known requirements (from official sources, Wis. Stat. s. 801.18)
+# These serve as baseline values when scraping confirms them.
+_WI_KNOWN_REQUIREMENTS = {
+    # All documents
+    "header_margin_top_inches": 0.5,  # blank top for court-applied header
+    "file_stamp_width_inches": 2.0,   # upper-right blank square
+    "file_stamp_height_inches": 2.0,
+    "max_file_size_mb": 50,
+    "max_page_width_inches": 12,
+    "max_page_height_inches": 18,
+    "scan_dpi": 300,
+    # Proposed orders
+    "proposed_order_margin_top_inches": 3.0,
+    # Accepted fonts
+    "accepted_fonts": [
+        "Arial", "Calibri", "Cambria", "Geneva",
+        "Tahoma", "Times", "Times New Roman",
+    ],
+    "font_size_pt": 12,
+}
 
 # Patterns for extracting requirements from Wisconsin court pages
 _MARGIN_PATTERN = re.compile(
@@ -96,6 +118,7 @@ class WisconsinScraper(BaseScraper):
         # Scrape each source
         await self._scrape_efiling_help(profile, circuit_court)
         await self._scrape_wicourts_circuit(profile, circuit_court)
+        await self._scrape_wicourts_tech(profile, circuit_court)
 
         # Cross-reference all requirements
         for req in profile.requirements:
@@ -182,6 +205,127 @@ class WisconsinScraper(BaseScraper):
         self._extract_general_requirements(
             soup, url, reliability, profile, court
         )
+
+    async def _scrape_wicourts_tech(
+        self,
+        profile: JurisdictionProfile,
+        court: CourtSystem,
+    ) -> None:
+        """Scrape official wicourts.gov technical requirements page.
+
+        This is the most authoritative source for Wisconsin e-filing
+        formatting requirements (official .gov domain).
+        """
+        url = _WI_CIRCUIT_TECH
+        try:
+            page = await self.fetch(url)
+        except (ValueError, ConnectionError) as e:
+            logger.error("Failed to fetch %s: %s", url, e)
+            return
+
+        if page.http_status != 200:
+            return
+
+        soup = self.parse(page)
+        reliability = self.assess_source(url, page)
+        text = soup.get_text(separator="\n", strip=True)
+
+        reliability = self._assessor.assess_page(
+            reliability, text, page.last_modified
+        )
+
+        court.requirements_urls.append(url)
+
+        # Extract requirements from the tech page
+        self._extract_proposed_order_requirements(
+            soup, url, reliability, profile, court
+        )
+        self._extract_general_requirements(
+            soup, url, reliability, profile, court
+        )
+        self._extract_document_standards(
+            soup, url, reliability, profile, court
+        )
+
+    def _extract_document_standards(
+        self,
+        soup: BeautifulSoup,
+        source_url: str,
+        reliability: SourceReliability,
+        profile: JurisdictionProfile,
+        court: CourtSystem,
+    ) -> None:
+        """Extract document standard requirements (header margin, file stamp, etc.)."""
+        text = soup.get_text(separator="\n", strip=True)
+        text_lower = text.lower()
+
+        # Header margin (1/2-inch top on every page)
+        if "1/2" in text_lower and "margin" in text_lower:
+            req = EFilingRequirement(
+                court_system_id=court.id,
+                jurisdiction=self.JURISDICTION,
+                category="margin",
+                field="header_margin_top_inches",
+                value=0.5,
+                condition=None,
+                description="Blank 1/2-inch top margin on every page for court-applied document header",
+                mandatory=True,
+                source_url=source_url,
+                source_text=self._find_surrounding_text(text, "1/2", window=200),
+                reliability=reliability,
+            )
+            profile.add_requirement(req)
+
+        # File stamp area (2x2 inch upper-right)
+        if "2-inch" in text_lower or "file stamp" in text_lower or "upper-right" in text_lower:
+            req = EFilingRequirement(
+                court_system_id=court.id,
+                jurisdiction=self.JURISDICTION,
+                category="margin",
+                field="file_stamp_area",
+                value={"width_inches": 2.0, "height_inches": 2.0, "position": "upper-right"},
+                condition=None,
+                description="Blank 2x2-inch area in upper-right corner of first page for court file stamp",
+                mandatory=True,
+                source_url=source_url,
+                source_text=self._find_surrounding_text(text, "upper-right", window=200),
+                reliability=reliability,
+            )
+            profile.add_requirement(req)
+
+        # DPI scanning requirement
+        if "300" in text and "dpi" in text_lower:
+            req = EFilingRequirement(
+                court_system_id=court.id,
+                jurisdiction=self.JURISDICTION,
+                category="general",
+                field="scan_dpi",
+                value=300,
+                condition=None,
+                description="Scanned documents must be 300 DPI, black and white preferred",
+                mandatory=True,
+                source_url=source_url,
+                source_text=self._find_surrounding_text(text, "300", window=150),
+                reliability=reliability,
+            )
+            profile.add_requirement(req)
+
+        # No active content
+        if "javascript" in text_lower or "macro" in text_lower:
+            req = EFilingRequirement(
+                court_system_id=court.id,
+                jurisdiction=self.JURISDICTION,
+                category="general",
+                field="no_active_content",
+                value=True,
+                condition=None,
+                description="No JavaScript, macros, document security, or digital signatures in filed documents",
+                mandatory=True,
+                source_url=source_url,
+                source_text=self._find_surrounding_text(text, "javascript", window=200),
+                reliability=reliability,
+            )
+            profile.add_requirement(req)
 
     def _extract_proposed_order_requirements(
         self,

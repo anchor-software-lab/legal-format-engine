@@ -85,14 +85,25 @@ _REGISTRY: list[_RegistryEntry] = [
         efiling_vendor="Tyler Technologies",
         efiling_system_name="Odyssey File & Serve",
         requirements_urls=[
-            # Tyler Technologies help portal for WI e-filing (quasi-official)
-            "https://efilinghelp.zendesk.com/hc/en-us/articles/25044580029965",
+            # Official technical requirements page
+            "https://www.wicourts.gov/ecourts/efilecircuit/tech.htm",
+            # Official e-filing rules (2021 PDF)
+            "https://www.wicourts.gov/ecourts/efilecircuit/docs/eFilingrule2021.pdf",
             # Wisconsin court system official e-filing page
             "https://www.wicourts.gov/ecourts/efilecircuit.htm",
+            # Tyler Technologies help portal (quasi-official)
+            "https://efilinghelp.zendesk.com/hc/en-us/articles/25044580029965",
+            # Training and user guides
+            "https://www.wicourts.gov/ecourts/efilecircuit/train.htm",
         ],
         source_tier=SourceTier.OFFICIAL,
         parent_system="Wisconsin Court System",
-        notes="Proposed orders: 3-inch top margin, .docx format, no judge signature block",
+        notes=(
+            "Wis. Stat. s. 801.18. Proposed orders: 3-inch top margin, .docx format, "
+            "no judge signature block. All docs: 1/2-inch top margin for header, "
+            "2x2-inch upper-right blank for file stamp. Fonts: Arial, Calibri, "
+            "Cambria, Geneva, Tahoma, Times, Times New Roman at 12pt. Max 50MB."
+        ),
     ),
     _RegistryEntry(
         jurisdiction="WI",
@@ -157,12 +168,12 @@ _REGISTRY: list[_RegistryEntry] = [
         efiling_vendor="Various (by county)",
         efiling_system_name="Various",
         requirements_urls=[
-            "https://www.courts.ca.gov/documents/adopt-20220701-CRC02.pdf",
+            "https://courts.ca.gov/cms/rules/index/eight/rule8_74",
             "https://www.courts.ca.gov/42702.htm",
         ],
         source_tier=SourceTier.OFFICIAL,
         parent_system="California Courts",
-        notes="California Rules of Court, Title 2 (Trial Court Rules), Division 4",
+        notes="CRC Rule 8.74 (electronic document format). Requires text-searchable PDF, bookmarks for long docs.",
     ),
 
     # -----------------------------------------------------------------------
@@ -178,12 +189,12 @@ _REGISTRY: list[_RegistryEntry] = [
         efiling_vendor="Tyler Technologies",
         efiling_system_name="eFileTexas",
         requirements_urls=[
+            "https://www.txcourts.gov/media/1435816/technology-standards.pdf",
             "https://www.txcourts.gov/rules-forms/rules-standards/",
-            "https://efiletexas.gov/service-providers.htm",
         ],
         source_tier=SourceTier.OFFICIAL,
         parent_system="Texas Courts",
-        notes="Mandatory e-filing statewide since 2014 for civil cases",
+        notes="Mandatory e-filing statewide since 2014 for civil cases. Technology Standards PDF has format specs.",
     ),
 
     # -----------------------------------------------------------------------
@@ -218,10 +229,12 @@ _REGISTRY: list[_RegistryEntry] = [
         efiling_vendor="Tyler Technologies",
         efiling_system_name="Odyssey eFileIL",
         requirements_urls=[
-            "https://www.illinoiscourts.gov/courts/supreme-court/supreme-court-rules/",
+            "https://efile.illinoiscourts.gov/eFile-Standards-Page/",
+            "https://efile.illinoiscourts.gov/wp-content/uploads/2022/10/2022_eFileIL_Electronic_Document_Standards_Revised.pdf",
         ],
         source_tier=SourceTier.OFFICIAL,
         parent_system="Illinois Courts",
+        notes="eFileIL Document Standards PDF has detailed format specs. Max 25MB trial, 150MB appellate.",
     ),
 
     # -----------------------------------------------------------------------
@@ -237,10 +250,12 @@ _REGISTRY: list[_RegistryEntry] = [
         efiling_vendor="CivicPlus (formerly FACC/OnBase)",
         efiling_system_name="Florida Courts E-Filing Portal",
         requirements_urls=[
-            "https://www.flcourts.gov/Resources-Services/Court-Technology/E-Filing-Portal",
+            "https://flcourts-media.flcourts.gov/content/download/873858/file/florida-courts-technology-standards-may-2023%20v3.pdf",
+            "https://supremecourt.flcourts.gov/resources/practice-procedures/about-e-filing-portal",
         ],
         source_tier=SourceTier.OFFICIAL,
         parent_system="Florida Courts",
+        notes="Technology Standards v3.0 (May 2023). E-signatures: s/, /s, or /s/ formats accepted.",
     ),
 
     # -----------------------------------------------------------------------
