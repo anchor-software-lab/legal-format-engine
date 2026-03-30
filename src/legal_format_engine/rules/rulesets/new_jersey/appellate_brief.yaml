@@ -1,0 +1,167 @@
+# New Jersey Appellate Division - Appellate Brief Format
+# Based on N.J. Ct. R. 2:6-2 and 2:6-7
+# Key conventions:
+# - Font: 12-point proportional, 10-point for footnotes
+# - Margins: 1" top/bottom, 1.5" left, 1" right
+# - Double-spaced
+# - Page limit: Varies by brief type
+# - Preliminary statement required
+
+jurisdiction: new_jersey
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 12.0
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.5
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Authorities and Citations"
+      - "Authorities Cited"
+      - "Table of Cases"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: preliminary_statement
+    canonical_name: "Preliminary Statement"
+    aliases:
+      - "Introduction"
+      - "Nature of the Action"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of Issues Presented"
+    aliases:
+      - "Issues Presented"
+      - "Issues on Appeal"
+      - "Questions Presented"
+      - "Legal Issues"
+      - "Points on Appeal"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of Facts and Procedural History"
+    aliases:
+      - "Statement of the Case"
+      - "Statement of Facts"
+      - "Facts and Procedural History"
+      - "Factual and Procedural Background"
+      - "Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Legal Argument"
+      - "Discussion"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 7
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "DOCKET NO."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {attorney_name_caps}
+    Attorney at Law
+    N.J. Bar ID No. {bar_number}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_length
+    title: null
+    template: |
+      I certify that this brief complies with the page limitations
+      of N.J. Ct. R. 2:6-7.
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I served a copy of this
+      brief upon all counsel of record by {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

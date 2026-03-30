@@ -1,0 +1,204 @@
+# California Court of Appeal - Appellate Brief Format
+# Based on Cal. Rules of Court, Rules 8.200, 8.204
+# Formatting requirements per California Rules of Court.
+#
+# Key conventions:
+# - Margins: 1.5" on all sides (per Rule 8.204(b)(4))
+# - Font: 13pt proportionally spaced (e.g., Times New Roman)
+# - Combined or separate Statement of the Case and Facts allowed
+# - Word limit: 14,000 words (opening/respondent); 8,400 (reply)
+# - Certificate of word count required
+
+jurisdiction: california
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 13
+  line_spacing: 2.0
+  margin_top_inches: 1.5
+  margin_bottom_inches: 1.5
+  margin_left_inches: 1.5
+  margin_right_inches: 1.5
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: introduction
+    canonical_name: "Introduction"
+    aliases:
+      - "Preliminary Statement"
+    order: 3
+    required: false
+    heading_level: 1
+
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Procedural and Factual Background"
+      - "Statement of the Case and Facts"
+    order: 4
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+      - "Factual and Procedural Background"
+    order: 5
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: standard_of_review
+    canonical_name: "Standard of Review"
+    aliases:
+      - "Standards of Review"
+      - "Standard of Appellate Review"
+    order: 6
+    required: false
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_word_count
+    canonical_name: "Certificate of Word Count"
+    aliases:
+      - "Certificate of Compliance"
+      - "Certification of Word Count"
+      - "Word Count Certificate"
+    order: 9
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "Case No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    Dated: {date}
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name}
+    State Bar No. {bar_number}
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorneys for {party_role}
+
+certifications:
+  - id: certificate_of_word_count
+    title: "Certificate of Word Count"
+    template: |
+      Pursuant to California Rules of Court, Rule 8.204(c)(1),
+      I certify that this brief contains {word_count} words,
+      including footnotes, as counted by Microsoft Word's
+      word-count function, exclusive of the tables, caption
+      page, signature block, and this certificate.
+
+      Dated: {date}
+
+      {attorney_name}
+
+  - id: proof_of_service
+    title: "Proof of Service"
+    template: |
+      I, {attorney_name}, declare that on {date}, I served a
+      true copy of the attached document described as
+      {document_title} on all interested parties by
+      [method of service].
+
+      I declare under penalty of perjury under the laws of the
+      State of California that the foregoing is true and correct.
+
+      Executed on {date} at {city}, California.
+
+      {attorney_name}
+
+signature_block_required: true

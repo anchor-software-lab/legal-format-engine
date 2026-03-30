@@ -1,0 +1,171 @@
+# West Virginia Supreme Court of Appeals - Appellate Brief Format
+# Based on W. Va. R. App. P. 10 and 19
+# Key conventions:
+# - Font: 12-point proportional serif
+# - Margins: 1" all sides
+# - Double-spaced
+# - Word limit: 10,000 words for petitioner's brief
+# - "Assignments of Error" required
+
+jurisdiction: west_virginia
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 12.0
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Authorities Cited"
+      - "Table of Cases and Authorities"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: assignments_of_error
+    canonical_name: "Assignments of Error"
+    aliases:
+      - "Errors Assigned"
+      - "Issues Presented"
+      - "Statement of the Issues"
+      - "Questions Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Procedural History"
+      - "Nature of the Proceedings"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
+    aliases:
+      - "Summary of the Argument"
+      - "Summary"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {attorney_name_caps}
+    W.Va. State Bar No. {bar_number}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Counsel for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I certify that this brief complies with the word count
+      limitation of W. Va. R. App. P. 10(d). This brief
+      contains {word_count} words.
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I certify that on {date}, a copy of the foregoing was
+      served upon all counsel of record by {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

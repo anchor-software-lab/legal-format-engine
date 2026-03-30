@@ -1,0 +1,205 @@
+[
+  {
+    "page": {
+      "width_inches": 8.5,
+      "height_inches": 11.0,
+      "margin_top_inches": 1.25,
+      "margin_bottom_inches": 1.25,
+      "margin_left_inches": 2.0,
+      "margin_right_inches": 2.0
+    },
+    "fonts": {
+      "dominant": "Unknown",
+      "all": {}
+    },
+    "font_sizes": {
+      "dominant_pt": 10.0,
+      "all_pt": {
+        "10.0": 2310
+      }
+    },
+    "headings": [
+      {
+        "text": "STATE OF WISCONSIN",
+        "bold": false,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "COURT OF APPEALS",
+        "bold": false,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "DISTRICT II",
+        "bold": false,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "CASE NO. 2025AP002377 \u2013 CR",
+        "bold": false,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "STATE OF WISCONSIN,",
+        "bold": false,
+        "centered": false,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "JEFFREY JAMES CHRISTOPHERSON,",
+        "bold": false,
+        "centered": false,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "BRIEF OF \nDEFENDANT-APPELLANT",
+        "bold": false,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "NICHOLAS G. SMITH",
+        "bold": false,
+        "centered": false,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "TABLE OF CONTENTS",
+        "bold": true,
+        "centered": true,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "Background and Initial Allegations",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "The Case Closes Without Charges",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Reopening the Investigation",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Criminal Complaint and Other-Acts Motion",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "The Other-Acts Hearing",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Pretrial Rulings on Expert Testimony",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Trial Testimony",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Dylan Wilson's Foreclosed Testimony",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Defense Case",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "Verdict and Sentencing",
+        "bold": true,
+        "centered": true,
+        "all_caps": false,
+        "style": "Normal",
+        "detected_level": 2
+      },
+      {
+        "text": "NICHOLAS G. SMITH",
+        "bold": false,
+        "centered": false,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      },
+      {
+        "text": "NICHOLAS G. SMITH",
+        "bold": false,
+        "centered": false,
+        "all_caps": true,
+        "style": "Normal",
+        "detected_level": 1
+      }
+    ],
+    "all_caps_lines": [
+      "STATE OF WISCONSIN",
+      "COURT OF APPEALS",
+      "DISTRICT II",
+      "CASE NO. 2025AP002377 \u2013 CR",
+      "STATE OF WISCONSIN,",
+      "JEFFREY JAMES CHRISTOPHERSON,",
+      "BRIEF OF \nDEFENDANT-APPELLANT",
+      "NICHOLAS G. SMITH",
+      "TABLE OF CONTENTS",
+      "NICHOLAS G. SMITH",
+      "NICHOLAS G. SMITH"
+    ]
+  }
+]

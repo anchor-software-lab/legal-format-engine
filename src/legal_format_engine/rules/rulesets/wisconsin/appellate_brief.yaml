@@ -1,0 +1,259 @@
+# Wisconsin Court of Appeals - Appellate Brief Format
+# Based on Wis. Stat. Ch. 809 and Wis. Stat. Rule 809.19
+# Formatting derived from analysis of actual filed Wisconsin appellate briefs.
+#
+# Key conventions:
+# - Margins: 1.25" top/bottom, 2.0" left/right
+# - Font: Times New Roman 10pt, double-spaced
+# - Combined "Statement of the Case and Facts" accepted (or separate)
+# - "Issues Presented" as canonical name (aliases cover all variations)
+# - Caption: party names left-aligned with indented roles
+# - Certifications combined under single heading
+
+jurisdiction: wisconsin
+court_level: appellate
+document_type: brief
+
+# Page layout derived from filed briefs
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 13
+  line_spacing: 2.0  # double-spaced
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+  first_line_indent_inches: 0.5
+  body_alignment: justify
+
+# Heading formatting by level
+#
+# Level 1: Major sections - bold, centered, title case
+#          e.g., "Table of Contents", "Issues Presented", "Argument", "Conclusion"
+#
+# Level 2: Top-level argument headings - ALL CAPS, left-aligned, bold, Roman numerals
+#          e.g., "I. THE CIRCUIT COURT ERRONEOUSLY ADMITTED..."
+#
+# Level 3: Sub-argument headings - title case, bold, left-aligned, Alpha numbering
+#          e.g., "A. The Independent Review Doctrine..."
+#
+# Level 4: Sub-sub-argument headings - sentence case, left-aligned, Arabic numerals
+#          e.g., "1. The circuit court failed to adequately apply..."
+heading_rules:
+  - level: 1
+    case_style: title
+    alignment: center
+    numbering: null
+    bold: true
+    indent_inches: 0.0
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+    indent_inches: 0.0
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+    indent_inches: 0.5
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+    indent_inches: 1.0
+
+# Required sections per Wis. Stat. Rule 809.19(1)
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Issues Presented"
+    aliases:
+      - "Statement of the Issues"
+      - "Statement of Issues"
+      - "Issues Presented for Review"
+      - "Issues"
+      - "Questions Presented"
+      - "Issue Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: position_on_oral_argument
+    canonical_name: "Position on Oral Argument and Publication"
+    aliases:
+      - "Statement on Oral Argument and Publication"
+      - "Oral Argument and Publication"
+      - "Position on Oral Argument"
+    order: 4
+    required: true
+    heading_level: 1
+
+  # Case and Facts: Attorneys use either combined or separate sections.
+  # The engine accepts both formats via group constraints.
+  - id: statement_of_case_and_facts
+    canonical_name: "Statement of the Case and Facts"
+    aliases:
+      - "Case and Facts"
+      - "Statement of Case and Facts"
+    order: 5
+    required: false
+    heading_level: 1
+    group: case_facts  # at least one in this group must be present
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Case History"
+      - "Procedural Background"
+    order: 5
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 6
+    required: false
+    heading_level: 1
+    group: case_facts
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: certifications
+    canonical_name: "Certifications"
+    aliases:
+      - "Certification"
+      - "Certificates"
+    order: 8
+    required: true
+    heading_level: 1
+
+# Caption formatting
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "CASE NO."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+# Signature block
+signature_block:
+  template: |
+    Dated this {day} day of {month}, {year}.
+
+    Respectfully submitted,
+
+    Electronically signed by
+    {attorney_display_name}
+    {attorney_name_caps}
+    {attorney_title}
+    State Bar No. {bar_number}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+# Certifications per Wis. Stat. Rule 809.19(8)(d) and 809.19(12)
+certifications:
+  - id: form_and_length
+    title: null  # Runs as continuous paragraphs under "Certifications"
+    template: |
+      I hereby certify that this brief conforms to the rules
+      contained in s. 809.19(8)(b), (bm), and (c) for a brief.
+      The length of this brief is {word_count} words.
+
+  - id: appendix_certification
+    title: null
+    template: |
+      I hereby certify that filed with this brief is an appendix
+      that complies with s. 809.19(2)(a) and that contains, at a
+      minimum: (1) a table of contents; (2) the findings or opinion
+      of the circuit court; (3) a copy of any unpublished opinion
+      cited under s. 809.23(3)(a) or (b); and (4) portions of the
+      record essential to an understanding of the issues raised,
+      including oral or written rulings or decisions showing the
+      circuit court's reasoning regarding those issues.
+
+      I further certify that if this appeal is taken from a circuit
+      court order or judgment entered in a judicial review or an
+      administrative decision, the appendix contains the findings
+      of fact and conclusions of law, if any, and final decision of
+      the administrative agency.
+
+      I further certify that if the record is required by law to be
+      confidential, the portions of the record included in the
+      appendix are reproduced using one or more initials or other
+      appropriate pseudonym or designation instead of full names of
+      persons, specifically including juveniles and parents of
+      juveniles, with actual names included in a sealed reference
+      list.
+
+  - id: signature_repeat
+    title: null
+    template: |
+      Signed:
+
+      Electronically signed by
+      {attorney_display_name}
+      {attorney_name_caps}
+      {attorney_title}
+
+signature_block_required: true

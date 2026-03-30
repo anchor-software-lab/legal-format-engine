@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Legal Format Engine</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css"/>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Legal Format Engine</h1>
+      <p class="subtitle">Wisconsin Appellate Brief Formatter</p>
+    </header>
+
+    <!-- Case Information (collapsible) -->
+    <section class="collapsible open" id="section-case">
+      <h2 class="collapsible-header" data-target="case-body">
+        <span class="chevron"></span> Case Information
+      </h2>
+      <div class="collapsible-body" id="case-body">
+        <div class="form-group">
+          <label for="case-number">Case Number <span class="required">*</span></label>
+          <input type="text" id="case-number" placeholder="2025AP001234-CR"/>
+          <span class="field-error" id="err-case-number"></span>
+        </div>
+        <div class="form-group">
+          <label for="court-name">Court</label>
+          <input type="text" id="court-name" value="Court of Appeals"/>
+        </div>
+        <div class="form-group">
+          <label for="district">District</label>
+          <select id="district">
+            <option value="District I">District I</option>
+            <option value="District II" selected>District II</option>
+            <option value="District III">District III</option>
+            <option value="District IV">District IV</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="county">County of Origin</label>
+          <input type="text" id="county" placeholder="Dane"/>
+        </div>
+        <div class="form-group">
+          <label for="judge">Trial Judge</label>
+          <input type="text" id="judge" placeholder="Hon. Smith"/>
+        </div>
+        <div class="form-group">
+          <label for="doc-title">Document Type <span class="required">*</span></label>
+          <select id="doc-title">
+            <option value="Brief of Defendant-Appellant" selected>Brief of Defendant-Appellant</option>
+            <option value="Brief of Plaintiff-Respondent">Brief of Plaintiff-Respondent</option>
+            <option value="Reply Brief of Defendant-Appellant">Reply Brief of Defendant-Appellant</option>
+            <option value="Reply Brief of Plaintiff-Respondent">Reply Brief of Plaintiff-Respondent</option>
+            <option value="Supplemental Brief">Supplemental Brief</option>
+            <option value="No-Merit Report">No-Merit Report</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parties (collapsible, dynamic) -->
+    <section class="collapsible open" id="section-parties">
+      <h2 class="collapsible-header" data-target="parties-body">
+        <span class="chevron"></span> Parties
+      </h2>
+      <div class="collapsible-body" id="parties-body">
+        <div id="party-list">
+          <div class="party-row" data-index="0">
+            <div class="form-group">
+              <label>Name <span class="required">*</span></label>
+              <input type="text" class="party-name" value="State of Wisconsin"/>
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select class="party-role">
+                <option value="plaintiff-respondent" selected>Plaintiff-Respondent</option>
+                <option value="defendant-appellant">Defendant-Appellant</option>
+                <option value="state-respondent">State-Respondent</option>
+                <option value="state-plaintiff">State-Plaintiff</option>
+                <option value="petitioner">Petitioner</option>
+                <option value="respondent">Respondent</option>
+                <option value="appellant">Appellant</option>
+              </select>
+            </div>
+          </div>
+          <div class="party-row" data-index="1">
+            <div class="party-row-header">
+              <button class="btn-icon btn-remove-party" title="Remove party">&times;</button>
+            </div>
+            <div class="form-group">
+              <label>Name <span class="required">*</span></label>
+              <input type="text" class="party-name" placeholder="John Doe"/>
+              <span class="field-error party-name-error"></span>
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select class="party-role">
+                <option value="plaintiff-respondent">Plaintiff-Respondent</option>
+                <option value="defendant-appellant" selected>Defendant-Appellant</option>
+                <option value="state-respondent">State-Respondent</option>
+                <option value="state-plaintiff">State-Plaintiff</option>
+                <option value="petitioner">Petitioner</option>
+                <option value="respondent">Respondent</option>
+                <option value="appellant">Appellant</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button id="btn-add-party" class="btn btn-text">+ Add Party</button>
+      </div>
+    </section>
+
+    <!-- Attorney (collapsible, with save/load) -->
+    <section class="collapsible" id="section-attorney">
+      <h2 class="collapsible-header" data-target="attorney-body">
+        <span class="chevron"></span> Attorney
+        <span class="section-badge" id="attorney-saved-badge"></span>
+      </h2>
+      <div class="collapsible-body collapsed" id="attorney-body">
+        <div class="profile-actions">
+          <button id="btn-save-profile" class="btn btn-text">Save as Default</button>
+          <button id="btn-load-profile" class="btn btn-text">Load Default</button>
+          <button id="btn-clear-profile" class="btn btn-text btn-danger-text">Clear Saved</button>
+        </div>
+        <div class="form-group">
+          <label for="attorney-name">Name <span class="required">*</span></label>
+          <input type="text" id="attorney-name"/>
+          <span class="field-error" id="err-attorney-name"></span>
+        </div>
+        <div class="form-group">
+          <label for="bar-number">Bar Number <span class="required">*</span></label>
+          <input type="text" id="bar-number"/>
+          <span class="field-error" id="err-bar-number"></span>
+        </div>
+        <div class="form-group">
+          <label for="firm">Firm/Office</label>
+          <input type="text" id="firm" placeholder="e.g., Smith Law Office"/>
+        </div>
+        <div class="form-group">
+          <label for="address">Address <span class="required">*</span></label>
+          <textarea id="address" rows="2"></textarea>
+          <span class="field-error" id="err-address"></span>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone <span class="required">*</span></label>
+          <input type="text" id="phone"/>
+          <span class="field-error" id="err-phone"></span>
+        </div>
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input type="email" id="email"/>
+          <span class="field-error" id="err-email"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Options (collapsible) -->
+    <section class="collapsible" id="section-options">
+      <h2 class="collapsible-header" data-target="options-body">
+        <span class="chevron"></span> Format Options
+      </h2>
+      <div class="collapsible-body collapsed" id="options-body">
+        <div class="form-group">
+          <label for="variant">Style Variant</label>
+          <select id="variant">
+            <option value="" selected>Wisconsin Appellate (Default)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="word-count">Word Count (for compliance cert)</label>
+          <input type="number" id="word-count" placeholder="Auto-detect"/>
+        </div>
+        <div class="form-group checkbox">
+          <input type="checkbox" id="insert-missing" checked/>
+          <label for="insert-missing">Insert stubs for missing sections</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Letterhead (collapsible) -->
+    <section class="collapsible" id="section-letterhead">
+      <h2 class="collapsible-header" data-target="letterhead-body">
+        <span class="chevron"></span> Letterhead
+        <span class="section-badge" id="letterhead-badge"></span>
+      </h2>
+      <div class="collapsible-body collapsed" id="letterhead-body">
+        <div class="form-group">
+          <label for="letterhead-select">Active Letterhead</label>
+          <select id="letterhead-select">
+            <option value="">None (no letterhead)</option>
+          </select>
+        </div>
+
+        <div id="letterhead-preview" class="letterhead-preview hidden"></div>
+
+        <div class="letterhead-actions">
+          <button id="btn-new-letterhead" class="btn btn-text">+ New Letterhead</button>
+          <button id="btn-edit-letterhead" class="btn btn-text hidden">Edit</button>
+          <button id="btn-delete-letterhead" class="btn btn-text btn-danger-text hidden">Delete</button>
+        </div>
+
+        <!-- Letterhead Editor (hidden by default) -->
+        <div id="letterhead-editor" class="hidden">
+          <h3 class="editor-title">Letterhead Editor</h3>
+          <input type="hidden" id="lh-edit-id" value=""/>
+          <div class="form-group">
+            <label for="lh-name">Letterhead Name <span class="required">*</span></label>
+            <input type="text" id="lh-name" placeholder="e.g., My Firm Letterhead"/>
+            <span class="field-error" id="err-lh-name"></span>
+          </div>
+
+          <div id="lh-lines-container">
+            <label class="block-label">Lines</label>
+            <div id="lh-lines-list"></div>
+            <button id="btn-add-lh-line" class="btn btn-text">+ Add Line</button>
+          </div>
+
+          <div class="form-group checkbox">
+            <input type="checkbox" id="lh-separator" checked/>
+            <label for="lh-separator">Separator line after letterhead</label>
+          </div>
+
+          <div class="form-group">
+            <label for="lh-spacing">Spacing after (pt)</label>
+            <input type="number" id="lh-spacing" value="12" min="0" max="72"/>
+          </div>
+
+          <div class="editor-actions">
+            <button id="btn-lh-cancel" class="btn btn-secondary">Cancel</button>
+            <button id="btn-lh-save" class="btn btn-primary">Save Letterhead</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section id="actions-section">
+      <button id="btn-validate" class="btn btn-secondary">
+        <span class="btn-label">Validate Structure</span>
+      </button>
+      <button id="btn-format" class="btn btn-primary">
+        <span class="btn-label">Format Brief</span>
+      </button>
+      <button id="btn-citations" class="btn btn-secondary">
+        <span class="btn-label">Check Citations</span>
+      </button>
+    </section>
+
+    <!-- Confirmation Dialog (hidden by default) -->
+    <div id="confirm-overlay" class="overlay hidden">
+      <div class="dialog">
+        <h3>Format Document?</h3>
+        <p>This will <strong>replace the entire document</strong> with the formatted version. Make sure you have saved your work.</p>
+        <div class="dialog-actions">
+          <button id="btn-confirm-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="btn-confirm-ok" class="btn btn-primary">Format</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <section id="results-section" class="hidden">
+      <h2>Results</h2>
+      <div id="results-content"></div>
+    </section>
+
+    <!-- Status Bar -->
+    <div id="status-bar">
+      <div id="spinner" class="spinner hidden"></div>
+      <span id="status-text">Ready</span>
+    </div>
+  </div>
+
+  <script src="taskpane.js"></script>
+</body>
+</html>
