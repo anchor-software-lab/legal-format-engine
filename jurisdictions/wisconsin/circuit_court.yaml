@@ -1,0 +1,159 @@
+# Wisconsin Circuit Court Formatting Rules
+# Extracted from: Dunnington Session Post-Mortem (March 30, 2026)
+# Case: Forest County Case No. 2024CF000099, State v. Dunnington
+#
+# These rules are learned from real formatting sessions and encode
+# mandatory formatting requirements for Wisconsin circuit court filings.
+
+jurisdiction: wisconsin
+court_level: circuit
+source: session_postmortem
+session_date: "2026-03-30"
+
+# ---------------------------------------------------------------------------
+# Caption Table Structure
+# ---------------------------------------------------------------------------
+caption:
+  grid_columns_dxa: [2898, 1350, 1080, 2520, 2340]
+  font_family: Arial
+
+  header_row:
+    # Full-width merged cell: "STATE OF WISCONSIN [tab] CIRCUIT COURT [tab] [COUNTY] COUNTY"
+    font_size_pt: 24
+    bold: true
+    tab_stops_dxa:
+      center: 4050
+      right: 7542
+
+  party_row:
+    font_size_pt: 22
+    font_family: Arial
+
+  case_number:
+    font_size_pt: 22
+    bold: true
+    alignment: center
+
+  title:
+    font_size_pt: 22
+    bold: true
+    alignment: center
+
+  official_use_box:
+    # Right column, vertically merged across all rows
+    text: "For Official Use"
+    font_size_pt: 18
+    bold: true
+    font_family: Arial
+    vertical_alignment: bottom
+    horizontal_alignment: center
+    left_border: true  # only border is the left edge
+    vmerge: restart  # spans all 3 rows via vMerge
+
+  borders:
+    structural: "thin_single_sz4"
+    cosmetic: "nil"
+
+# ---------------------------------------------------------------------------
+# Body Text
+# ---------------------------------------------------------------------------
+body:
+  font_family: Arial
+  font_size_pt: 12  # renders as 12pt visual (24 half-points in XML)
+  line_spacing: 1.15  # 276 twips in XML
+  alignment: justify
+  first_line_indent_inches: 0.5  # 720 DXA
+
+# ---------------------------------------------------------------------------
+# Signature Blocks
+# ---------------------------------------------------------------------------
+signature:
+  line_character: "_"  # underscore, NOT underlined tabs
+  signature_line_length: 33  # characters
+  date_line_length: 18  # characters
+  date_tab_stop_dxa: 5760  # 4 inches
+  fixed_length: true  # same length for all signatories regardless of name
+
+  structure:
+    # Line 1: signature underscores [tab] date underscores
+    # Line 2: [Name] [tab] Date
+    # Line 3: [Title]
+    # Line 4: State Bar No. [number]
+    lines_per_signatory: 4
+
+  electronic_signature:
+    # /s/ format: "/" + italic "s" + "/ [Name]" + trailing spaces, all underlined
+    format: "/s/"
+    italic_s: true
+    underlined: true
+
+  # Lesson: Never use underlined tabs for signature lines in generated .docx
+  # Use underscore characters for deterministic rendering across Word versions
+
+# ---------------------------------------------------------------------------
+# Proposed Order (eFiling)
+# ---------------------------------------------------------------------------
+efiling_proposed_order:
+  top_margin_dxa: 4320  # 3 inches - space for court's digital signature
+  top_margin_inches: 3.0
+  judge_signature_block: false  # court applies digitally, do NOT include
+  dated_this_line: false  # court applies, do NOT include
+  file_format: docx  # NOT PDF - court needs to edit before signing
+  voice: party_titles  # "the defendant", NOT "Mr. Dunnington"
+
+# ---------------------------------------------------------------------------
+# Stipulation (for PDF conversion)
+# ---------------------------------------------------------------------------
+stipulation:
+  top_margin_dxa: 1080  # 0.75 inches - standard
+  top_margin_inches: 0.75
+  includes_signature_blocks: true
+  counsel_signature: electronic  # /s/ format
+  da_signature: blank  # left blank for wet or electronic signature
+  voice: humanize  # "Mr. Dunnington", NOT "the defendant"
+
+# ---------------------------------------------------------------------------
+# Voice Rules
+# ---------------------------------------------------------------------------
+voice:
+  court_orders:
+    # Court refers to parties by party title
+    defendant: "the defendant"
+    state: "the State"
+    plaintiff: "the plaintiff"
+  counsel_documents:
+    # Counsel humanizes by using the client's name
+    defendant: "Mr./Ms. [LastName]"
+    state: "the State"
+
+# ---------------------------------------------------------------------------
+# XML/Technical Rules
+# ---------------------------------------------------------------------------
+technical:
+  # Template-based editing is preferred over generation from scratch
+  preferred_method: unpack_edit_repack
+  # vMerge cannot be reliably produced by docx-js
+  vmerge_note: "Use template XML editing for vertical cell merges"
+  # When adapting templates, delete surplus XML elements entirely
+  surplus_fields: delete_entirely  # don't blank text, remove <w:p>
+  # Always strip vanish runs from court templates
+  strip_vanish_runs: true
+  # Use XML entities for smart quotes
+  smart_quotes: xml_entities
+  # DXA conversion: 1 inch = 1440 DXA
+  dxa_per_inch: 1440
+
+# ---------------------------------------------------------------------------
+# Error Types Commonly Encountered
+# ---------------------------------------------------------------------------
+common_errors:
+  - TEMPLATE_QUALITY
+  - DUPLICATE_FIELD
+  - VMERGE_FAILURE
+  - TAB_UNDERLINE_MISALIGN
+  - PROPORTIONAL_LINE_LENGTH
+  - VOICE_MISMATCH
+  - EFILING_NONCOMPLIANCE
+  - SPACER_PARAGRAPH_EXCESS
+  - VANISH_RUN_PERSISTENCE
+  - BOOKMARK_ID_COLLISION
