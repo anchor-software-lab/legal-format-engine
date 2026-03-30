@@ -94,6 +94,15 @@ class MLPipeline:
             except Exception:
                 pass  # Attribution detection is best-effort
 
+        # Normalize firm name via the firm database
+        if detected_firm and firm is None:
+            try:
+                from legal_format_engine.ml.firm_database import FirmDatabase
+                db = FirmDatabase()
+                detected_firm = db.normalize_name(detected_firm)
+            except Exception:
+                pass  # Firm normalization is best-effort
+
         # User-provided values always override auto-detected ones
         final_author = author if author is not None else detected_author
         final_firm = firm if firm is not None else detected_firm
