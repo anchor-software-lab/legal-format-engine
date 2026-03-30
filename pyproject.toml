@@ -19,11 +19,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+tf = [
+    "tensorflow>=2.15",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov",
     "ruff",
     "mypy",
+    "httpx",
 ]
 
 [project.scripts]
