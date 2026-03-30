@@ -149,7 +149,7 @@ def _build_sections(
             current_level = level
             current_content = []
         else:
-            current_content.append(ContentBlock(text=text))
+            current_content.append(ContentBlock(text=text, is_body_text=True))
 
     # Don't forget the last section
     if current_heading is not None:

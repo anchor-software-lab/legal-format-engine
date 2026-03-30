@@ -11,6 +11,8 @@ from pathlib import Path
 from docx import Document as DocxDocument
 from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 from legal_format_engine.models.document import (
@@ -39,30 +41,22 @@ def render_docx(
     output_path: str | Path,
     letterhead: Letterhead | None = None,
 ) -> Path:
-    """Render a LegalDocument to a DOCX file.
-
-    Args:
-        doc: The internal document representation.
-        ruleset: The active ruleset for formatting rules.
-        output_path: Where to save the DOCX file.
-        letterhead: Optional letterhead to render at the top of the document.
-
-    Returns:
-        The Path to the saved file.
-    """
+    """Render a LegalDocument to a DOCX file."""
     output_path = Path(output_path)
     docx = DocxDocument()
     fmt = ruleset.page_format
 
     _setup_page(docx, fmt)
     _set_default_font(docx, fmt)
+    _enable_hyphenation(docx)
 
     if letterhead:
         _render_letterhead(docx, letterhead, fmt)
 
     if doc.caption:
         _render_caption(docx, doc.caption, fmt)
-        _add_blank_line(docx, fmt)
+        # Page break after caption — body starts on a new page
+        docx.add_page_break()
 
     for section in doc.sections:
         _render_section(docx, section, fmt, ruleset)
@@ -103,10 +97,39 @@ def _set_default_font(docx: DocxDocument, fmt: PageFormat) -> None:
     pf.space_before = Pt(0)
 
 
+def _enable_hyphenation(docx: DocxDocument) -> None:
+    """Enable automatic hyphenation to prevent excessive word spacing with JUSTIFY."""
+    settings = docx.settings.element
+    auto_hyphen = OxmlElement("w:autoHyphenation")
+    auto_hyphen.set(qn("w:val"), "true")
+    settings.append(auto_hyphen)
+
+
+# ── Caption ──────────────────────────────────────────────────────────
+
+
 def _render_caption(docx: DocxDocument, caption: CaptionBlock, fmt: PageFormat) -> None:
-    """Render the caption block."""
+    """Render the caption block with single spacing."""
     for line in caption.lines:
-        _add_content_paragraph(docx, line, fmt)
+        para = docx.add_paragraph()
+        alignment = _ALIGN_MAP.get(line.alignment, WD_ALIGN_PARAGRAPH.CENTER)
+        para.alignment = alignment
+
+        # Caption lines are single-spaced
+        pf = para.paragraph_format
+        pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        pf.space_before = Pt(0)
+        pf.space_after = Pt(2)
+
+        run = para.add_run(line.text)
+        run.font.name = fmt.font_name
+        run.font.size = Pt(fmt.font_size_pt)
+        run.bold = line.bold
+        run.italic = line.italic
+        run.underline = line.underline
+
+
+# ── Sections ─────────────────────────────────────────────────────────
 
 
 def _render_section(
@@ -129,18 +152,107 @@ def _render_section(
         if heading_rule:
             alignment = Alignment(heading_rule.alignment)
 
-        heading_block = ContentBlock(
-            text=heading_text,
-            bold=heading_bold,
-            alignment=alignment,
-        )
-        _add_content_paragraph(docx, heading_block, fmt)
+        # Determine heading indent based on heading level
+        indent = 0.0
+        if heading_rule:
+            indent = heading_rule.indent_inches
+
+        _add_heading_paragraph(docx, heading_text, fmt, alignment,
+                               heading_bold, indent)
 
     for block in section.content:
         _add_content_paragraph(docx, block, fmt)
 
     for subsection in section.subsections:
         _render_section(docx, subsection, fmt, ruleset)
+
+
+def _add_heading_paragraph(
+    docx: DocxDocument,
+    text: str,
+    fmt: PageFormat,
+    alignment: Alignment,
+    bold: bool,
+    indent_inches: float = 0.0,
+) -> None:
+    """Add a heading paragraph (no first-line indent, double-spaced)."""
+    para = docx.add_paragraph()
+    para.alignment = _ALIGN_MAP.get(alignment, WD_ALIGN_PARAGRAPH.LEFT)
+
+    pf = para.paragraph_format
+    pf.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+    pf.space_before = Pt(0)
+    pf.space_after = Pt(0)
+    pf.first_line_indent = Inches(0)  # headings never have first-line indent
+    if indent_inches > 0:
+        pf.left_indent = Inches(indent_inches)
+
+    run = para.add_run(text)
+    run.font.name = fmt.font_name
+    run.font.size = Pt(fmt.font_size_pt)
+    run.bold = bold
+
+
+def _add_content_paragraph(
+    docx: DocxDocument,
+    block: ContentBlock,
+    fmt: PageFormat,
+) -> None:
+    """Add a single content block as a paragraph.
+
+    Body text gets first-line indent and justified alignment.
+    Caption text gets single spacing and no indent.
+    """
+    para = docx.add_paragraph()
+
+    # Determine alignment
+    if block.alignment:
+        para.alignment = _ALIGN_MAP.get(block.alignment, WD_ALIGN_PARAGRAPH.JUSTIFY)
+    else:
+        para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+    pf = para.paragraph_format
+
+    if block.is_caption:
+        # Caption lines: single-spaced, no indent
+        pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        pf.space_before = Pt(0)
+        pf.space_after = Pt(2)
+        pf.first_line_indent = Inches(0)
+    elif block.is_body_text:
+        # Body text: double-spaced, first-line indent, justified
+        pf.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+        pf.space_before = Pt(0)
+        pf.space_after = Pt(0)
+        pf.first_line_indent = Inches(fmt.first_line_indent_inches)
+    else:
+        # Default: double-spaced, no indent (headings, signature lines, etc.)
+        pf.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+        pf.space_before = Pt(0)
+        pf.space_after = Pt(0)
+        pf.first_line_indent = Inches(0)
+
+    # Apply any explicit left indent
+    if block.indent_inches > 0:
+        pf.left_indent = Inches(block.indent_inches)
+
+    run = para.add_run(block.text)
+    run.font.name = fmt.font_name
+    run.font.size = Pt(fmt.font_size_pt)
+    run.bold = block.bold
+    run.italic = block.italic
+    run.underline = block.underline
+
+
+def _add_blank_line(docx: DocxDocument, fmt: PageFormat) -> None:
+    """Add a blank paragraph as a spacer."""
+    para = docx.add_paragraph()
+    run = para.add_run("")
+    run.font.name = fmt.font_name
+    run.font.size = Pt(fmt.font_size_pt)
+
+
+# ── Signature block ──────────────────────────────────────────────────
 
 
 def _render_signature_block(
@@ -169,32 +281,7 @@ def _render_signature_block(
         _add_content_paragraph(docx, block, fmt)
 
 
-def _add_content_paragraph(
-    docx: DocxDocument,
-    block: ContentBlock,
-    fmt: PageFormat,
-) -> None:
-    """Add a single content block as a paragraph."""
-    para = docx.add_paragraph()
-    para.alignment = _ALIGN_MAP.get(block.alignment, WD_ALIGN_PARAGRAPH.JUSTIFY)
-
-    run = para.add_run(block.text)
-    run.font.name = fmt.font_name
-    run.font.size = Pt(fmt.font_size_pt)
-    run.bold = block.bold
-    run.italic = block.italic
-    run.underline = block.underline
-
-
-def _add_blank_line(docx: DocxDocument, fmt: PageFormat) -> None:
-    """Add a blank paragraph as a spacer."""
-    para = docx.add_paragraph()
-    run = para.add_run("")
-    run.font.name = fmt.font_name
-    run.font.size = Pt(fmt.font_size_pt)
-
-
-# ── Letterhead ────────────────────────────────────────────────────────
+# ── Letterhead ───────────────────────────────────────────────────────
 
 _LETTERHEAD_ALIGN = {
     "left": WD_ALIGN_PARAGRAPH.LEFT,

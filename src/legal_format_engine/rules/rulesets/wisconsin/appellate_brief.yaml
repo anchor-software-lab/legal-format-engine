@@ -17,14 +17,16 @@ document_type: brief
 # Page layout derived from filed briefs
 page_format:
   font_name: "Times New Roman"
-  font_size_pt: 10
+  font_size_pt: 13
   line_spacing: 2.0  # double-spaced
-  margin_top_inches: 1.25
-  margin_bottom_inches: 1.25
-  margin_left_inches: 2.0
-  margin_right_inches: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
   page_width_inches: 8.5
   page_height_inches: 11.0
+  first_line_indent_inches: 0.5
+  body_alignment: justify
 
 # Heading formatting by level
 #
@@ -45,21 +47,25 @@ heading_rules:
     alignment: center
     numbering: null
     bold: true
+    indent_inches: 0.0
   - level: 2
     case_style: upper
     alignment: left
     numbering: roman
     bold: true
+    indent_inches: 0.0
   - level: 3
     case_style: title
     alignment: left
     numbering: alpha_upper
     bold: true
+    indent_inches: 0.5
   - level: 4
     case_style: sentence
     alignment: left
     numbering: arabic
     bold: false
+    indent_inches: 1.0
 
 # Required sections per Wis. Stat. Rule 809.19(1)
 required_sections:

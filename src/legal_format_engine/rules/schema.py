@@ -13,6 +13,7 @@ class HeadingRule(BaseModel):
     alignment: str  # "center", "left"
     numbering: str | None = None  # "roman", "alpha_upper", "alpha_lower", "arabic"
     bold: bool = False
+    indent_inches: float = 0.0  # left indent for sub-headings
 
 
 class RequiredSection(BaseModel):
@@ -44,6 +45,8 @@ class PageFormat(BaseModel):
     margin_right_inches: float = 1.0
     page_width_inches: float = 8.5
     page_height_inches: float = 11.0
+    first_line_indent_inches: float = 0.5
+    body_alignment: str = "justify"
 
 
 class CaptionRule(BaseModel):

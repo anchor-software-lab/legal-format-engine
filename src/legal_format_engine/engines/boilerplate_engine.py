@@ -65,7 +65,7 @@ def generate_certifications(
             id=rule.id,
             heading_text=(rule.title or rule.id.replace("_", " ")).upper(),
             heading_level=HeadingLevel.LEVEL_1,
-            content=[ContentBlock(text=text, alignment=Alignment.JUSTIFY)],
+            content=[ContentBlock(text=text, alignment=Alignment.JUSTIFY, is_body_text=True)],
             is_generated=True,
         )
         sections.append(section)

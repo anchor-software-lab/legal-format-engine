@@ -364,6 +364,7 @@ def _build_sections(paragraphs: list[dict]) -> list[Section]:
                 bold=para.get("bold", False),
                 italic=para.get("italic", False),
                 alignment=alignment,
+                is_body_text=True,
             )
             current_content.append(block)
 

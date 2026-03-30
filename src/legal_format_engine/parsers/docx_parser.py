@@ -267,6 +267,7 @@ def _build_sections(paragraphs: list[dict]) -> list[Section]:
                 italic=para["italic"],
                 underline=para["underline"],
                 alignment=para["alignment"],
+                is_body_text=True,
             )
             current_content.append(block)
 

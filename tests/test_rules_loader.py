@@ -15,10 +15,10 @@ class TestLoadRuleset:
     def test_page_format(self, wi_appellate_ruleset):
         fmt = wi_appellate_ruleset.page_format
         assert fmt.font_name == "Times New Roman"
-        assert fmt.font_size_pt == 10
+        assert fmt.font_size_pt == 13
         assert fmt.line_spacing == 2.0
-        assert fmt.margin_top_inches == 1.25
-        assert fmt.margin_left_inches == 2.0
+        assert fmt.margin_top_inches == 1.0
+        assert fmt.margin_left_inches == 1.0
 
     def test_heading_rules(self, wi_appellate_ruleset):
         rules = wi_appellate_ruleset.heading_rules
@@ -57,12 +57,12 @@ class TestWisconsinAppellateFormat:
 
     def test_margins(self):
         rs = load_ruleset("wisconsin", "appellate", "brief")
-        assert rs.page_format.margin_top_inches == 1.25
-        assert rs.page_format.margin_left_inches == 2.0
+        assert rs.page_format.margin_top_inches == 1.0
+        assert rs.page_format.margin_left_inches == 1.0
 
     def test_font_size(self):
         rs = load_ruleset("wisconsin", "appellate", "brief")
-        assert rs.page_format.font_size_pt == 10
+        assert rs.page_format.font_size_pt == 13
 
     def test_case_and_facts_flexible(self):
         rs = load_ruleset("wisconsin", "appellate", "brief")
@@ -112,4 +112,4 @@ class TestWisconsinAppellateFormat:
         """Unknown variant falls back to default ruleset."""
         rs = load_ruleset("wisconsin", "appellate", "brief", variant="nonexistent")
         assert rs.jurisdiction == "wisconsin"
-        assert rs.page_format.margin_top_inches == 1.25
+        assert rs.page_format.margin_top_inches == 1.0

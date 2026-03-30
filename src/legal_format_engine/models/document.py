@@ -33,6 +33,9 @@ class ContentBlock(BaseModel):
     italic: bool = False
     underline: bool = False
     alignment: Alignment = Alignment.JUSTIFY
+    is_body_text: bool = False  # True for body paragraphs that get first-line indent
+    is_caption: bool = False  # True for caption lines (single-spaced)
+    indent_inches: float = 0.0  # left indent override
 
 
 class Section(BaseModel):
