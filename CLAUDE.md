@@ -1,43 +1,28 @@
 # Legal Format Engine - Development Context
 
-## Architecture Summary
-Rules-based legal document formatting engine. Five layers:
-1. **Input** - accepts pasted text, DOCX, PDF uploads
-2. **Rules** - YAML-based declarative rulesets per jurisdiction/court
-3. **Parser** - converts messy documents to structured internal model
-4. **Formatter/Validator** - enforces rules deterministically
-5. **Output** - DOCX, Markdown, HTML rendering
-
-## ML Pipeline
-- `src/legal_format_engine/ml/` - normalizer, feature extractor, learner, synthesizer
-- Documents are normalized to remove format-specific quirks before learning
-- Rule hierarchy: Court Rules > ML Learned Patterns > Style Profiles > Defaults
-- Author/firm attribution auto-detected from signature blocks, metadata, letterhead
-- Firm database: 160+ firms pre-loaded with fuzzy matching
-- Archive ingestion: ZIP, RAR, Adobe Portfolio
+## Architecture
+F# (.NET 8) rules-based legal document formatting and compliance engine.
+Seven projects in a single solution.
 
 ## Key Design Decisions
-- Court rules ALWAYS win over ML-learned preferences
-- ML only fills discretionary gaps (indent depth, block quote style, etc.)
-- DOCX output must match real filed briefs exactly
-- Wisconsin appellate brief is the starting market (derived from actual filed briefs)
-- 64 jurisdiction rulesets (50 states + 14 federal courts)
-- Word Add-in is the primary distribution channel
+- F# discriminated unions model the legal domain — impossible states are unrepresentable
+- Court rules ALWAYS win over ML-learned preferences (rule hierarchy enforced in F#)
+- ML engine (Python, separate repo: anchor-ml-engine) feeds patterns via JSON
+- Rules are YAML files — adding jurisdictions requires zero F# code changes
+- Every rule is a pure function: ValidationContext -> LegalDocument -> Finding list
 
 ## GitHub Organization
-- Org: `anchor-software-lab` (the software company)
-- Repo: `anchor-software-lab/legal-format-engine`
-- Development branch: `claude/recreate-code-from-transcript-GFS1h`
+- Org: `anchor-software-lab`
+- This repo: `anchor-software-lab/legal-format-engine`
+- ML engine: `anchor-software-lab/anchor-ml-engine`
 
 ## What's Built
-- Caption engine, heading normalizer, section validator/reorderer
-- Boilerplate generator (signature blocks, certifications)
-- DOCX/PDF/plain text parsers
-- DOCX/Markdown renderers with proper formatting
-- Wisconsin appellate brief ruleset + 63 additional jurisdictions
-- ML pipeline (normalize, extract, learn, synthesize)
-- Firm database + auto-attribution
-- Archive ingestion (ZIP, RAR, Adobe Portfolio)
-- FastAPI server + Word Add-in
-- Letterhead system
-- Style profiles with rule hierarchy enforcement
+- Domain types: Jurisdiction, CourtLevel, FilingType, SectionKind DUs
+- Parsing: NumberingUtils, TextUtils, HeadingDetector, SectionBuilder, PlainTextParser
+- Ingestion: DocxReader (DocumentFormat.OpenXml), TextNormalizer
+- Rules: YamlLoader, SectionRules, HeadingRules, CaptionRules, BoilerplateRules, FormattingRules, RuleEngine
+- Rendering: DocxRenderer, MarkdownRenderer
+- API: ASP.NET Core with format, validate, caption, rulesets endpoints
+- 78 YAML jurisdiction rulesets (50 states + 14 federal)
+- Word Add-in (Office.js taskpane)
+- 14 domain tests passing

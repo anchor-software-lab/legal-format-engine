@@ -1,1 +1,0 @@
-"""Letterhead management system."""
