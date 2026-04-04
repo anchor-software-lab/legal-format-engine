@@ -7,11 +7,13 @@
 
   <ItemGroup>
     <Compile Include="YamlLoader.fs" />
+    <Compile Include="MlPatternLoader.fs" />
     <Compile Include="SectionRules.fs" />
     <Compile Include="HeadingRules.fs" />
     <Compile Include="CaptionRules.fs" />
     <Compile Include="BoilerplateRules.fs" />
     <Compile Include="FormattingRules.fs" />
+    <Compile Include="RuleHierarchy.fs" />
     <Compile Include="RuleEngine.fs" />
   </ItemGroup>
 

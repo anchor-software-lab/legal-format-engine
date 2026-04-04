@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="Contracts.fs" />
+    <Compile Include="MlBridge.fs" />
     <Compile Include="FormatHandler.fs" />
     <Compile Include="ValidateHandler.fs" />
     <Compile Include="CaptionHandler.fs" />
