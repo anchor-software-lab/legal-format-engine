@@ -1,0 +1,453 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "DocumentFormat.OpenXml/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "DocumentFormat.OpenXml.Framework": "3.2.0"
+        },
+        "compile": {
+          "lib/net8.0/DocumentFormat.OpenXml.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/DocumentFormat.OpenXml.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "DocumentFormat.OpenXml.Framework/3.2.0": {
+        "type": "package",
+        "dependencies": {
+          "System.IO.Packaging": "8.0.1"
+        },
+        "compile": {
+          "lib/net8.0/DocumentFormat.OpenXml.Framework.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/DocumentFormat.OpenXml.Framework.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "FSharp.Core/8.0.102": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/FSharp.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/FSharp.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "resource": {
+          "lib/netstandard2.1/cs/FSharp.Core.resources.dll": {
+            "locale": "cs"
+          },
+          "lib/netstandard2.1/de/FSharp.Core.resources.dll": {
+            "locale": "de"
+          },
+          "lib/netstandard2.1/es/FSharp.Core.resources.dll": {
+            "locale": "es"
+          },
+          "lib/netstandard2.1/fr/FSharp.Core.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/netstandard2.1/it/FSharp.Core.resources.dll": {
+            "locale": "it"
+          },
+          "lib/netstandard2.1/ja/FSharp.Core.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/netstandard2.1/ko/FSharp.Core.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/netstandard2.1/pl/FSharp.Core.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/netstandard2.1/pt-BR/FSharp.Core.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/netstandard2.1/ru/FSharp.Core.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/netstandard2.1/tr/FSharp.Core.resources.dll": {
+            "locale": "tr"
+          },
+          "lib/netstandard2.1/zh-Hans/FSharp.Core.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/netstandard2.1/zh-Hant/FSharp.Core.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "System.IO.Packaging/8.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.IO.Packaging.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.IO.Packaging.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "YamlDotNet/16.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/YamlDotNet.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/YamlDotNet.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "LegalEngine.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "FSharp.Core": "8.0.102"
+        },
+        "compile": {
+          "bin/placeholder/LegalEngine.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LegalEngine.Domain.dll": {}
+        }
+      },
+      "LegalEngine.Ingestion/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "DocumentFormat.OpenXml": "3.2.0",
+          "FSharp.Core": "8.0.102",
+          "LegalEngine.Domain": "1.0.0",
+          "LegalEngine.Parsing": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/LegalEngine.Ingestion.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LegalEngine.Ingestion.dll": {}
+        }
+      },
+      "LegalEngine.Parsing/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "FSharp.Core": "8.0.102",
+          "LegalEngine.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/LegalEngine.Parsing.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LegalEngine.Parsing.dll": {}
+        }
+      },
+      "LegalEngine.Rendering/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "DocumentFormat.OpenXml": "3.2.0",
+          "FSharp.Core": "8.0.102",
+          "LegalEngine.Domain": "1.0.0",
+          "LegalEngine.Rules": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/LegalEngine.Rendering.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LegalEngine.Rendering.dll": {}
+        }
+      },
+      "LegalEngine.Rules/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "FSharp.Core": "8.0.102",
+          "LegalEngine.Domain": "1.0.0",
+          "YamlDotNet": "16.3.0"
+        },
+        "compile": {
+          "bin/placeholder/LegalEngine.Rules.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LegalEngine.Rules.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DocumentFormat.OpenXml/3.2.0": {
+      "sha512": "eDBT9G0sAWUvjgE8l8E5bGCFXgxCZXIecQ8dqUnj2PyxyMR5eBmLahqRRw3Q7uSKM3cKbysaL2mEY0JJbEEOEA==",
+      "type": "package",
+      "path": "documentformat.openxml/3.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "documentformat.openxml.3.2.0.nupkg.sha512",
+        "documentformat.openxml.nuspec",
+        "icon.png",
+        "lib/net35/DocumentFormat.OpenXml.dll",
+        "lib/net35/DocumentFormat.OpenXml.xml",
+        "lib/net40/DocumentFormat.OpenXml.dll",
+        "lib/net40/DocumentFormat.OpenXml.xml",
+        "lib/net46/DocumentFormat.OpenXml.dll",
+        "lib/net46/DocumentFormat.OpenXml.xml",
+        "lib/net8.0/DocumentFormat.OpenXml.dll",
+        "lib/net8.0/DocumentFormat.OpenXml.xml",
+        "lib/netstandard2.0/DocumentFormat.OpenXml.dll",
+        "lib/netstandard2.0/DocumentFormat.OpenXml.xml"
+      ]
+    },
+    "DocumentFormat.OpenXml.Framework/3.2.0": {
+      "sha512": "e1neOKqRnSHUom4JQEorAoZ67aiJOp6+Xzsu0fc6IYfFcgQn6roo+w6i2w//N2u/5ilEfvLr35bNO9zaIN7r7g==",
+      "type": "package",
+      "path": "documentformat.openxml.framework/3.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "documentformat.openxml.framework.3.2.0.nupkg.sha512",
+        "documentformat.openxml.framework.nuspec",
+        "icon.png",
+        "lib/net35/DocumentFormat.OpenXml.Framework.dll",
+        "lib/net35/DocumentFormat.OpenXml.Framework.xml",
+        "lib/net40/DocumentFormat.OpenXml.Framework.dll",
+        "lib/net40/DocumentFormat.OpenXml.Framework.xml",
+        "lib/net46/DocumentFormat.OpenXml.Framework.dll",
+        "lib/net46/DocumentFormat.OpenXml.Framework.xml",
+        "lib/net6.0/DocumentFormat.OpenXml.Framework.dll",
+        "lib/net6.0/DocumentFormat.OpenXml.Framework.xml",
+        "lib/net8.0/DocumentFormat.OpenXml.Framework.dll",
+        "lib/net8.0/DocumentFormat.OpenXml.Framework.xml",
+        "lib/netstandard2.0/DocumentFormat.OpenXml.Framework.dll",
+        "lib/netstandard2.0/DocumentFormat.OpenXml.Framework.xml"
+      ]
+    },
+    "FSharp.Core/8.0.102": {
+      "sha512": "8RcBVpWY7kFBbWQPw0B0zCFJhklnZud37sQpKj9xM6bqvSj70jhnG4EhujAFzXD47RBdYBpuE1fRolDjGeviTw==",
+      "type": "package",
+      "path": "fsharp.core/8.0.102",
+      "files": [
+        ".nupkg.metadata",
+        "Icon.png",
+        "fsharp.core.8.0.102.nupkg.sha512",
+        "fsharp.core.nuspec",
+        "lib/netstandard2.0/FSharp.Core.dll",
+        "lib/netstandard2.0/FSharp.Core.xml",
+        "lib/netstandard2.0/cs/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/de/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/es/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/fr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/it/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ja/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ko/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pl/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ru/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/tr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/FSharp.Core.dll",
+        "lib/netstandard2.1/FSharp.Core.xml",
+        "lib/netstandard2.1/cs/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/de/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/es/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/fr/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/it/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/ja/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/ko/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/pl/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/pt-BR/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/ru/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/tr/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/zh-Hans/FSharp.Core.resources.dll",
+        "lib/netstandard2.1/zh-Hant/FSharp.Core.resources.dll"
+      ]
+    },
+    "System.IO.Packaging/8.0.1": {
+      "sha512": "KYkIOAvPexQOLDxPO2g0BVoWInnQhPpkFzRqvNrNrMhVT6kqhVr0zEb6KCHlptLFukxnZrjuMVAnxK7pOGUYrw==",
+      "type": "package",
+      "path": "system.io.packaging/8.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.IO.Packaging.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.IO.Packaging.targets",
+        "lib/net462/System.IO.Packaging.dll",
+        "lib/net462/System.IO.Packaging.xml",
+        "lib/net6.0/System.IO.Packaging.dll",
+        "lib/net6.0/System.IO.Packaging.xml",
+        "lib/net7.0/System.IO.Packaging.dll",
+        "lib/net7.0/System.IO.Packaging.xml",
+        "lib/net8.0/System.IO.Packaging.dll",
+        "lib/net8.0/System.IO.Packaging.xml",
+        "lib/netstandard2.0/System.IO.Packaging.dll",
+        "lib/netstandard2.0/System.IO.Packaging.xml",
+        "system.io.packaging.8.0.1.nupkg.sha512",
+        "system.io.packaging.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "YamlDotNet/16.3.0": {
+      "sha512": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA==",
+      "type": "package",
+      "path": "yamldotnet/16.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "images/yamldotnet.png",
+        "lib/net47/YamlDotNet.dll",
+        "lib/net47/YamlDotNet.xml",
+        "lib/net6.0/YamlDotNet.dll",
+        "lib/net6.0/YamlDotNet.xml",
+        "lib/net8.0/YamlDotNet.dll",
+        "lib/net8.0/YamlDotNet.xml",
+        "lib/netstandard2.0/YamlDotNet.dll",
+        "lib/netstandard2.0/YamlDotNet.xml",
+        "lib/netstandard2.1/YamlDotNet.dll",
+        "lib/netstandard2.1/YamlDotNet.xml",
+        "yamldotnet.16.3.0.nupkg.sha512",
+        "yamldotnet.nuspec"
+      ]
+    },
+    "LegalEngine.Domain/1.0.0": {
+      "type": "project",
+      "path": "../LegalEngine.Domain/LegalEngine.Domain.fsproj",
+      "msbuildProject": "../LegalEngine.Domain/LegalEngine.Domain.fsproj"
+    },
+    "LegalEngine.Ingestion/1.0.0": {
+      "type": "project",
+      "path": "../LegalEngine.Ingestion/LegalEngine.Ingestion.fsproj",
+      "msbuildProject": "../LegalEngine.Ingestion/LegalEngine.Ingestion.fsproj"
+    },
+    "LegalEngine.Parsing/1.0.0": {
+      "type": "project",
+      "path": "../LegalEngine.Parsing/LegalEngine.Parsing.fsproj",
+      "msbuildProject": "../LegalEngine.Parsing/LegalEngine.Parsing.fsproj"
+    },
+    "LegalEngine.Rendering/1.0.0": {
+      "type": "project",
+      "path": "../LegalEngine.Rendering/LegalEngine.Rendering.fsproj",
+      "msbuildProject": "../LegalEngine.Rendering/LegalEngine.Rendering.fsproj"
+    },
+    "LegalEngine.Rules/1.0.0": {
+      "type": "project",
+      "path": "../LegalEngine.Rules/LegalEngine.Rules.fsproj",
+      "msbuildProject": "../LegalEngine.Rules/LegalEngine.Rules.fsproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "FSharp.Core >= 8.0.102",
+      "LegalEngine.Domain >= 1.0.0",
+      "LegalEngine.Ingestion >= 1.0.0",
+      "LegalEngine.Parsing >= 1.0.0",
+      "LegalEngine.Rendering >= 1.0.0",
+      "LegalEngine.Rules >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "/root/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/user/legal-compliance-engine/src/LegalEngine.Api/LegalEngine.Api.fsproj",
+      "projectName": "LegalEngine.Api",
+      "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Api/LegalEngine.Api.fsproj",
+      "packagesPath": "/root/.nuget/packages/",
+      "outputPath": "/home/user/legal-compliance-engine/src/LegalEngine.Api/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/root/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "/usr/lib/dotnet/sdk/8.0.125/FSharp/library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "/home/user/legal-compliance-engine/src/LegalEngine.Domain/LegalEngine.Domain.fsproj": {
+              "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Domain/LegalEngine.Domain.fsproj"
+            },
+            "/home/user/legal-compliance-engine/src/LegalEngine.Ingestion/LegalEngine.Ingestion.fsproj": {
+              "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Ingestion/LegalEngine.Ingestion.fsproj"
+            },
+            "/home/user/legal-compliance-engine/src/LegalEngine.Parsing/LegalEngine.Parsing.fsproj": {
+              "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Parsing/LegalEngine.Parsing.fsproj"
+            },
+            "/home/user/legal-compliance-engine/src/LegalEngine.Rendering/LegalEngine.Rendering.fsproj": {
+              "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Rendering/LegalEngine.Rendering.fsproj"
+            },
+            "/home/user/legal-compliance-engine/src/LegalEngine.Rules/LegalEngine.Rules.fsproj": {
+              "projectPath": "/home/user/legal-compliance-engine/src/LegalEngine.Rules/LegalEngine.Rules.fsproj"
+            }
+          }
+        }
+      }
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "FSharp.Core": {
+            "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
+            "target": "Package",
+            "version": "[8.0.102, )",
+            "generatePathProperty": true
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

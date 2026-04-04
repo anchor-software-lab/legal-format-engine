@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "It3ZINMK0gWaZm3CG4yN3oriqk1Mdsk2hvJLWpwb5IculdyI2LWLfoOutzku35lnB0coKDIYpwe0pIFTKyiEpg==",
+  "success": true,
+  "projectFilePath": "/home/user/legal-compliance-engine/src/LegalEngine.Domain/LegalEngine.Domain.fsproj",
+  "expectedPackageFiles": [
+    "/root/.nuget/packages/fsharp.core/8.0.102/fsharp.core.8.0.102.nupkg.sha512"
+  ],
+  "logs": []
+}

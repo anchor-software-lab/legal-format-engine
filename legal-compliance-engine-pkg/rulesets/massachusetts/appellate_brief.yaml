@@ -1,0 +1,208 @@
+# Massachusetts Appeals Court - Appellate Brief Format
+# Based on Mass. R. App. P. 16 and 20
+# Formatting requirements per Massachusetts Rules of Appellate Procedure.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 14pt, double-spaced
+# - Word limit: 11,000 words (principal brief) per Rule 20(a)(2)
+# - "Addendum" with relevant statutes/regulations required
+# - Certificate of compliance and service required
+
+jurisdiction: massachusetts
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of the Issues"
+    aliases:
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Issues"
+      - "Questions Presented"
+      - "Statement of Issues"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Procedural Background"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of the Facts"
+    aliases:
+      - "Statement of Facts"
+      - "Facts"
+      - "Factual Background"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
+    aliases:
+      - "Summary of the Argument"
+      - "Summary"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: addendum
+    canonical_name: "Addendum"
+    aliases:
+      - "Statutory Addendum"
+      - "Appendix"
+      - "Addendum of Statutes and Regulations"
+    order: 9
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 10
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {party_role},
+    By his/her attorney,
+
+    {attorney_name}
+    BBO No. {bar_number}
+
+    {firm_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Dated: {date}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief complies with the rules
+      of court that pertain to the filing of briefs, including,
+      but not limited to, Mass. R. App. P. 16(a)(13) (addendum);
+      Mass. R. App. P. 16(e) (references to the record);
+      Mass. R. App. P. 20 (form and length of briefs,
+      appendices, and other documents); and Mass. R. App. P.
+      21 (redaction).
+
+      This brief contains {word_count} words.
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I made service of this
+      brief upon the attorney of record for each party by
+      [method of service].
+
+      {attorney_name}
+
+signature_block_required: true

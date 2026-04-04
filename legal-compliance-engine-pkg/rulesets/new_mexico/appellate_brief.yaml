@@ -1,0 +1,163 @@
+# New Mexico Court of Appeals - Appellate Brief Format
+# Based on NMRA Rule 12-318 (N.M. R. App. P.)
+# Key conventions:
+# - Font: 14-point proportional serif
+# - Margins: 1" all sides
+# - Double-spaced
+# - Word limit: 12,000 words for brief-in-chief
+
+jurisdiction: new_mexico
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Century Schoolbook"
+  font_size_pt: 14.0
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Authorities Cited"
+      - "Table of Cases and Authorities"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Statement of the Issues"
+    aliases:
+      - "Issues Presented"
+      - "Issues on Appeal"
+      - "Questions Presented"
+      - "Issues Presented for Review"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: summary_of_proceedings
+    canonical_name: "Summary of Proceedings"
+    aliases:
+      - "Procedural History"
+      - "Procedural Background"
+      - "Statement of the Case"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 7
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {attorney_name_caps}
+    {attorney_title}
+
+    {office_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I certify that this brief complies with the type-volume
+      limitation of Rule 12-318 NMRA. This brief contains
+      {word_count} words, excluding the parts of the brief
+      exempted by Rule 12-318(F)(3).
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, a true and correct copy
+      of the foregoing was served upon all counsel of record by
+      {service_method}.
+
+      {attorney_name}
+
+signature_block_required: true

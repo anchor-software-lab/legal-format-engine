@@ -1,0 +1,187 @@
+# Georgia Court of Appeals - Appellate Brief Format
+# Based on Ga. Ct. App. R. 24 and Ga. Sup. Ct. R. 12-15
+# Formatting requirements per Georgia Court of Appeals Rules.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 14pt, double-spaced
+# - Enumerations of Errors required
+# - Word limit: 12,500 words (appellant's brief)
+# - Certificate of service required
+
+jurisdiction: georgia
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+      - "Table of Citations"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: enumerations_of_errors
+    canonical_name: "Enumerations of Errors"
+    aliases:
+      - "Enumeration of Errors"
+      - "Errors Enumerated"
+      - "Statement of Errors"
+      - "Assignments of Error"
+      - "Issues Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Procedural Background"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument and Citation of Authority"
+    aliases:
+      - "Argument"
+      - "Arguments"
+      - "Discussion"
+      - "Argument and Authorities"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 8
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "Case No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {attorney_name}
+    Georgia Bar No. {bar_number}
+
+    {firm_name}
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief has been prepared in
+      accordance with the font and word-count requirements of
+      Court of Appeals Rule 24(f). This brief contains
+      {word_count} words as measured by the word-count function
+      of the word processing software used to prepare the brief.
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that I have this day served a copy
+      of this brief upon all parties to this appeal by
+      [method of service].
+
+      This {day} day of {month}, {year}.
+
+      {attorney_name}
+
+signature_block_required: true

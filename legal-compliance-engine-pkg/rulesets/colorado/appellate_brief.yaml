@@ -1,0 +1,205 @@
+# Colorado Court of Appeals - Appellate Brief Format
+# Based on C.A.R. 28, 32 (Colorado Appellate Rules)
+# Formatting requirements per Colorado Rules of Appellate Procedure.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 14pt, double-spaced
+# - Separate Statement of the Case and Statement of Facts
+# - Word limit: 9,500 words (opening brief)
+# - Certificate of compliance required
+
+jurisdiction: colorado
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_issues
+    canonical_name: "Issues Presented for Review"
+    aliases:
+      - "Statement of the Issues"
+      - "Statement of Issues"
+      - "Issues Presented"
+      - "Issues"
+      - "Questions Presented"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Procedural Background"
+      - "Nature of the Case"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of the Argument"
+    aliases:
+      - "Summary of Argument"
+      - "Summary"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 9
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "Case No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: true
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name}
+    Colorado Attorney Registration No. {bar_number}
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief complies with all
+      requirements of C.A.R. 28 and C.A.R. 32, including all
+      formatting requirements set forth in these rules.
+      Specifically, the undersigned certifies that:
+
+      The brief complies with the applicable word limit set
+      forth in C.A.R. 28(g).
+
+      It contains {word_count} words (principal brief does not
+      exceed 9,500 words).
+
+      The brief complies with the standard of review
+      requirements set forth in C.A.R. 28(a)(7)(A) and/or
+      C.A.R. 28(b).
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, a true and correct copy
+      of the foregoing was served via [method of service] on
+      the following:
+
+      [Names and addresses of parties served]
+
+      {attorney_name}
+
+signature_block_required: true

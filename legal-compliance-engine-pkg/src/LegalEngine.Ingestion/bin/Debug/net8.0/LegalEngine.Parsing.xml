@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>LegalEngine.Parsing</name></assembly>
+<members>
+<member name="M:LegalEngine.Parsing.NumberingUtils.|RomanPrefix|AlphaPrefix|ArabicPrefix|NoPrefix|(System.String)">
+<summary>
+ Active patterns for classifying numbering prefixes.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.stripNumberingPrefix(System.String)">
+<summary>
+ Strip a leading numbering prefix from heading text.
+ Returns (prefix, remainingText). Returns (&quot;&quot;, text) if no prefix is found.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.generatePrefix(System.Int32,Microsoft.FSharp.Core.FSharpOption{System.String})">
+<summary>
+ Generate a numbering prefix for a given 1-based index.
+ numberingType: &quot;roman&quot;, &quot;alpha_upper&quot;, &quot;alpha_lower&quot;, &quot;arabic&quot;, or None.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.intToAlphaLower(System.Int32)">
+<summary>
+ Convert a 1-based index to lowercase letter(s). 1 -&gt; &quot;a&quot;, 26 -&gt; &quot;z&quot;, 27 -&gt; &quot;aa&quot;
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.intToAlphaUpper(System.Int32)">
+<summary>
+ Convert a 1-based index to uppercase letter(s). 1 -&gt; &quot;A&quot;, 26 -&gt; &quot;Z&quot;, 27 -&gt; &quot;AA&quot;
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.romanToInt(System.String)">
+<summary>
+ Convert a Roman numeral string to an integer.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.NumberingUtils.intToRoman(System.Int32)">
+<summary>
+ Convert a positive integer to an uppercase Roman numeral string.
+</summary>
+</member>
+<member name="P:LegalEngine.Parsing.NumberingUtils.numberingPrefixPattern">
+<summary>
+ Matches leading numbering prefixes: &quot;I.&quot;, &quot;II.&quot;, &quot;A.&quot;, &quot;1.&quot;, &quot;a.&quot;, &quot;(1)&quot;, &quot;(a)&quot;
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.NumberingUtils">
+<summary>
+ Numbering conversion utilities for legal document headings.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.isLikelyHeading(System.String)">
+<summary>
+ Heuristic check if a line looks like a section heading.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.fuzzyHeadingMatch(System.String,Microsoft.FSharp.Collections.FSharpMap{System.String,Microsoft.FSharp.Collections.FSharpList{System.String}})">
+<summary>
+ Match a heading against canonical names and their aliases.
+ candidates: Map from section_id to list of acceptable names/aliases.
+ Returns the matched section_id, or None.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.normalizeForMatching(System.String)">
+<summary>
+ Normalize a string for fuzzy heading comparison.
+ Strips numbering prefixes, lowercases, removes punctuation, collapses whitespace.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.normalizeWhitespace(System.String)">
+<summary>
+ Collapse multiple whitespace characters into single spaces and strip.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.toSentenceCase(System.String)">
+<summary>
+ Convert text to sentence case (first letter capitalized, rest lowercase).
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.toTitleCase(System.String)">
+<summary>
+ Convert text to title case with legal-aware exceptions.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextUtils.toUpper(System.String)">
+<summary>
+ Convert text to uppercase.
+</summary>
+</member>
+<member name="P:LegalEngine.Parsing.TextUtils.titleCaseExceptions">
+<summary>
+ Words that should stay lowercase in title case (unless first/last).
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.TextUtils">
+<summary>
+ Text processing utilities for legal documents.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.HeadingDetector.detectHeadingLevel(System.String)">
+<summary>
+ Detect whether a line is a heading and what level.
+ Heuristics:
+ - ALL CAPS, short, no ending punctuation except period -&gt; Level1
+ - Starts with Roman numeral prefix -&gt; Level2
+ - Starts with capital letter prefix (A., B.) -&gt; Level3
+ - Starts with arabic number prefix (1., 2.) -&gt; Level4
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.HeadingDetector">
+<summary>
+ Heading detection heuristics for plain text legal documents.
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.SectionBuilder.ClassifiedLine">
+<summary>
+ A classified line: either a heading with a level, or content.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.SectionBuilder.buildSections(Microsoft.FSharp.Collections.FSharpList{LegalEngine.Parsing.SectionBuilder.ClassifiedLine})">
+<summary>
+ Build a flat list of sections from classified lines.
+ Groups content lines under the preceding heading.
+ Content before any heading goes into a preamble section.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.SectionBuilder.makeSection(System.String,LegalEngine.Domain.HeadingLevel,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.ContentBlock},System.Int32)">
+<summary>
+ Create a section from a heading and content blocks.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.SectionBuilder.trimContent(Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.ContentBlock})">
+<summary>
+ Trim leading and trailing empty content blocks from a list.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.SectionBuilder.classifyLines(Microsoft.FSharp.Collections.FSharpList{System.String})">
+<summary>
+ Classify each line as a heading or content.
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.SectionBuilder">
+<summary>
+ Line classification and section building for plain text legal documents.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextNormalizer.normalizeLineEndings(System.String)">
+<summary>
+ Normalize line endings to Unix-style (\n).
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.TextNormalizer.stripUnicodeControl(System.String)">
+<summary>
+ Remove Unicode control characters except standard whitespace (\n, \r, \t, space).
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.TextNormalizer">
+<summary>
+ Text normalization utilities for ingested documents.
+</summary>
+</member>
+<member name="M:LegalEngine.Parsing.PlainTextParser.parsePlainText(System.String)">
+<summary>
+ Parse plain text into a LegalDocument with best-effort section detection.
+ The parser identifies headings heuristically and groups content
+ into sections. It does NOT extract metadata - that must be
+ provided separately.
+</summary>
+</member>
+<member name="T:LegalEngine.Parsing.PlainTextParser">
+<summary>
+ Plain text parser for legal documents.
+ Converts unstructured text into a LegalDocument by detecting
+ headings, sections, and content blocks heuristically.
+</summary>
+</member>
+</members>
+</doc>

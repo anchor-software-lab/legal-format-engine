@@ -1,0 +1,175 @@
+# Delaware Supreme Court - Appellate Brief Format
+# Based on Del. Sup. Ct. R. 14 and 15
+# Formatting requirements per Delaware Supreme Court Rules.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 14pt, double-spaced
+# - Opening brief limited to 30 pages or equivalent word count
+# - Separate Statement of the Case and Statement of Facts
+# - Certificate of compliance required
+
+jurisdiction: delaware
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Citations"
+    aliases:
+      - "Table of Authorities"
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: nature_of_proceedings
+    canonical_name: "Nature of Proceedings"
+    aliases:
+      - "Nature of the Proceedings"
+      - "Procedural History"
+      - "Nature of the Case"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: summary_of_argument
+    canonical_name: "Summary of Argument"
+    aliases:
+      - "Summary of the Argument"
+      - "Summary"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 7
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: center
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name} (No. {bar_number})
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+    Dated: {date}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance with Typeface Requirement and Type-Volume Limitation"
+    template: |
+      This brief complies with the typeface requirement of
+      Rule 13(a)(i) because it has been prepared in Times New
+      Roman 14-point typeface using Microsoft Word.
+
+      This brief complies with the type-volume limitation of
+      Rule 14(d)(i). This brief contains {word_count} words,
+      excluding the parts of the brief exempted by Rule 14(d)(vi).
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, the foregoing brief
+      was served electronically through File & ServeXpress on
+      all registered counsel.
+
+      {attorney_name}
+
+signature_block_required: true

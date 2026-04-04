@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Contracts.fs" />
+    <Compile Include="FormatHandler.fs" />
+    <Compile Include="ValidateHandler.fs" />
+    <Compile Include="CaptionHandler.fs" />
+    <Compile Include="RulesetsHandler.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LegalEngine.Domain\LegalEngine.Domain.fsproj" />
+    <ProjectReference Include="..\LegalEngine.Parsing\LegalEngine.Parsing.fsproj" />
+    <ProjectReference Include="..\LegalEngine.Ingestion\LegalEngine.Ingestion.fsproj" />
+    <ProjectReference Include="..\LegalEngine.Rules\LegalEngine.Rules.fsproj" />
+    <ProjectReference Include="..\LegalEngine.Rendering\LegalEngine.Rendering.fsproj" />
+  </ItemGroup>
+
+</Project>

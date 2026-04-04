@@ -1,0 +1,13 @@
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/bin/Debug/net8.0/LegalEngine.Domain.deps.json
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/bin/Debug/net8.0/LegalEngine.Domain.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/bin/Debug/net8.0/LegalEngine.Domain.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/bin/Debug/net8.0/LegalEngine.Domain.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.fsproj.AssemblyReference.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.AssemblyInfoInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.AssemblyInfo.fs
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.fsproj.CoreCompileInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/refint/LegalEngine.Domain.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/LegalEngine.Domain.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Domain/obj/Debug/net8.0/ref/LegalEngine.Domain.dll

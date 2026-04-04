@@ -1,0 +1,17 @@
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Parsing.deps.json
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Parsing.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Parsing.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Parsing.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Domain.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Domain.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/bin/Debug/net8.0/LegalEngine.Domain.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.fsproj.AssemblyReference.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.AssemblyInfoInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.AssemblyInfo.fs
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.fsproj.CoreCompileInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.fsproj.CopyComplete
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/refint/LegalEngine.Parsing.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/LegalEngine.Parsing.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Parsing/obj/Debug/net8.0/ref/LegalEngine.Parsing.dll

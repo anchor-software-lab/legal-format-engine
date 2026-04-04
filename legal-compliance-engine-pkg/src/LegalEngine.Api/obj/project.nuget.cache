@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "YRPP4cIyGGgiXS44BMikVXTf0PkgpBagAktp4rwwFT3ILgMIxw+riL76vFR6Cx4/DSSyCvIlAEWky1eQsJ0qvA==",
+  "success": true,
+  "projectFilePath": "/home/user/legal-compliance-engine/src/LegalEngine.Api/LegalEngine.Api.fsproj",
+  "expectedPackageFiles": [
+    "/root/.nuget/packages/documentformat.openxml/3.2.0/documentformat.openxml.3.2.0.nupkg.sha512",
+    "/root/.nuget/packages/documentformat.openxml.framework/3.2.0/documentformat.openxml.framework.3.2.0.nupkg.sha512",
+    "/root/.nuget/packages/fsharp.core/8.0.102/fsharp.core.8.0.102.nupkg.sha512",
+    "/root/.nuget/packages/system.io.packaging/8.0.1/system.io.packaging.8.0.1.nupkg.sha512",
+    "/root/.nuget/packages/yamldotnet/16.3.0/yamldotnet.16.3.0.nupkg.sha512"
+  ],
+  "logs": []
+}

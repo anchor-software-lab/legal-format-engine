@@ -1,0 +1,17 @@
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Rules.deps.json
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Rules.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Rules.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Rules.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Domain.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Domain.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/bin/Debug/net8.0/LegalEngine.Domain.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.fsproj.AssemblyReference.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.AssemblyInfoInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.AssemblyInfo.fs
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.fsproj.CoreCompileInputs.cache
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.fsproj.CopyComplete
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/refint/LegalEngine.Rules.dll
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.xml
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/LegalEngine.Rules.pdb
+/home/user/legal-compliance-engine/src/LegalEngine.Rules/obj/Debug/net8.0/ref/LegalEngine.Rules.dll

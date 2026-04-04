@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TextNormalizer.fs" />
+    <Compile Include="DocxReader.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LegalEngine.Domain\LegalEngine.Domain.fsproj" />
+    <ProjectReference Include="..\LegalEngine.Parsing\LegalEngine.Parsing.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
+  </ItemGroup>
+
+</Project>

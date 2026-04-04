@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>LegalEngine.Ingestion</name></assembly>
+<members>
+<member name="M:LegalEngine.Ingestion.TextNormalizer.normalizeLineEndings(System.String)">
+<summary>
+ Normalize line endings to Unix-style (\n).
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.TextNormalizer.stripUnicodeControl(System.String)">
+<summary>
+ Remove Unicode control characters except standard whitespace (\n, \r, \t, space).
+</summary>
+</member>
+<member name="T:LegalEngine.Ingestion.TextNormalizer">
+<summary>
+ Ingestion-level text normalization that delegates to core parsing utilities.
+ Re-exports stripUnicodeControl and normalizeLineEndings for ingestion callers.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.extractFormatProfile(System.String)">
+<summary>
+ Extract format profile details from a DOCX file.
+ Returns a dictionary of formatting properties found in the document.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.parseDocx(System.String)">
+<summary>
+ Parse a DOCX file into a LegalDocument.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.toContentBlock(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Convert a paragraph to a ContentBlock.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.getIndentInches(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Get indent in inches from paragraph properties.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.getAlignment(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Get alignment from paragraph properties.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.isUnderline(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Check if a paragraph has underline formatting.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.isItalic(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Check if a paragraph has italic formatting.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.isBold(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Check if a paragraph has bold formatting.
+</summary>
+</member>
+<member name="M:LegalEngine.Ingestion.DocxReader.paragraphText(DocumentFormat.OpenXml.Wordprocessing.Paragraph)">
+<summary>
+ Extract text content from a paragraph element.
+</summary>
+</member>
+<member name="T:LegalEngine.Ingestion.DocxReader">
+<summary>
+ DOCX file reader that parses Word documents into LegalDocument.
+</summary>
+</member>
+</members>
+</doc>

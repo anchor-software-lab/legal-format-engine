@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>LegalEngine.Rules</name></assembly>
+<members>
+<member name="T:LegalEngine.Rules.YamlPageFormat">
+<summary>
+ YamlDotNet deserialization targets. These mirror the YAML schema
+ with mutable properties and nullable types, then get mapped to
+ the immutable Domain.Ruleset records.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.YamlLoader.loadRuleset(System.String,System.String,System.String,Microsoft.FSharp.Core.FSharpOption{System.String})">
+<summary>
+ Load a ruleset by jurisdiction/courtLevel/documentType lookup.
+ Searches RulesetsDirectory for matching YAML files.
+ Tries variant-specific file first, then falls back to generic.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.YamlLoader.loadFromFile(System.String)">
+<summary>
+ Load a ruleset from a file path.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.YamlLoader.loadFromYaml(System.String)">
+<summary>
+ Load a ruleset from YAML text.
+</summary>
+</member>
+<member name="P:LegalEngine.Rules.YamlLoader.RulesetsDirectory">
+<summary>
+ Default directory for bundled rulesets, relative to the assembly location.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.insertMissingSections(LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Section})">
+<summary>
+ Insert stub sections for any missing required sections at the correct position.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.reorderSections(LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Section})">
+<summary>
+ Reorder sections to match the canonical order defined in the ruleset.
+ Matched sections are placed in rule order. Unmatched sections
+ are appended at the end (never discarded).
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.validateSections(LegalEngine.Domain.Ruleset,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Validate that required sections exist in the document.
+ Returns findings for missing, unknown, misordered sections.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.checkOrder(Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Section},LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpMap{System.String,Microsoft.FSharp.Collections.FSharpList{System.String}})">
+<summary>
+ Check if sections are in correct order.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.checkGroups(LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpSet{System.String})">
+<summary>
+ Check group constraints: at least one section in each group must exist.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.fuzzyMatchSection(System.String,Microsoft.FSharp.Collections.FSharpMap{System.String,Microsoft.FSharp.Collections.FSharpList{System.String}})">
+<summary>
+ Fuzzy-match a heading against known sections.
+ Returns Some section_id if matched, None otherwise.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.buildAliasMap(LegalEngine.Domain.Ruleset)">
+<summary>
+ Build a mapping of section_id -&gt; [canonical_name; aliases...].
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.SectionRules.normalizeForMatching(System.String)">
+<summary>
+ Normalize a string for comparison: lowercase, trim, collapse whitespace.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.normalizeHeadings(LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Section})">
+<summary>
+ Normalize all headings in a section list according to ruleset rules.
+ Applies case transformation, regenerates numbering prefixes,
+ and processes all nesting levels (1-4).
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.normalizeSubsections(LegalEngine.Domain.Ruleset,LegalEngine.Domain.Section)">
+<summary>
+ Recursively normalize subsections at deeper levels.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.normalizeLevel(System.Int32,LegalEngine.Domain.Ruleset,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Section})">
+<summary>
+ Normalize headings at a specific level among siblings.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.applyCase(System.String,System.String)">
+<summary>
+ Apply a case transformation based on CaseStyle string.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.toSentenceCase(System.String)">
+<summary>
+ Convert text to Sentence case (first letter upper, rest lower).
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.toTitleCase(System.String)">
+<summary>
+ Convert text to Title Case.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.toUpper(System.String)">
+<summary>
+ Convert text to UPPER CASE.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.generatePrefix(System.Int32,Microsoft.FSharp.Core.FSharpOption{System.String})">
+<summary>
+ Generate a numbering prefix for the given 1-based index and numbering type.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.HeadingRules.stripNumberingPrefix(System.String)">
+<summary>
+ Strip any existing numbering prefix from a heading.
+ Handles Roman numerals (I., II., III.), alpha (A., B.), arabic (1., 2.),
+ and parenthesized variants.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.generateCaption(LegalEngine.Domain.DocumentMetadata,LegalEngine.Domain.CaptionRule)">
+<summary>
+ Generate a formatted caption block from metadata and rules.
+ Creates court name line, party block with separator, case number,
+ appeal-from line, and document title with horizontal rules.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.addPartyLines(LegalEngine.Domain.DocumentMetadata,LegalEngine.Domain.CaptionRule)">
+<summary>
+ Add party lines with separator to the caption.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.formatRoleLabel(LegalEngine.Domain.CaptionPartyRole)">
+<summary>
+ Format a party role enum to a display label.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.applyStyle(System.String,System.String)">
+<summary>
+ Apply case style to text.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.captionLine(System.String,System.Boolean,System.Boolean,System.Boolean,LegalEngine.Domain.Alignment)">
+<summary>
+ Create a caption content block.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.CaptionRules.parseAlignment(System.String)">
+<summary>
+ Parse an alignment string to the Alignment DU.
+</summary>
+</member>
+<member name="P:LegalEngine.Rules.CaptionRules.horizontalRuleText">
+<summary>
+ Box-drawing horizontal line character, repeated for a rule line.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.BoilerplateRules.generateCertifications(LegalEngine.Domain.DocumentMetadata,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.CertificationRule},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{System.String})">
+<summary>
+ Generate certification sections from templates.
+ Each CertificationRule produces a Section with the rendered template.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.BoilerplateRules.generateSignatureBlock(LegalEngine.Domain.DocumentMetadata)">
+<summary>
+ Generate a signature block from attorney metadata.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.BoilerplateRules.renderTemplate(System.String,Microsoft.FSharp.Collections.FSharpMap{System.String,System.String})">
+<summary>
+ Render a template string by substituting {variable} placeholders.
+ Missing keys produce [KEY_NAME] placeholder text instead of errors.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.BoilerplateRules.buildTemplateVars(LegalEngine.Domain.DocumentMetadata,System.DateTime,Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{System.String})">
+<summary>
+ Build the template variable dictionary for certification/signature rendering.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.FormattingRules.checkFormatting(LegalEngine.Domain.Ruleset,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Check formatting compliance of a document against ruleset page format rules.
+ Returns a list of findings for any violations detected.
+ NOTE: Full formatting checks require rendered output metadata (font, margins, etc.)
+ which may not be available from plain-text parsing. This module validates what
+ can be checked from the internal document model.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.RuleEngine.fullValidationRule(LegalEngine.Domain.Ruleset)">
+<summary>
+ Create a combined validation Rule that checks both sections and formatting.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.RuleEngine.formattingValidationRule(LegalEngine.Domain.Ruleset,LegalEngine.Domain.ValidationContext,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Create a validation Rule from the formatting check logic.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.RuleEngine.sectionValidationRule(LegalEngine.Domain.Ruleset,LegalEngine.Domain.ValidationContext,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Create a validation Rule from the section validation logic.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.RuleEngine.composeRules(Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Core.FSharpFunc{LegalEngine.Domain.ValidationContext,Microsoft.FSharp.Core.FSharpFunc{LegalEngine.Domain.LegalDocument,Microsoft.FSharp.Collections.FSharpList{LegalEngine.Domain.Finding}}}},LegalEngine.Domain.ValidationContext,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Compose multiple Rule functions into a single Rule.
+ Each rule is applied and all findings are collected.
+</summary>
+</member>
+<member name="M:LegalEngine.Rules.RuleEngine.formatDocument(LegalEngine.Domain.DocumentMetadata,LegalEngine.Domain.Ruleset,Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{System.String},System.Boolean,LegalEngine.Domain.LegalDocument)">
+<summary>
+ Run the full formatting pipeline on a document.
+
+ Steps:
+ 1. Validate sections against ruleset
+ 2. Reorder sections to canonical order
+ 3. Insert stubs for missing required sections (optional)
+ 4. Normalize headings
+ 5. Generate caption from metadata
+ 6. Generate signature block and certifications
+ 7. Check formatting compliance
+
+ Returns the formatted document and all validation findings.
+</summary>
+</member>
+</members>
+</doc>

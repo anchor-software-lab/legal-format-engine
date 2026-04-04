@@ -1,0 +1,49 @@
+STATEMENT OF ISSUES
+
+I. Whether the circuit court erred in denying defendant's motion to suppress evidence obtained during a warrantless search of his vehicle.
+
+II. Whether the evidence was sufficient to support the jury's verdict on Count One.
+
+STATEMENT OF THE CASE
+
+This is an appeal from a judgment of conviction entered on June 15, 2023, in the Circuit Court of Waukesha County, the Honorable Jane Smith presiding. The defendant, John A. Christopherson, was charged with one count of possession with intent to deliver a controlled substance, contrary to Wis. Stat. 961.41(1m)(cm)4.
+
+On March 10, 2023, following a jury trial, Christopherson was found guilty on Count One. The circuit court sentenced him to five years of initial confinement and five years of extended supervision.
+
+Christopherson filed a timely notice of appeal on July 14, 2023.
+
+STATEMENT OF FACTS
+
+On January 5, 2023, at approximately 2:30 a.m., Officer James Rodriguez of the Waukesha Police Department initiated a traffic stop of a vehicle driven by John Christopherson after observing the vehicle cross the center line twice on West Main Street.
+
+Upon approaching the vehicle, Officer Rodriguez detected what he described as a strong odor of marijuana emanating from the vehicle. Rodriguez asked Christopherson to exit the vehicle and conducted a search of the vehicle without obtaining a warrant.
+
+During the search, Rodriguez discovered a bag containing approximately 28 grams of a substance that later tested positive for cocaine in the center console of the vehicle.
+
+Christopherson was placed under arrest and transported to the Waukesha County Jail.
+
+Prior to trial, defense counsel filed a motion to suppress the evidence recovered during the vehicle search, arguing that the search violated Christopherson's Fourth Amendment rights. The circuit court denied the motion following an evidentiary hearing, finding that the odor of marijuana provided probable cause for the warrantless search under the automobile exception.
+
+ARGUMENT
+
+I. The Circuit Court Erred in Denying the Motion to Suppress
+
+A. Standard of Review
+
+Whether evidence should be suppressed presents a question of constitutional fact. State v. Knapp, 2005 WI 127, paragraph 19, 285 Wis. 2d 86, 700 N.W.2d 899. This Court applies a two-step standard of review. The circuit court's findings of historical fact are upheld unless clearly erroneous. Id. However, the application of constitutional principles to those facts is reviewed de novo. Id.
+
+B. The automobile exception does not apply where the sole basis for probable cause is the odor of marijuana
+
+The Fourth Amendment to the United States Constitution and Article I, Section 11 of the Wisconsin Constitution protect against unreasonable searches and seizures. A warrantless search is per se unreasonable unless it falls within a well-recognized exception to the warrant requirement. State v. Tullberg, 2014 WI 134, paragraph 30, 359 Wis. 2d 421, 857 N.W.2d 120.
+
+The automobile exception permits a warrantless search of a vehicle when there is probable cause to believe the vehicle contains contraband or evidence of a crime. State v. Sulla, 2016 WI 46, paragraph 23, 369 Wis. 2d 225, 880 N.W.2d 659.
+
+This Court should find that the odor of marijuana alone, particularly in light of the changing legal landscape regarding marijuana, is insufficient to establish probable cause for a full vehicle search.
+
+II. The Evidence Was Insufficient to Support the Verdict
+
+The evidence presented at trial was insufficient to support the jury's finding that Christopherson possessed cocaine with the intent to deliver. The State presented no evidence of scales, packaging materials, large amounts of cash, or other indicia of drug dealing. The amount recovered, 28 grams, is consistent with personal use. See State v. Poellinger, 153 Wis. 2d 493, 501, 451 N.W.2d 752 (1990).
+
+CONCLUSION
+
+For the foregoing reasons, defendant-appellant John A. Christopherson respectfully requests that this Court reverse the judgment of conviction entered in the Circuit Court of Waukesha County and remand with directions to suppress the evidence obtained during the warrantless vehicle search and to vacate the conviction.

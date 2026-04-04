@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>LegalEngine.Domain</name></assembly>
+<members>
+<member name="T:LegalEngine.Domain.Jurisdiction">
+<summary>
+ Core domain types for the legal compliance engine.
+ These discriminated unions model the legal domain with
+ exhaustive pattern matching — impossible states are unrepresentable.
+</summary>
+</member>
+<member name="T:LegalEngine.Domain.SourceSpan">
+<summary>
+ Internal document representation.
+ All engines operate on this model — parsers produce it, rules validate it,
+ renderers consume it.
+</summary>
+</member>
+<member name="T:LegalEngine.Domain.PageFormat">
+<summary>
+ Typed representation of jurisdiction-specific formatting rules.
+ Loaded from YAML files, never modified at runtime.
+</summary>
+</member>
+<member name="T:LegalEngine.Domain.ValidationContext">
+<summary>
+ A validation rule is a pure function from context + document to findings.
+</summary>
+</member>
+<member name="T:LegalEngine.Domain.Finding">
+<summary>
+ Structured findings from rule validation.
+ Every finding is typed — no vibes, no loose strings.
+</summary>
+</member>
+</members>
+</doc>

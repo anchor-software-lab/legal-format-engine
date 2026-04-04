@@ -1,0 +1,197 @@
+# Michigan Court of Appeals - Appellate Brief Format
+# Based on Mich. Ct. R. 7.212 and 7.215
+# Formatting requirements per Michigan Court Rules.
+#
+# Key conventions:
+# - Margins: 1" all sides
+# - Font: Times New Roman 12pt, double-spaced
+# - Word limit: 16,000 words (appellant's brief) or 50 pages
+# - "Jurisdictional Statement" required
+# - "Index of Authorities" and "Statement of Questions Presented"
+# - Certificate of compliance required
+
+jurisdiction: michigan
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 12
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: index_of_authorities
+    canonical_name: "Index of Authorities"
+    aliases:
+      - "Table of Authorities"
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: jurisdictional_statement
+    canonical_name: "Statement of Jurisdiction"
+    aliases:
+      - "Jurisdictional Statement"
+      - "Jurisdiction"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: statement_of_questions
+    canonical_name: "Statement of Questions Presented"
+    aliases:
+      - "Questions Presented"
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Issues"
+      - "Statement of the Issues"
+      - "Statement of Issues"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: standard_of_review
+    canonical_name: "Standard of Review"
+    aliases:
+      - "Standards of Review"
+      - "Standard of Appellate Review"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion and Relief Requested"
+    aliases:
+      - "Conclusion"
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 9
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v"
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: left
+  party_role_indented: true
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name} (P{bar_number})
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      I hereby certify that this brief complies with the
+      type-volume limitation of MCR 7.212(B). Excluding the
+      items listed in MCR 7.212(B), this brief contains
+      {word_count} words.
+
+      I further certify that this brief complies with the
+      requirements of MCR 7.212(B) regarding typeface and
+      type size (Times New Roman, 12-point).
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, I served a copy of
+      this brief upon all parties or their counsel of record
+      by [method of service].
+
+      {attorney_name}
+
+signature_block_required: true

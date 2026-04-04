@@ -1,0 +1,194 @@
+# Hawaii Intermediate Court of Appeals - Appellate Brief Format
+# Based on Haw. R. App. P. 28 and 32
+# Formatting requirements per Hawaii Rules of Appellate Procedure.
+#
+# Key conventions:
+# - Margins: 1.5" left, 1" top/bottom/right
+# - Font: Times New Roman 14pt, double-spaced
+# - "Points of Error" section required (unique to Hawaii)
+# - Word limit: 14,000 words (opening brief)
+# - Certificate of compliance required
+
+jurisdiction: hawaii
+court_level: appellate
+document_type: brief
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 14
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.5
+  margin_right_inches: 1.0
+  page_width_inches: 8.5
+  page_height_inches: 11.0
+
+heading_rules:
+  - level: 1
+    case_style: upper
+    alignment: center
+    numbering: null
+    bold: true
+  - level: 2
+    case_style: upper
+    alignment: left
+    numbering: roman
+    bold: true
+  - level: 3
+    case_style: title
+    alignment: left
+    numbering: alpha_upper
+    bold: true
+  - level: 4
+    case_style: sentence
+    alignment: left
+    numbering: arabic
+    bold: false
+
+required_sections:
+  - id: table_of_contents
+    canonical_name: "Table of Contents"
+    aliases:
+      - "Contents"
+      - "Index"
+    order: 1
+    required: true
+    heading_level: 1
+
+  - id: table_of_authorities
+    canonical_name: "Table of Authorities"
+    aliases:
+      - "Table of Cases and Authorities"
+      - "Authorities Cited"
+      - "Cases Cited"
+    order: 2
+    required: true
+    heading_level: 1
+
+  - id: statement_of_case
+    canonical_name: "Statement of the Case"
+    aliases:
+      - "Case Statement"
+      - "Statement of Case"
+      - "Procedural History"
+      - "Procedural Background"
+      - "Nature of the Case"
+    order: 3
+    required: true
+    heading_level: 1
+
+  - id: points_of_error
+    canonical_name: "Points of Error"
+    aliases:
+      - "Statement of the Points of Error"
+      - "Points on Appeal"
+      - "Issues Presented"
+      - "Issues Presented for Review"
+      - "Statement of Issues"
+      - "Questions Presented"
+    order: 4
+    required: true
+    heading_level: 1
+
+  - id: standards_of_review
+    canonical_name: "Standards of Review"
+    aliases:
+      - "Standard of Review"
+      - "Standard of Appellate Review"
+    order: 5
+    required: true
+    heading_level: 1
+
+  - id: statement_of_facts
+    canonical_name: "Statement of Facts"
+    aliases:
+      - "Facts"
+      - "Factual Background"
+      - "Statement of the Facts"
+    order: 6
+    required: true
+    heading_level: 1
+
+  - id: argument
+    canonical_name: "Argument"
+    aliases:
+      - "Arguments"
+      - "Discussion"
+    order: 7
+    required: true
+    heading_level: 1
+
+  - id: conclusion
+    canonical_name: "Conclusion"
+    aliases:
+      - "Prayer for Relief"
+      - "Relief Requested"
+    order: 8
+    required: true
+    heading_level: 1
+
+  - id: certificate_of_service
+    canonical_name: "Certificate of Service"
+    aliases:
+      - "Proof of Service"
+      - "Service Certificate"
+    order: 9
+    required: true
+    heading_level: 1
+
+caption_rule:
+  court_line_style: upper
+  court_line_alignment: center
+  case_number_alignment: right
+  case_number_prefix: "No."
+  party_separator: "v."
+  party_name_style: upper
+  party_role_style: title
+  party_alignment: center
+  party_role_indented: false
+  document_title_style: upper
+  document_title_alignment: center
+  include_district: false
+  include_appeal_from: true
+  appeal_from_style: sentence
+  appeal_from_alignment: center
+
+signature_block:
+  template: |
+    Respectfully submitted,
+
+    {firm_name}
+
+    By: ____________________________
+    {attorney_name}
+
+    {address_line_1}
+    {address_line_2}
+    {phone}
+    {email}
+
+    Attorney for {party_role}
+
+certifications:
+  - id: certificate_of_compliance
+    title: "Certificate of Compliance"
+    template: |
+      This brief complies with the word limitation of
+      Rule 28(a) of the Hawaii Rules of Appellate Procedure.
+      This brief contains {word_count} words, excluding the
+      parts of the brief exempted by HRAP 28.
+
+      {attorney_name}
+
+  - id: certificate_of_service
+    title: "Certificate of Service"
+    template: |
+      I hereby certify that on {date}, a copy of the foregoing
+      was served upon the following by [method of service]:
+
+      [Names and addresses of parties served]
+
+      {attorney_name}
+
+signature_block_required: true

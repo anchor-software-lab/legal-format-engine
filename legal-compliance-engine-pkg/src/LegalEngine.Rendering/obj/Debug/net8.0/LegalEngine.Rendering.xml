@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>LegalEngine.Rendering</name></assembly>
+<members>
+<member name="M:LegalEngine.Rendering.DocxRenderer.renderDocx(LegalEngine.Domain.LegalDocument,LegalEngine.Domain.Ruleset,System.String)">
+<summary>
+ Render a LegalDocument to a DOCX file at the specified output path.
+</summary>
+</member>
+<member name="M:LegalEngine.Rendering.DocxRenderer.ptToTwips(System.Double)">
+<summary>
+ Convert points to twentieths of a point.
+</summary>
+</member>
+<member name="M:LegalEngine.Rendering.DocxRenderer.ptToHalfPoints(System.Double)">
+<summary>
+ Convert points to half-points. OpenXml font sizes are in half-points.
+</summary>
+</member>
+<member name="M:LegalEngine.Rendering.DocxRenderer.inchesToTwips(System.Double)">
+<summary>
+ Convert inches to twentieths of a point (twips). 1 inch = 1440 twips.
+</summary>
+</member>
+<member name="M:LegalEngine.Rendering.DocxRenderer.inchesToEmu(System.Double)">
+<summary>
+ Convert inches to EMUs (English Metric Units). 1 inch = 914400 EMUs.
+</summary>
+</member>
+<member name="T:LegalEngine.Rendering.DocxRenderer">
+<summary>
+ DOCX renderer for legal documents.
+ Produces properly formatted Word documents from the internal
+ LegalDocument representation using DocumentFormat.OpenXml.
+</summary>
+</member>
+<member name="M:LegalEngine.Rendering.MarkdownRenderer.renderMarkdown(LegalEngine.Domain.LegalDocument)">
+<summary>
+ Render a LegalDocument as Markdown text.
+</summary>
+</member>
+<member name="T:LegalEngine.Rendering.MarkdownRenderer">
+<summary>
+ Markdown renderer for legal documents.
+ Produces clean Markdown output for debugging and previewing.
+</summary>
+</member>
+</members>
+</doc>
