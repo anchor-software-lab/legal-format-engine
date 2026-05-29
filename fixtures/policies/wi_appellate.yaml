@@ -1,0 +1,30 @@
+# Example policy for Wisconsin appellate briefs.
+#
+# Used by `Pipeline(policy=load_policy("fixtures/policies/wi_appellate.yaml"))`.
+# Enables a small set of checkers and demonstrates severity overrides
+# and auto-fix glob allowlists.
+
+name: wi_appellate
+
+enabled:
+  - formatting.spec_diff
+  # v0+ additions (currently scaffolded, not yet implemented):
+  # - bluebook.case_form
+  # - bluebook.signal
+  # - bluebook.pinpoint
+  # - citations.exists
+
+severity_overrides:
+  # Bluebook surface-form issues are warnings, not errors.
+  bluebook.case_form: warning
+  bluebook.signal: warning
+
+auto_fix:
+  allow:
+    # Safe auto-fixes: formatting that comes from explicit rules,
+    # and Bluebook surface-form normalizations.
+    - "FORMAT.FONT.*"
+    - "FORMAT.MARGIN.*"
+    - "FORMAT.LINE_SPACING"
+    - "BB.SIGNAL.*"
+    - "BB.ITALICS.*"

@@ -1,30 +1,49 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
-name = "legal-format-engine"
-version = "0.1.0"
-description = "Rules-based legal document formatting engine with ML-learned pattern support"
-readme = "README.md"
+name = "anchor-quality-gate-workspace"
+version = "0.0.0"
+description = "Anchor Quality Gate monorepo workspace (not a publishable package)"
 requires-python = ">=3.10"
-license = "MIT"
-dependencies = [
-    "pydantic>=2.0,<3",
-    "pyyaml>=6.0,<7",
-]
 
-[project.optional-dependencies]
-ml = [
-    "anchor-ml-engine>=0.1.0",
-]
-dev = [
-    "pytest",
-]
+[tool.uv.workspace]
+members = ["packages/*"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/legal_format_engine"]
+[tool.uv.sources]
+legal_format_engine = { workspace = true }
+legal_quality_gate = { workspace = true }
+legal_docx = { workspace = true }
+legal_citations = { workspace = true }
+legal_llm_gateway = { workspace = true }
+legal_authority = { workspace = true }
+legal_authority_scraper = { workspace = true }
+legal_style_memory = { workspace = true }
+legal_api = { workspace = true }
+legal_cli = { workspace = true }
+legal_skill_kit = { workspace = true }
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src"]
+testpaths = [
+    "packages/legal_format_engine/tests",
+    "packages/legal_quality_gate/tests",
+    "packages/legal_docx/tests",
+    "packages/legal_citations/tests",
+    "packages/legal_llm_gateway/tests",
+    "packages/legal_authority/tests",
+    "packages/legal_style_memory/tests",
+    "packages/legal_api/tests",
+    "packages/legal_cli/tests",
+    "packages/legal_skill_kit/tests",
+    "packages/legal_authority_scraper/tests",
+]
+pythonpath = [
+    "packages/legal_format_engine/src",
+    "packages/legal_quality_gate/src",
+    "packages/legal_docx/src",
+    "packages/legal_citations/src",
+    "packages/legal_llm_gateway/src",
+    "packages/legal_authority/src",
+    "packages/legal_style_memory/src",
+    "packages/legal_api/src",
+    "packages/legal_cli/src",
+    "packages/legal_skill_kit/src",
+    "packages/legal_authority_scraper/src",
+]

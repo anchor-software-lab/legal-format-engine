@@ -21,6 +21,12 @@ from legal_format_engine.ml_integration.content_consumer import (
     suggest_argument_outline,
 )
 
+from legal_format_engine.checkers import (
+    FORMATTING_SPEC_DIFF_ID,
+    FormattingSpecDiffChecker,
+    build_formatting_checker,
+)
+
 __all__ = [
     # Format integration
     "FormatSpec",
@@ -30,4 +36,8 @@ __all__ = [
     "DocumentStructureSpec",
     "load_structure_spec",
     "suggest_argument_outline",
+    # Quality-gate checker
+    "FORMATTING_SPEC_DIFF_ID",
+    "FormattingSpecDiffChecker",
+    "build_formatting_checker",
 ]

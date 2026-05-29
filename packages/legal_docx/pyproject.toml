@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "legal-docx"
+version = "0.1.0"
+description = "DOCX parsing, segmentation, and annotated-writer for the Anchor Quality Gate"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "pydantic>=2.0,<3",
+    "python-docx>=1.1.0",
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+pdf = ["pdfminer.six>=20231228"]
+dev = ["pytest"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/legal_docx"]

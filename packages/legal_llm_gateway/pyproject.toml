@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "legal-llm-gateway"
+version = "0.1.0"
+description = "Provider-agnostic LLM gateway with prompt versioning and cost tracking"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "pydantic>=2.0,<3",
+    "pyyaml>=6.0,<7",
+    "litellm>=1.50",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/legal_llm_gateway"]
