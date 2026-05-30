@@ -26,6 +26,11 @@ class DocumentRecord:
     org_id: str
     sha256: str
     original_filename: str | None = None
+    encrypted: bool = False
+    # Set when `encrypted=True`. The wrapped_dek + nonce travel with
+    # the metadata; the ciphertext sits in the blob store.
+    wrapped_dek: bytes | None = None
+    nonce: bytes | None = None
 
 
 @dataclass

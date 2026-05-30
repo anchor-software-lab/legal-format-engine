@@ -19,6 +19,17 @@ docx uploads with operator-managed at-rest encryption.
 """
 
 from legal_api.blobs import BlobStore, FilesystemBlobStore
+from legal_api.envelope import (
+    EncryptedPayload,
+    decrypt_document,
+    encrypt_document,
+    encrypt_for_upload,
+    generate_dek,
+    generate_keypair_pem,
+    unwrap_dek,
+    wrap_dek,
+)
+from legal_api.keyring import EnvelopeKeyring, InMemoryKeyring, KeyringError
 from legal_api.main import AppDeps, create_app
 from legal_api.security import (
     ApiKeyResolver,
@@ -40,14 +51,25 @@ __all__ = [
     "AppDeps",
     "BlobStore",
     "DocumentRecord",
+    "EncryptedPayload",
+    "EnvelopeKeyring",
     "FilesystemBlobStore",
     "InMemoryApiKeyResolver",
+    "InMemoryKeyring",
     "InMemoryStore",
+    "KeyringError",
     "RequestPrincipal",
     "RunRecord",
     "Store",
     "create_app",
+    "decrypt_document",
+    "encrypt_document",
+    "encrypt_for_upload",
+    "generate_dek",
+    "generate_keypair_pem",
     "new_id",
     "require_principal",
     "require_scope",
+    "unwrap_dek",
+    "wrap_dek",
 ]

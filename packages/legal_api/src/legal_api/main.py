@@ -53,6 +53,8 @@ from legal_quality_gate import (
 )
 
 from legal_api.blobs import BlobStore, FilesystemBlobStore
+from legal_api.envelope import decrypt_document
+from legal_api.keyring import EnvelopeKeyring, InMemoryKeyring
 from legal_api.security import (
     ApiKeyResolver,
     InMemoryApiKeyResolver,
@@ -96,6 +98,30 @@ class HealthResponse(BaseModel):
     version: str = "1.0.0-draft"
 
 
+class EncryptedUploadRequest(BaseModel):
+    """Envelope-encrypted document upload payload.
+
+    Fields are base64-encoded so the JSON wire shape works for any
+    transport that doesn't speak binary. Server decodes once and stores
+    raw bytes — no base64 lives in the blob store.
+    """
+
+    ciphertext_b64: str
+    nonce_b64: str
+    wrapped_dek_b64: str
+    sha256: str = Field(
+        ...,
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 of the original plaintext, for integrity check after decrypt.",
+    )
+    original_filename: str | None = None
+
+
+class PublicKeyResponse(BaseModel):
+    org_id: str
+    public_key_pem: str
+
+
 # -------- App factory --------
 
 
@@ -106,6 +132,7 @@ class AppDeps:
     store: Store = field(default_factory=InMemoryStore)
     blobs: BlobStore | None = None
     api_key_resolver: ApiKeyResolver = field(default_factory=InMemoryApiKeyResolver)
+    keyring: EnvelopeKeyring | None = None
     llm_client: "LLMClient | None" = None
     authority_client: "AuthorityLookupClient | None" = None
     policy_loader: Any = None  # callable(policy_id) -> Policy
@@ -118,6 +145,8 @@ def create_app(deps: AppDeps | None = None) -> FastAPI:
         deps.blobs = FilesystemBlobStore(root=Path(tempfile.mkdtemp(prefix="aqg-blobs-")))
     if deps.registry_builder is None:
         deps.registry_builder = _default_registry_builder
+    if deps.keyring is None:
+        deps.keyring = InMemoryKeyring()
 
     app = FastAPI(title="Anchor Quality Gate", version="1.0.0-draft")
     app.state.deps = deps
@@ -159,6 +188,79 @@ def create_app(deps: AppDeps | None = None) -> FastAPI:
             )
         )
         return DocumentRef(document_id=document_id)
+
+    @app.post(
+        "/v1/documents/encrypted",
+        response_model=DocumentRef,
+        status_code=status.HTTP_201_CREATED,
+        tags=["documents"],
+    )
+    async def upload_encrypted_document(
+        body: EncryptedUploadRequest,
+        principal: RequestPrincipal = Depends(require_principal),
+    ) -> DocumentRef:
+        """Envelope-encrypted upload: server stores ciphertext + nonce +
+        wrapped_dek but cannot read plaintext until it unwraps the DEK
+        via the keyring at run time."""
+        import base64
+
+        if deps.keyring.public_key_pem(principal.org_id) is None:
+            raise HTTPException(
+                status_code=status.HTTP_412_PRECONDITION_FAILED,
+                detail=(
+                    "no public key registered for this org; encrypted upload "
+                    "requires GET /v1/orgs/me/public-key to return a key first"
+                ),
+            )
+
+        try:
+            ciphertext = base64.b64decode(body.ciphertext_b64, validate=True)
+            nonce = base64.b64decode(body.nonce_b64, validate=True)
+            wrapped_dek = base64.b64decode(body.wrapped_dek_b64, validate=True)
+        except (ValueError, base64.binascii.Error) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"invalid base64 in upload payload: {exc}",
+            )
+
+        document_id = new_id()
+        deps.blobs.put(
+            org_id=principal.org_id,
+            key=f"{document_id}.docx.enc",
+            data=ciphertext,
+        )
+        deps.store.put_document(
+            DocumentRecord(
+                id=document_id,
+                org_id=principal.org_id,
+                sha256=body.sha256,
+                original_filename=body.original_filename,
+                encrypted=True,
+                wrapped_dek=wrapped_dek,
+                nonce=nonce,
+            )
+        )
+        return DocumentRef(document_id=document_id)
+
+    @app.get(
+        "/v1/orgs/me/public-key",
+        response_model=PublicKeyResponse,
+        tags=["orgs"],
+    )
+    async def get_org_public_key(
+        principal: RequestPrincipal = Depends(require_principal),
+    ) -> PublicKeyResponse:
+        """Return the public key the client should encrypt DEKs against."""
+        pem = deps.keyring.public_key_pem(principal.org_id)
+        if pem is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="no public key registered for this org",
+            )
+        return PublicKeyResponse(
+            org_id=principal.org_id,
+            public_key_pem=pem.decode("ascii"),
+        )
 
     @app.post(
         "/v1/runs",
@@ -274,13 +376,38 @@ def _default_registry_builder(
 
 
 async def _run_pipeline(*, deps: AppDeps, run: RunRecord, doc: DocumentRecord) -> None:
-    """Decrypt blob → parse → run pipeline → (if autofix) write annotated → persist."""
+    """Decrypt blob (envelope-style if encrypted) → parse → run pipeline
+    → (if autofix) write annotated → persist."""
     try:
-        ciphertext = deps.blobs.get(org_id=run.org_id, key=f"{run.document_id}.docx")
-        # v1 alpha treats blobs as plaintext; envelope decryption hooks here.
+        if doc.encrypted:
+            # Envelope flow: ciphertext blob + wrapped DEK from the
+            # document record + nonce. Unwrap the DEK through the
+            # keyring (which in production callbacks to the customer's
+            # plugin; in v1 alpha and tests holds the private key
+            # directly).
+            ciphertext = deps.blobs.get(
+                org_id=run.org_id, key=f"{run.document_id}.docx.enc"
+            )
+            assert doc.wrapped_dek is not None
+            assert doc.nonce is not None
+            dek = deps.keyring.unwrap(
+                org_id=run.org_id, wrapped_dek=doc.wrapped_dek
+            )
+            try:
+                plaintext = decrypt_document(ciphertext, doc.nonce, dek)
+            finally:
+                # Best-effort scrub. CPython doesn't guarantee zeroing
+                # but at least the reference is dropped immediately.
+                del dek
+        else:
+            plaintext = deps.blobs.get(
+                org_id=run.org_id, key=f"{run.document_id}.docx"
+            )
+
         with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
-            tmp.write(ciphertext)
+            tmp.write(plaintext)
             tmp_path = Path(tmp.name)
+        del plaintext  # drop the reference promptly
 
         result = parse_docx(tmp_path, document_id=run.document_id)
         policy = deps.policy_loader(run.policy_id) if (
