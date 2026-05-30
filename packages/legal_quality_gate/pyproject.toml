@@ -12,7 +12,6 @@ license = "MIT"
 dependencies = [
     "pydantic>=2.0,<3",
     "pyyaml>=6.0,<7",
-    "legal-format-engine>=0.1.0",
 ]
 
 [project.optional-dependencies]
