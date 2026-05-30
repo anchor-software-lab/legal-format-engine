@@ -191,6 +191,46 @@ def fix(
     )
 
 
+skill_app = typer.Typer(help="Skill packaging commands.", no_args_is_help=True)
+app.add_typer(skill_app, name="skill")
+
+
+@skill_app.command("build")
+def skill_build(
+    out: Path = typer.Option(
+        Path("dist/skills"), "--out", "-O",
+        help="Output directory. Bundle is written to <out>/anchor-quality-gate/.",
+    ),
+    api_url: str = typer.Option(
+        "https://api.anchorlabs.dev/v1", "--api-url",
+        help="API base URL baked into the skill's helper script.",
+    ),
+    version: str = typer.Option(
+        "0.1.0", "--version",
+        help="Skill version written into SKILL.md frontmatter.",
+    ),
+    no_archive: bool = typer.Option(
+        False, "--no-archive",
+        help="Skip the .zip; write only the unpacked directory.",
+    ),
+) -> None:
+    """Build the distributable Claude skill bundle."""
+    from legal_skill_kit import build_skill_bundle
+
+    console = Console()
+    bundle = build_skill_bundle(
+        out_dir=out,
+        api_base_url=api_url,
+        version=version,
+        archive=not no_archive,
+    )
+    console.print(f"[green]Built skill bundle:[/] {bundle.root}")
+    for f in bundle.files:
+        console.print(f"  - {f.relative_to(bundle.root)}")
+    if bundle.archive is not None:
+        console.print(f"[green]Archive:[/] {bundle.archive}")
+
+
 @app.command()
 def cites(
     path: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),

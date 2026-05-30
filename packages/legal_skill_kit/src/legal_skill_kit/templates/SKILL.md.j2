@@ -1,0 +1,88 @@
+---
+name: {{ name }}
+version: {{ version }}
+description: Anchor Quality Gate — runs an obsessive-first-year-associate
+  pass over a legal brief. Flags and corrects formatting, checks
+  citations against CourtListener, validates Bluebook form, and
+  catches not-good-law cites. Wraps the Anchor SaaS API; requires
+  ANCHOR_API_KEY in env.
+trigger_phrases:
+  - "cite check this brief"
+  - "bluebook check"
+  - "run the quality gate"
+  - "check this brief for citation problems"
+  - "is this case still good law"
+  - "wisconsin appellate format"
+api_base_url: {{ api_base_url }}
+---
+
+# Anchor Quality Gate
+
+Run a comprehensive quality-gate pass over a Word document and surface
+formatting violations, malformed citations, missing pinpoints, ghost
+cites, and bad-law cites.
+
+## When to use
+
+Invoke this skill when the user asks you to:
+
+- Cite-check or Bluebook-check a brief, motion, or memorandum.
+- Verify whether a cited case is still good law.
+- Check formatting against Wisconsin appellate rules (or any
+  configured court rule set).
+- Apply auto-safe fixes to a docx (font size, margins, line spacing).
+
+Don't invoke for: pure prose editing, generic proofreading, or
+non-legal documents.
+
+## How it works
+
+The skill is a thin wrapper around the Anchor SaaS API. The user must
+have `ANCHOR_API_KEY` set in their environment; the skill never sees
+their document content (envelope encryption is applied locally before
+upload when the org has a public key registered server-side).
+
+Available operations:
+
+### `qg_check`
+
+```bash
+scripts/qg_check.py check <path-to-docx> [--rules <rules.yaml>] [--policy <policy.yaml>]
+```
+
+Uploads the docx, runs the quality-gate pipeline, prints the findings
+table. Exit code 1 if any ERROR findings are present.
+
+### `qg_fix`
+
+```bash
+scripts/qg_check.py fix <path-to-docx> --out <fixed.docx>
+```
+
+Same as `check` but writes an annotated copy with auto-safe
+suggestions applied (font size, margins, line spacing for
+rule-sourced violations).
+
+### `qg_cites`
+
+```bash
+scripts/qg_check.py cites <path-to-docx>
+```
+
+Extracts every citation with its signal, pinpoint, and good-law
+status.
+
+## Environment
+
+- `ANCHOR_API_KEY` (required): org-scoped API key.
+- `ANCHOR_API_URL` (optional): override `{{ api_base_url }}`.
+- `ANCHOR_ORG_PRIVATE_KEY` (optional, PEM): private key for the
+  envelope-encryption upload flow. When set, documents are
+  encrypted in the helper before upload and the server never sees
+  plaintext.
+
+## Output format
+
+`qg_check` prints a JSON report when `--json` is passed, otherwise a
+human-readable table grouped by severity. The JSON shape matches
+`schemas/json-schema/quality_report.schema.json` in the Anchor repo.

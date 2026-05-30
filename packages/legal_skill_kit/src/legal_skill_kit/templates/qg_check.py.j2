@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+"""Distributable Claude-skill helper for {{ name }} v{{ version }}.
+
+Thin client over the Anchor Quality Gate SaaS API. Uploads a .docx,
+starts a run, polls until done, and prints findings. Lives in the
+skill bundle that Claude loads; no other Anchor packages required.
+
+Usage:
+
+  qg_check.py check  <path-to-docx> [--rules R.yaml] [--policy P.yaml] [--json]
+  qg_check.py fix    <path-to-docx> [--out <fixed.docx>]
+  qg_check.py cites  <path-to-docx> [--json]
+
+Env:
+  ANCHOR_API_KEY     required, org-scoped API key
+  ANCHOR_API_URL     optional, defaults to the production URL
+  ANCHOR_ORG_PRIVATE_KEY optional PEM; when set, uploads use envelope encryption
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import hashlib
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+import httpx  # third-party; lightweight enough to ship in the skill bundle
+
+DEFAULT_BASE_URL = "{{ api_base_url }}"
+
+
+def _client() -> httpx.Client:
+    api_key = os.environ.get("ANCHOR_API_KEY")
+    if not api_key:
+        sys.exit("ANCHOR_API_KEY not set in env")
+    base_url = os.environ.get("ANCHOR_API_URL", DEFAULT_BASE_URL).rstrip("/")
+    return httpx.Client(
+        base_url=base_url,
+        headers={"X-Anchor-API-Key": api_key},
+        timeout=60.0,
+    )
+
+
+def _upload_plaintext(client: httpx.Client, path: Path) -> str:
+    with open(path, "rb") as fh:
+        response = client.post(
+            "/documents",
+            files={"file": (path.name, fh, "application/octet-stream")},
+        )
+    response.raise_for_status()
+    return response.json()["document_id"]
+
+
+def _upload_encrypted(client: httpx.Client, path: Path, private_pem: str) -> str:
+    # Fetch the org's public key first, then encrypt locally and POST.
+    pk_resp = client.get("/orgs/me/public-key")
+    pk_resp.raise_for_status()
+    public_pem = pk_resp.json()["public_key_pem"].encode("ascii")
+
+    try:
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.asymmetric import padding
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    except ImportError:
+        sys.exit(
+            "cryptography is required for encrypted upload; "
+            "`pip install cryptography` or unset ANCHOR_ORG_PRIVATE_KEY"
+        )
+
+    plaintext = path.read_bytes()
+    sha = hashlib.sha256(plaintext).hexdigest()
+    dek = os.urandom(32)
+    nonce = os.urandom(12)
+    ciphertext = AESGCM(dek).encrypt(nonce, plaintext, associated_data=None)
+    pub = serialization.load_pem_public_key(public_pem)
+    wrapped_dek = pub.encrypt(
+        dek,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None,
+        ),
+    )
+
+    body = {
+        "ciphertext_b64": base64.b64encode(ciphertext).decode("ascii"),
+        "nonce_b64": base64.b64encode(nonce).decode("ascii"),
+        "wrapped_dek_b64": base64.b64encode(wrapped_dek).decode("ascii"),
+        "sha256": sha,
+        "original_filename": path.name,
+    }
+    response = client.post("/documents/encrypted", json=body)
+    response.raise_for_status()
+    return response.json()["document_id"]
+
+
+def _upload(client: httpx.Client, path: Path) -> str:
+    private_pem = os.environ.get("ANCHOR_ORG_PRIVATE_KEY")
+    if private_pem:
+        return _upload_encrypted(client, path, private_pem)
+    return _upload_plaintext(client, path)
+
+
+def _start_run(client: httpx.Client, document_id: str, mode: str) -> dict:
+    response = client.post(
+        "/runs",
+        json={"document_id": document_id, "mode": mode},
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def _wait_for_report(client: httpx.Client, run_id: str, *, timeout: float = 120.0) -> dict:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        response = client.get(f"/runs/{run_id}")
+        if response.status_code == 200:
+            return response.json()
+        if response.status_code == 409:
+            time.sleep(1.0)
+            continue
+        response.raise_for_status()
+    sys.exit(f"run {run_id} did not complete within {timeout}s")
+
+
+def _print_report(report: dict, *, as_json: bool = False) -> None:
+    if as_json:
+        print(json.dumps(report, indent=2))
+        return
+    print(f"\nScore: {report['score']:.0f}/100")
+    findings = report.get("findings", [])
+    if not findings:
+        print("No findings.")
+        return
+    print(f"Findings: {len(findings)}\n")
+    for f in findings:
+        sev = f["severity"].upper().ljust(8)
+        print(f"  {sev} {f['rule_id']:30s} {f['segment_id']}")
+        print(f"           {f['message']}")
+        print()
+
+
+def cmd_check(args: argparse.Namespace) -> int:
+    path = Path(args.path).resolve()
+    with _client() as client:
+        document_id = _upload(client, path)
+        run = _start_run(client, document_id, mode="report")
+        report = _wait_for_report(client, run["run_id"])
+    _print_report(report, as_json=args.json)
+    has_errors = any(f["severity"] == "error" for f in report.get("findings", []))
+    return 1 if has_errors else 0
+
+
+def cmd_fix(args: argparse.Namespace) -> int:
+    path = Path(args.path).resolve()
+    out_path = Path(args.out) if args.out else path.with_suffix(".fixed.docx")
+    with _client() as client:
+        document_id = _upload(client, path)
+        run = _start_run(client, document_id, mode="autofix")
+        report = _wait_for_report(client, run["run_id"])
+        # Stream the annotated.docx.
+        with client.stream("GET", f"/runs/{run['run_id']}/annotated.docx") as resp:
+            if resp.status_code == 404:
+                print("No auto-safe suggestions were applied.")
+                return 0
+            resp.raise_for_status()
+            with open(out_path, "wb") as fh:
+                for chunk in resp.iter_bytes(65536):
+                    fh.write(chunk)
+    print(f"Wrote {out_path}")
+    _print_report(report)
+    return 0
+
+
+def cmd_cites(args: argparse.Namespace) -> int:
+    """Quick cite extraction: runs the gate, prints only citation findings."""
+    path = Path(args.path).resolve()
+    with _client() as client:
+        document_id = _upload(client, path)
+        run = _start_run(client, document_id, mode="report")
+        report = _wait_for_report(client, run["run_id"])
+    cites = [f for f in report.get("findings", []) if f["rule_id"].startswith(("CITE.", "BB."))]
+    if args.json:
+        print(json.dumps(cites, indent=2))
+        return 0
+    if not cites:
+        print("No citation issues.")
+        return 0
+    for f in cites:
+        print(f"  {f['rule_id']:30s} {f['message']}")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="qg_check", description="Anchor Quality Gate skill helper")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    check = sub.add_parser("check", help="Run the quality gate and print findings")
+    check.add_argument("path")
+    check.add_argument("--json", action="store_true")
+    check.set_defaults(func=cmd_check)
+
+    fix = sub.add_parser("fix", help="Apply auto-safe suggestions; write annotated docx")
+    fix.add_argument("path")
+    fix.add_argument("--out")
+    fix.set_defaults(func=cmd_fix)
+
+    cites = sub.add_parser("cites", help="Print citation findings only")
+    cites.add_argument("path")
+    cites.add_argument("--json", action="store_true")
+    cites.set_defaults(func=cmd_cites)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

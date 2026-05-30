@@ -19,6 +19,7 @@ dependencies = [
     "legal-citations>=0.1.0",
     "legal-llm-gateway>=0.1.0",
     "legal-authority>=0.1.0",
+    "legal-skill-kit>=0.1.0",
 ]
 
 [project.scripts]
