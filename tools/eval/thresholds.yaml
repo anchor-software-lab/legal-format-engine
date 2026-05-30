@@ -1,0 +1,36 @@
+# Per-prompt × per-model thresholds.
+#
+# CI behavior:
+#   - PR check (smoke tier): runs all enabled models against
+#     tools/eval/datasets/<prompt>/smoke.jsonl. Fails if absolute
+#     thresholds are violated OR if regression policy is breached vs
+#     the previous run on `main`.
+#   - Nightly: runs regression tier across the same matrix; absolute
+#     thresholds only.
+
+bluebook.normalize_case@v1:
+  regression:
+    accuracy_pp: 2.0       # max allowed drop in percentage points
+    cost_pct: 10.0         # max allowed cost rise in percent
+    latency_pct: 25.0      # max allowed p95 latency rise in percent
+  models:
+    anthropic/claude-haiku-4-5:
+      min_accuracy: 0.85
+      max_cost_cents_per_call: 5
+      max_p95_latency_ms: 2500
+      accuracy_scorer: bluebook_fuzzy
+    anthropic/claude-sonnet-4-6:
+      min_accuracy: 0.92
+      max_cost_cents_per_call: 20
+      max_p95_latency_ms: 3500
+      accuracy_scorer: bluebook_fuzzy
+    openai/gpt-4o-mini:
+      min_accuracy: 0.82
+      max_cost_cents_per_call: 4
+      max_p95_latency_ms: 2500
+      accuracy_scorer: bluebook_fuzzy
+    openai/gpt-4o:
+      min_accuracy: 0.90
+      max_cost_cents_per_call: 25
+      max_p95_latency_ms: 3500
+      accuracy_scorer: bluebook_fuzzy

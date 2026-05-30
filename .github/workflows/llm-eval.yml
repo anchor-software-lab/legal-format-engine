@@ -1,0 +1,129 @@
+name: LLM eval
+
+on:
+  pull_request:
+    paths:
+      - "schemas/prompts/**"
+      - "tools/eval/**"
+      - "packages/legal_llm_gateway/**"
+      - "packages/legal_citations/src/legal_citations/bluebook/**"
+  schedule:
+    # Nightly regression run at 06:00 UTC.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "Dataset tier: smoke | regression | full"
+        default: "smoke"
+        required: true
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  # Smoke tier on every PR. Cheap models only.
+  smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - anthropic/claude-haiku-4-5
+          - openai/gpt-4o-mini
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need history for baseline comparison
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install workspace
+        run: ./scripts/install-dev.sh
+
+      - name: Restore eval cache
+        uses: actions/cache@v4
+        with:
+          path: tools/eval/.cache
+          key: eval-cache-${{ matrix.model }}-${{ hashFiles('schemas/prompts/**', 'tools/eval/datasets/**') }}
+          restore-keys: |
+            eval-cache-${{ matrix.model }}-
+
+      - name: Run smoke eval
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m tools.eval.cli run \
+            tools/eval/datasets/bluebook.normalize_case/smoke.jsonl \
+            --prompt-id bluebook.normalize_case@v1 \
+            --model ${{ matrix.model }} \
+            --real
+
+      - name: Check thresholds (absolute + regression)
+        run: |
+          python -m tools.eval.cli thresholds-check \
+            tools/eval/thresholds.yaml \
+            --prompt-id bluebook.normalize_case@v1
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ matrix.model }}-${{ github.run_id }}
+          path: tools/eval/results.duckdb
+
+  # Regression tier nightly. All models, all prompts.
+  nightly:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - anthropic/claude-haiku-4-5
+          - anthropic/claude-sonnet-4-6
+          - openai/gpt-4o-mini
+          - openai/gpt-4o
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install workspace
+        run: ./scripts/install-dev.sh
+      - name: Restore eval cache
+        uses: actions/cache@v4
+        with:
+          path: tools/eval/.cache
+          key: eval-cache-nightly-${{ matrix.model }}
+      - name: Generate adversarial mutants
+        run: |
+          python -m tools.eval.cli generate-adversarial \
+            tools/eval/datasets/bluebook.normalize_case/smoke.jsonl \
+            --out /tmp/adversarial.jsonl --per-case 5
+      - name: Run regression eval (smoke + adversarial)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -m tools.eval.cli run \
+            tools/eval/datasets/bluebook.normalize_case/smoke.jsonl \
+            --model ${{ matrix.model }} --real
+          python -m tools.eval.cli run /tmp/adversarial.jsonl \
+            --model ${{ matrix.model }} --real
+      - name: Check thresholds
+        run: |
+          python -m tools.eval.cli thresholds-check \
+            tools/eval/thresholds.yaml \
+            --prompt-id bluebook.normalize_case@v1
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-results-${{ matrix.model }}-${{ github.run_id }}
+          path: tools/eval/results.duckdb

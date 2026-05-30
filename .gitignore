@@ -208,3 +208,7 @@ __marimo__/
 
 # Generated demo files from `make demo`/`make demo-fix`
 .demo/
+
+# eval harness cache + local results
+tools/eval/.cache/
+tools/eval/results.duckdb
