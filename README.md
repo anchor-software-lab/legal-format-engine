@@ -94,11 +94,25 @@ The format engine library still installs standalone:
 pip install ./packages/legal_format_engine
 ```
 
-For workspace development:
+For workspace development, one of:
 
 ```bash
-uv sync                       # installs all packages in dev mode
-pytest                        # runs every package's tests
+make install                  # auto-detects uv; falls back to pip
+make demo                     # build a sample brief and run lqg check / cites
+make test                     # 97 tests
+make help                     # show every target
+
+# or directly:
+uv sync                       # if you have uv installed
+./scripts/install-dev.sh      # no-uv fallback
+```
+
+After installing, `lqg` is on PATH:
+
+```bash
+lqg check brief.docx --rules rules.yaml
+lqg fix   brief.docx --rules rules.yaml --out fixed.docx
+lqg cites brief.docx
 ```
 
 ## License

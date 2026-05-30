@@ -89,15 +89,18 @@ New (foundation):
 ## Running
 
 ```bash
-pip install pytest pydantic pyyaml
-pytest                       # runs every package's tests
+make install         # uv if present, else pip via scripts/install-dev.sh
+make test            # full suite
+make test-package P=legal_docx   # single package
+make schemas         # regenerate schemas/json-schema/*.schema.json
+make demo            # build a sample brief and run lqg against it
+make demo-fix        # demonstrate lqg fix and re-check
+make clean
 ```
 
-For a single package:
+The `lqg` CLI installs as a console script; commands are `lqg check`,
+`lqg fix`, `lqg cites`. See `make help` for every target.
 
-```bash
-pytest packages/legal_quality_gate/tests
-```
-
-A `uv` workspace is configured in the root `pyproject.toml` for
-production installs (`uv sync`).
+The root `pyproject.toml` configures a `uv` workspace for production
+installs; `scripts/install-dev.sh` is the no-uv fallback that the
+`Makefile` calls when uv isn't on PATH.
