@@ -14,6 +14,7 @@ import yaml
 
 from legal_citations import (
     build_case_form_checker,
+    build_citations_exists_checker,
     build_pinpoint_checker,
     build_signal_checker,
 )
@@ -21,6 +22,7 @@ from legal_format_engine import build_formatting_checker
 from legal_quality_gate import CheckerRegistry
 
 if TYPE_CHECKING:
+    from legal_authority import AuthorityLookupClient
     from legal_llm_gateway import LLMClient
 
 
@@ -46,6 +48,7 @@ def build_default_registry(
     rules: dict | None = None,
     *,
     llm_client: "LLMClient | None" = None,
+    authority_client: "AuthorityLookupClient | None" = None,
 ) -> CheckerRegistry:
     """Register every default checker.
 
@@ -55,6 +58,8 @@ def build_default_registry(
       `bluebook.case_form`. This keeps the offline CLI path free of
       LLM dependencies; pass a `LiteLLMClient` or a `FakeLLMClient` to
       enable them.
+    - Authority-backed checkers register only when `authority_client`
+      is supplied: `citations.exists` (ghost-cite + good-law).
 
     The Pipeline's Policy filters this down further to the enabled set
     if one is supplied; otherwise every registered checker runs.
@@ -65,4 +70,6 @@ def build_default_registry(
     registry.register(build_pinpoint_checker())
     if llm_client is not None:
         registry.register(build_case_form_checker(llm=llm_client))
+    if authority_client is not None:
+        registry.register(build_citations_exists_checker(authority=authority_client))
     return registry

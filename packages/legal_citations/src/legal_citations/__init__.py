@@ -37,6 +37,11 @@ from legal_citations.bluebook.case_form import (
     NormalizeCaseOutput,
     build_case_form_checker,
 )
+from legal_citations.existence import (
+    CITATION_EXISTS_ID,
+    CitationExistsChecker,
+    build_citations_exists_checker,
+)
 
 __all__ = [
     "BLUEBOOK_CASE_FORM_ID",
@@ -44,6 +49,8 @@ __all__ = [
     "BLUEBOOK_SIGNAL_ID",
     "BluebookCaseFormChecker",
     "BluebookSignalChecker",
+    "CITATION_EXISTS_ID",
+    "CitationExistsChecker",
     "ExtractedCitation",
     "NormalizeCaseOutput",
     "PinpointMissingChecker",
@@ -51,6 +58,7 @@ __all__ = [
     "SignalKind",
     "all_citations",
     "build_case_form_checker",
+    "build_citations_exists_checker",
     "build_pinpoint_checker",
     "build_signal_checker",
     "classify_signal_text",

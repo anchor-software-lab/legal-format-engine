@@ -62,6 +62,11 @@ def check(
         help="Enable LLM-bound checkers (e.g. bluebook.case_form). "
              "Requires ANTHROPIC_API_KEY or OPENAI_API_KEY in env.",
     ),
+    authority: bool = typer.Option(
+        False, "--authority",
+        help="Enable authority-backed checkers (citations.exists). "
+             "Requires CL_API_TOKEN (CourtListener) in env.",
+    ),
 ) -> None:
     """Run the quality gate against a .docx and print findings."""
     console = Console()
@@ -71,6 +76,7 @@ def check(
     registry = build_default_registry(
         rules=load_rules(rules),
         llm_client=_build_llm_client() if llm else None,
+        authority_client=_build_authority_client() if authority else None,
     )
 
     ctx = CheckContext(text_loader=result.text_loader)
@@ -101,6 +107,19 @@ def _build_llm_client():
     from legal_llm_gateway import LiteLLMClient  # lazy import — heavy
 
     return LiteLLMClient()
+
+
+def _build_authority_client():
+    """Construct a CourtListenerClient. Lazy import keeps httpx out of
+    the offline CLI startup path."""
+    if not os.environ.get("CL_API_TOKEN"):
+        raise typer.BadParameter(
+            "--authority requires CL_API_TOKEN (CourtListener API token) "
+            "in env. Skip --authority to run without good-law checks."
+        )
+    from legal_authority import CourtListenerClient
+
+    return CourtListenerClient()
 
 
 @app.command()

@@ -212,6 +212,14 @@ def test_check_llm_flag_rejected_when_no_api_key(runner, sample_brief_docx, monk
     assert "ANTHROPIC_API_KEY" in result.stdout or "ANTHROPIC_API_KEY" in (result.stderr or "")
 
 
+def test_check_authority_flag_rejected_when_no_token(runner, sample_brief_docx, monkeypatch):
+    """`--authority` must fail fast without CL_API_TOKEN."""
+    monkeypatch.delenv("CL_API_TOKEN", raising=False)
+    result = runner.invoke(app, ["check", str(sample_brief_docx), "--authority"])
+    assert result.exit_code != 0
+    assert "CL_API_TOKEN" in result.stdout or "CL_API_TOKEN" in (result.stderr or "")
+
+
 def test_fix_policy_auto_fix_allow_globs(runner, sample_brief_docx, tmp_path):
     """A policy that doesn't allow FORMAT.* in auto_fix should skip those fixes."""
     rules_path = tmp_path / "rules.yaml"
