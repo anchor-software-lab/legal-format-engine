@@ -69,3 +69,82 @@ def make_sample_brief(out_path: str | Path) -> Path:
 
     doc.save(str(out_path))
     return out_path
+
+
+def make_well_formatted_brief(out_path: str | Path) -> Path:
+    """A 3-paragraph brief that should produce zero findings against
+    the standard 13pt / 2.0-spacing / 1" margin rules.
+
+    Used as the negative case in the fixture corpus: any new checker
+    that mistakenly flags clean text will fail this fixture.
+    """
+    out_path = Path(out_path)
+    doc = DocxDocument()
+    section = doc.sections[0]
+    section.top_margin = Inches(1.0)
+    section.bottom_margin = Inches(1.0)
+    section.left_margin = Inches(1.0)
+    section.right_margin = Inches(1.0)
+
+    h = doc.add_heading("ARGUMENT", level=1)
+    h.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    body = doc.add_paragraph()
+    body.paragraph_format.first_line_indent = Inches(0.5)
+    body.paragraph_format.line_spacing = 2.0
+    body_run = body.add_run(
+        "The standard of review is de novo. See Tews v. NHI, LLC, 2010 WI "
+        "137, ¶ 4, 330 Wis. 2d 389. The trial court erred."
+    )
+    body_run.font.name = "Times New Roman"
+    body_run.font.size = Pt(13)
+
+    concl = doc.add_paragraph()
+    concl.paragraph_format.first_line_indent = Inches(0.5)
+    concl.paragraph_format.line_spacing = 2.0
+    concl_run = concl.add_run("The order should be affirmed.")
+    concl_run.font.name = "Times New Roman"
+    concl_run.font.size = Pt(13)
+
+    doc.save(str(out_path))
+    return out_path
+
+
+def make_brief_with_malformed_signal(out_path: str | Path) -> Path:
+    """A brief whose body paragraph uses "See, also," instead of "See also".
+
+    The Bluebook signal checker should flag BB.SIGNAL.UNKNOWN on the
+    Brown cite.
+    """
+    out_path = Path(out_path)
+    doc = DocxDocument()
+    section = doc.sections[0]
+    section.top_margin = Inches(1.0)
+    section.bottom_margin = Inches(1.0)
+    section.left_margin = Inches(1.0)
+    section.right_margin = Inches(1.0)
+
+    h = doc.add_heading("ARGUMENT", level=1)
+    h.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    body = doc.add_paragraph()
+    body.paragraph_format.first_line_indent = Inches(0.5)
+    body.paragraph_format.line_spacing = 2.0
+    body_run = body.add_run(
+        "We review de novo. See Tews v. NHI, LLC, 2010 WI 137, ¶ 4. "
+        "See, also, Brown v. Holiday, 2008 WI 49, ¶ 12."
+    )
+    body_run.font.name = "Times New Roman"
+    body_run.font.size = Pt(13)
+
+    doc.save(str(out_path))
+    return out_path
+
+
+# Public corpus map. Tests parametrize over this; CLI demos use it to
+# generate sample documents.
+FIXTURE_BUILDERS: dict[str, callable] = {
+    "well_formatted": make_well_formatted_brief,
+    "font_size_violation": make_sample_brief,
+    "malformed_signal": make_brief_with_malformed_signal,
+}

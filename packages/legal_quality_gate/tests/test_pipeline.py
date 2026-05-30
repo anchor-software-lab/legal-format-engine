@@ -167,3 +167,34 @@ def test_registry_rejects_duplicate_ids():
     registry.register(a)
     with pytest.raises(ValueError):
         registry.register(b)
+
+
+class _CrashingChecker:
+    id = "test.crash"
+    severity_default = Severity.WARNING
+    requires: tuple = ()
+
+    def check(self, document, ctx):
+        raise RuntimeError("synthetic checker failure")
+
+
+def test_pipeline_isolates_checker_exceptions():
+    """One crashing checker must not abort the run."""
+    registry = CheckerRegistry()
+    crash = _CrashingChecker()
+    healthy = _FakeChecker(finding_count=1)
+    healthy.id = "test.healthy"
+    healthy.rule_prefix = "TEST.HEALTHY"
+    registry.register(crash)
+    registry.register(healthy)
+
+    report = asyncio.run(Pipeline(registry).run(_doc(), _ctx()))
+
+    # Healthy checker's finding is present.
+    assert any(f.checker_id == "test.healthy" for f in report.findings)
+    # A synthetic QG.CHECKER.FAILED finding stands in for the crash.
+    failures = [f for f in report.findings if f.rule_id == "QG.CHECKER.FAILED"]
+    assert len(failures) == 1
+    assert failures[0].checker_id == "test.crash"
+    assert failures[0].severity is Severity.WARNING
+    assert failures[0].evidence["exception_type"] == "RuntimeError"

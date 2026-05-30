@@ -1,0 +1,9 @@
+{
+  "_doc": "Body paragraph (ordinal 1) is 12pt where the rule requires 13pt. Block quote (ordinal 2) is single-spaced where default is 2.0. Brown citation (in body) has no pinpoint.",
+  "rules": {"page_format": {"font_size_pt": 13.0, "line_spacing": 2.0}},
+  "must_contain": [
+    {"rule_id": "FORMAT.FONT.SIZE", "segment_ordinal": 1, "severity": "error"},
+    {"rule_id": "BB.PINPOINT.MISSING", "segment_ordinal": 1, "severity": "warning"}
+  ],
+  "must_not_contain": []
+}

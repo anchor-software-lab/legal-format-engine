@@ -1,0 +1,10 @@
+{
+  "_doc": "Body paragraph contains 'See, also,' before the Brown citation — a malformed signal that should be flagged BB.SIGNAL.UNKNOWN.",
+  "rules": {"page_format": {"font_size_pt": 13.0, "line_spacing": 2.0}},
+  "must_contain": [
+    {"rule_id": "BB.SIGNAL.UNKNOWN", "segment_ordinal": 1, "severity": "warning"}
+  ],
+  "must_not_contain": [
+    {"rule_id": "FORMAT.FONT.SIZE", "severity": "error"}
+  ]
+}

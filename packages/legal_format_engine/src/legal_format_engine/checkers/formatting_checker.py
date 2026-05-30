@@ -34,6 +34,7 @@ from legal_quality_gate.types import (
     ObservedStyle,
     Provenance,
     Segment,
+    SegmentKind,
     Severity,
     Suggestion,
     SuggestionKind,
@@ -41,19 +42,29 @@ from legal_quality_gate.types import (
 
 FORMATTING_SPEC_DIFF_ID = "formatting.spec_diff"
 
-# Mapping from ObservedStyle attribute → merge_with_rules dict key.
-# Kept here (not in legal_quality_gate) because the merge keys are an
-# implementation detail of legal_format_engine.
-_FIELD_MAP: dict[str, tuple[str, str]] = {
-    # observed attr: (resolved key, rule_id)
-    "font_name": ("font_name", "FORMAT.FONT.NAME"),
-    "font_size_pt": ("font_size_pt", "FORMAT.FONT.SIZE"),
-    "line_spacing": ("line_spacing", "FORMAT.LINE_SPACING"),
-    "indent_inches": ("body_first_line_indent_inches", "FORMAT.INDENT.BODY"),
-    "margin_top_inches": ("margin_top_inches", "FORMAT.MARGIN.TOP"),
-    "margin_bottom_inches": ("margin_bottom_inches", "FORMAT.MARGIN.BOTTOM"),
-    "margin_left_inches": ("margin_left_inches", "FORMAT.MARGIN.LEFT"),
-    "margin_right_inches": ("margin_right_inches", "FORMAT.MARGIN.RIGHT"),
+# Segment kinds that legitimately deviate from body-paragraph defaults:
+# - Headings have their own typography (size, alignment, bold).
+# - Block quotes are conventionally single-spaced and indented from both
+#   margins; the body line-spacing and first-line-indent rules don't
+#   apply to them.
+# - Footnotes use a smaller font and tighter spacing.
+#
+# This map gates each field to the SegmentKinds it actually applies to.
+_ALL = frozenset(SegmentKind)
+_BODY_LIKE = frozenset({SegmentKind.PARAGRAPH, SegmentKind.BLOCK_QUOTE})
+_BODY_ONLY = frozenset({SegmentKind.PARAGRAPH})
+
+# Mapping from ObservedStyle attribute → (resolved key, rule_id, applies_to).
+# Resolved keys are an implementation detail of legal_format_engine.
+_FIELD_MAP: dict[str, tuple[str, str, frozenset]] = {
+    "font_name": ("font_name", "FORMAT.FONT.NAME", _ALL),
+    "font_size_pt": ("font_size_pt", "FORMAT.FONT.SIZE", _BODY_LIKE),
+    "line_spacing": ("line_spacing", "FORMAT.LINE_SPACING", _BODY_ONLY),
+    "indent_inches": ("body_first_line_indent_inches", "FORMAT.INDENT.BODY", _BODY_ONLY),
+    "margin_top_inches": ("margin_top_inches", "FORMAT.MARGIN.TOP", _ALL),
+    "margin_bottom_inches": ("margin_bottom_inches", "FORMAT.MARGIN.BOTTOM", _ALL),
+    "margin_left_inches": ("margin_left_inches", "FORMAT.MARGIN.LEFT", _ALL),
+    "margin_right_inches": ("margin_right_inches", "FORMAT.MARGIN.RIGHT", _ALL),
 }
 
 _PROVENANCE_MAP = {
@@ -95,7 +106,9 @@ class FormattingSpecDiffChecker:
     ) -> list[Finding]:
         out: list[Finding] = []
         observed = segment.style_observed
-        for attr, (resolved_key, rule_id) in _FIELD_MAP.items():
+        for attr, (resolved_key, rule_id, applies_to) in _FIELD_MAP.items():
+            if segment.kind not in applies_to:
+                continue
             observed_val = getattr(observed, attr, None)
             expected_val = resolved.get(resolved_key)
             if observed_val is None or expected_val is None:

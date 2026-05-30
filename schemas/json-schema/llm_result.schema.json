@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "BaseModel": {
+      "properties": {},
+      "title": "BaseModel",
+      "type": "object"
+    },
+    "LLMUsage": {
+      "properties": {
+        "cached_input_tokens": {
+          "default": 0,
+          "title": "Cached Input Tokens",
+          "type": "integer"
+        },
+        "cost_usd_cents": {
+          "default": 0,
+          "title": "Cost Usd Cents",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "LLMUsage",
+      "type": "object"
+    }
+  },
+  "description": "A successful LLM call, parsed into the requested output schema.",
+  "properties": {
+    "completed_at": {
+      "format": "date-time",
+      "title": "Completed At",
+      "type": "string"
+    },
+    "latency_ms": {
+      "default": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "output": {
+      "$ref": "#/$defs/BaseModel"
+    },
+    "prompt_id": {
+      "title": "Prompt Id",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "#/$defs/LLMUsage"
+    }
+  },
+  "required": [
+    "prompt_id",
+    "provider",
+    "model",
+    "output"
+  ],
+  "title": "LLMResult",
+  "type": "object"
+}

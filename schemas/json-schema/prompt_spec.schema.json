@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "ModelClass": {
+      "description": "Quality / cost tier requested by the caller.\n\nThe gateway's Routing maps each class to an ordered provider list\n(e.g. CHEAP_FAST \u2192 [\"gpt-4o-mini\", \"haiku\", \u2026]).",
+      "enum": [
+        "cheap_fast",
+        "balanced",
+        "top_quality",
+        "local_only"
+      ],
+      "title": "ModelClass",
+      "type": "string"
+    }
+  },
+  "description": "A loaded prompt template, including frontmatter routing hints.",
+  "properties": {
+    "cache_segments": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Cache Segments",
+      "type": "array"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "max_tokens": {
+      "default": 1024,
+      "title": "Max Tokens",
+      "type": "integer"
+    },
+    "model_class": {
+      "$ref": "#/$defs/ModelClass",
+      "default": "balanced"
+    },
+    "output_schema_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Schema Ref"
+    },
+    "pinned_model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pinned Model"
+    },
+    "temperature": {
+      "default": 0.0,
+      "title": "Temperature",
+      "type": "number"
+    },
+    "template": {
+      "title": "Template",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "template"
+  ],
+  "title": "PromptSpec",
+  "type": "object"
+}

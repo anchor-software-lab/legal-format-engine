@@ -13,6 +13,7 @@ The annotated writer (round-tripping findings back into the docx as
 tracked changes + comments) lands in the next iteration of v0.
 """
 
+from legal_docx.annotated_writer import write_annotated
 from legal_docx.parser import ParseResult, parse_docx
 from legal_docx.segmenter import Segmenter, classify_segment_kind
 
@@ -21,4 +22,5 @@ __all__ = [
     "Segmenter",
     "classify_segment_kind",
     "parse_docx",
+    "write_annotated",
 ]

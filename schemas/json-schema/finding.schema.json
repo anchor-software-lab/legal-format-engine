@@ -1,0 +1,305 @@
+{
+  "$defs": {
+    "CharRange": {
+      "description": "A character range within a Document, addressed by segment + offsets.",
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start",
+        "end"
+      ],
+      "title": "CharRange",
+      "type": "object"
+    },
+    "ObservedStyle": {
+      "description": "Style properties observed on a Segment.\n\nField names mirror the keys produced by\n`legal_format_engine.merge_with_rules` so the diff is direct.",
+      "properties": {
+        "alignment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alignment"
+        },
+        "bold": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bold"
+        },
+        "font_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Font Name"
+        },
+        "font_size_pt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Font Size Pt"
+        },
+        "indent_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Indent Inches"
+        },
+        "italic": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Italic"
+        },
+        "line_spacing": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line Spacing"
+        },
+        "margin_bottom_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Bottom Inches"
+        },
+        "margin_left_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Left Inches"
+        },
+        "margin_right_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Right Inches"
+        },
+        "margin_top_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Top Inches"
+        }
+      },
+      "title": "ObservedStyle",
+      "type": "object"
+    },
+    "Provenance": {
+      "enum": [
+        "rule",
+        "ml",
+        "llm",
+        "hybrid"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "error",
+        "warning",
+        "info"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Suggestion": {
+      "properties": {
+        "auto_apply_safe": {
+          "default": false,
+          "title": "Auto Apply Safe",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/SuggestionKind"
+        },
+        "new_style": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservedStyle"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "new_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "New Text"
+        },
+        "range": {
+          "$ref": "#/$defs/CharRange"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "range",
+        "rationale"
+      ],
+      "title": "Suggestion",
+      "type": "object"
+    },
+    "SuggestionKind": {
+      "enum": [
+        "replace",
+        "insert",
+        "delete",
+        "reformat"
+      ],
+      "title": "SuggestionKind",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "checker_id": {
+      "title": "Checker Id",
+      "type": "string"
+    },
+    "confidence": {
+      "default": 1.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "evidence": {
+      "additionalProperties": true,
+      "title": "Evidence",
+      "type": "object"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "rule"
+    },
+    "rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "segment_id": {
+      "title": "Segment Id",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "suggestion": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Suggestion"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "id",
+    "segment_id",
+    "checker_id",
+    "rule_id",
+    "severity",
+    "message"
+  ],
+  "title": "Finding",
+  "type": "object"
+}

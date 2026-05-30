@@ -36,6 +36,15 @@ class ParseResult:
     def text_loader(self) -> Callable[[Segment], str]:
         return lambda segment: self.text_by_segment_id.get(segment.id, "")
 
+    @property
+    def segment_ordinal_by_id(self) -> dict[str, int]:
+        """Map from segment id back to docx paragraph index.
+
+        Needed by `legal_docx.write_annotated` to locate the paragraph
+        a Suggestion targets when applying REFORMAT fixes.
+        """
+        return {seg.id: seg.ordinal for seg in self.document.segments}
+
 
 def parse_docx(path: str | Path, *, document_id: str | None = None) -> ParseResult:
     """Parse a .docx file into a `Document` plus a plaintext side-table.

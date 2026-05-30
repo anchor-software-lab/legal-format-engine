@@ -124,3 +124,111 @@ def test_check_rejects_missing_file(runner, tmp_path):
     missing = tmp_path / "nope.docx"
     result = runner.invoke(app, ["check", str(missing)])
     assert result.exit_code != 0
+
+
+def test_fix_applies_safe_suggestions(runner, sample_brief_docx, tmp_path):
+    rules_path = tmp_path / "rules.yaml"
+    rules_path.write_text("page_format:\n  font_size_pt: 13.0\n")
+    out_path = tmp_path / "fixed.docx"
+
+    result = runner.invoke(
+        app,
+        [
+            "fix",
+            str(sample_brief_docx),
+            "--rules",
+            str(rules_path),
+            "--out",
+            str(out_path),
+        ],
+    )
+    assert result.exit_code == 0
+    assert out_path.exists()
+    assert "Applied" in result.stdout
+    assert "FORMAT.FONT.SIZE" in result.stdout
+
+    # Re-check the fixed docx: no more FORMAT.FONT.SIZE errors.
+    recheck = runner.invoke(
+        app, ["check", str(out_path), "--rules", str(rules_path)]
+    )
+    assert "FORMAT.FONT.SIZE" not in recheck.stdout or "ERROR" not in recheck.stdout
+
+
+def test_fix_with_no_safe_suggestions_exits_zero(runner, sample_brief_docx, tmp_path):
+    # No rules → no rule-sourced ERROR findings → all suggestions are
+    # ML/default-sourced and not auto_apply_safe → nothing to fix.
+    result = runner.invoke(app, ["fix", str(sample_brief_docx)])
+    assert result.exit_code == 0
+    assert "No auto-safe suggestions" in result.stdout
+
+
+def test_fix_rejects_conflicting_in_place_and_out(runner, sample_brief_docx, tmp_path):
+    result = runner.invoke(
+        app,
+        [
+            "fix",
+            str(sample_brief_docx),
+            "--in-place",
+            "--out",
+            str(tmp_path / "x.docx"),
+        ],
+    )
+    assert result.exit_code == 2
+    assert "mutually exclusive" in result.stdout
+
+
+def test_fix_in_place_overwrites_original(runner, tmp_path, sample_brief_docx):
+    rules_path = tmp_path / "rules.yaml"
+    rules_path.write_text("page_format:\n  font_size_pt: 13.0\n")
+
+    result = runner.invoke(
+        app,
+        [
+            "fix",
+            str(sample_brief_docx),
+            "--rules",
+            str(rules_path),
+            "--in-place",
+        ],
+    )
+    assert result.exit_code == 0
+    # The original docx itself should now pass the rule.
+    recheck = runner.invoke(
+        app, ["check", str(sample_brief_docx), "--rules", str(rules_path)]
+    )
+    # No FORMAT.FONT.SIZE ERROR after in-place fix.
+    assert not (
+        "FORMAT.FONT.SIZE" in recheck.stdout and "ERROR" in recheck.stdout
+    )
+
+
+def test_fix_policy_auto_fix_allow_globs(runner, sample_brief_docx, tmp_path):
+    """A policy that doesn't allow FORMAT.* in auto_fix should skip those fixes."""
+    rules_path = tmp_path / "rules.yaml"
+    rules_path.write_text("page_format:\n  font_size_pt: 13.0\n")
+
+    policy_path = tmp_path / "policy.yaml"
+    policy_path.write_text(
+        "name: pinpoint_only_fixes\n"
+        "auto_fix:\n"
+        "  allow:\n"
+        "    - BB.*\n"
+    )
+    out_path = tmp_path / "fixed.docx"
+    result = runner.invoke(
+        app,
+        [
+            "fix",
+            str(sample_brief_docx),
+            "--rules",
+            str(rules_path),
+            "--policy",
+            str(policy_path),
+            "--out",
+            str(out_path),
+        ],
+    )
+    # FORMAT.* findings filtered out; BB.* findings don't have
+    # auto_apply_safe suggestions in v0 → nothing applied.
+    assert result.exit_code == 0
+    assert "No auto-safe suggestions" in result.stdout

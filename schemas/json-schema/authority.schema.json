@@ -1,0 +1,142 @@
+{
+  "$defs": {
+    "GoodLawStatus": {
+      "enum": [
+        "good_law",
+        "questioned",
+        "overruled",
+        "reversed",
+        "vacated",
+        "superseded"
+      ],
+      "title": "GoodLawStatus",
+      "type": "string"
+    },
+    "Treatment": {
+      "properties": {
+        "citing_authority_id": {
+          "title": "Citing Authority Id",
+          "type": "string"
+        },
+        "depth": {
+          "default": 1,
+          "title": "Depth",
+          "type": "integer"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "signal": {
+          "$ref": "#/$defs/TreatmentSignal"
+        },
+        "source": {
+          "default": "courtlistener",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "citing_authority_id",
+        "signal"
+      ],
+      "title": "Treatment",
+      "type": "object"
+    },
+    "TreatmentSignal": {
+      "enum": [
+        "positive",
+        "negative",
+        "neutral",
+        "distinguishing"
+      ],
+      "title": "TreatmentSignal",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "canonical_cite": {
+      "title": "Canonical Cite",
+      "type": "string"
+    },
+    "court": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Court"
+    },
+    "current_status": {
+      "$ref": "#/$defs/GoodLawStatus",
+      "default": "good_law"
+    },
+    "decided": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decided"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "last_verified": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Verified"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Name"
+    },
+    "parallel_cites": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Parallel Cites",
+      "type": "array"
+    },
+    "treatments": {
+      "items": {
+        "$ref": "#/$defs/Treatment"
+      },
+      "title": "Treatments",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "canonical_cite"
+  ],
+  "title": "Authority",
+  "type": "object"
+}

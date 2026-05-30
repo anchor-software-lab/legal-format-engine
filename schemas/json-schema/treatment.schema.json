@@ -1,0 +1,44 @@
+{
+  "$defs": {
+    "TreatmentSignal": {
+      "enum": [
+        "positive",
+        "negative",
+        "neutral",
+        "distinguishing"
+      ],
+      "title": "TreatmentSignal",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "citing_authority_id": {
+      "title": "Citing Authority Id",
+      "type": "string"
+    },
+    "depth": {
+      "default": 1,
+      "title": "Depth",
+      "type": "integer"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "signal": {
+      "$ref": "#/$defs/TreatmentSignal"
+    },
+    "source": {
+      "default": "courtlistener",
+      "title": "Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "citing_authority_id",
+    "signal"
+  ],
+  "title": "Treatment",
+  "type": "object"
+}

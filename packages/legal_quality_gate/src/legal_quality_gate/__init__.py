@@ -14,11 +14,13 @@ checkers, then scores and deduplicates findings.
 """
 
 from legal_quality_gate.types import (
+    Authority,
     Capability,
     CharRange,
     Citation,
     Document,
     Finding,
+    GoodLawStatus,
     ObservedStyle,
     ParsedCitation,
     Provenance,
@@ -28,6 +30,8 @@ from legal_quality_gate.types import (
     Severity,
     Suggestion,
     SuggestionKind,
+    Treatment,
+    TreatmentSignal,
 )
 from legal_quality_gate.checker import CheckContext, Checker
 from legal_quality_gate.registry import CheckerRegistry, default_registry
@@ -36,6 +40,7 @@ from legal_quality_gate.policy import Policy, load_policy
 from legal_quality_gate.scoring import score_findings
 
 __all__ = [
+    "Authority",
     "Capability",
     "CharRange",
     "Citation",
@@ -44,6 +49,7 @@ __all__ = [
     "CheckerRegistry",
     "Document",
     "Finding",
+    "GoodLawStatus",
     "ObservedStyle",
     "ParsedCitation",
     "Pipeline",
@@ -55,6 +61,8 @@ __all__ = [
     "Severity",
     "Suggestion",
     "SuggestionKind",
+    "Treatment",
+    "TreatmentSignal",
     "default_registry",
     "load_policy",
     "score_findings",

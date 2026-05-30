@@ -1,0 +1,10 @@
+{
+  "_doc": "Negative-case fixture: 13pt Times New Roman, double-spaced, 1\" margins, a single Tews cite with pinpoint and 'See' signal. The default v0 registry should produce zero ERROR or WARNING findings against the 13pt font rule.",
+  "rules": {"page_format": {"font_size_pt": 13.0, "line_spacing": 2.0}},
+  "must_contain": [],
+  "must_not_contain": [
+    {"rule_id": "FORMAT.FONT.SIZE", "severity": "error"},
+    {"rule_id": "BB.SIGNAL.UNKNOWN"},
+    {"rule_id": "BB.PINPOINT.MISSING"}
+  ]
+}

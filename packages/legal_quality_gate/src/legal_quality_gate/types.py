@@ -21,7 +21,7 @@ Design notes:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -137,11 +137,51 @@ class Document(BaseModel):
     source_uri: str | None = None
     mime: str = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     sha256: str
-    parsed_at: datetime = Field(default_factory=datetime.utcnow)
+    parsed_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
     jurisdiction_hints: list[str] = Field(default_factory=list)
     doc_type: str | None = None
     segments: list[Segment] = Field(default_factory=list)
     citations: list[Citation] = Field(default_factory=list)
+
+
+class TreatmentSignal(str, Enum):
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
+    DISTINGUISHING = "distinguishing"
+
+
+class GoodLawStatus(str, Enum):
+    GOOD_LAW = "good_law"
+    QUESTIONED = "questioned"
+    OVERRULED = "overruled"
+    REVERSED = "reversed"
+    VACATED = "vacated"
+    SUPERSEDED = "superseded"
+
+
+class Treatment(BaseModel):
+    citing_authority_id: str
+    signal: TreatmentSignal
+    depth: int = 1
+    source: str = "courtlistener"
+    observed_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+
+class Authority(BaseModel):
+    id: str
+    canonical_cite: str
+    name: str | None = None
+    court: str | None = None
+    decided: datetime | None = None
+    parallel_cites: list[str] = Field(default_factory=list)
+    treatments: list[Treatment] = Field(default_factory=list)
+    current_status: GoodLawStatus = GoodLawStatus.GOOD_LAW
+    last_verified: datetime | None = None
 
 
 class Suggestion(BaseModel):

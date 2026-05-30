@@ -1,0 +1,351 @@
+# Anchor Quality Gate SaaS API — v1 skeleton.
+#
+# Source of truth for:
+#   - The FastAPI implementation in packages/legal_api/
+#   - The TypeScript client used by the Office Add-in (apps/office-addin)
+#   - The C# client used by VSTO (apps/vsto-addin)
+#
+# Codegen (v1): `openapi-typescript-codegen` for TS, NSwag for C#,
+# `datamodel-code-generator` for Python clients. The component schemas
+# referenced below are also exported as standalone JSON schema files in
+# schemas/json-schema/ via tools/codegen/export_json_schemas.py.
+
+openapi: 3.1.0
+
+info:
+  title: Anchor Quality Gate
+  version: 1.0.0-draft
+  description: |
+    AI quality gate for legal documents. Clients upload an encrypted
+    docx, request a run, poll for findings, accept or reject
+    suggestions, and download the annotated docx.
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.anchorlabs.dev/v1
+    description: Production
+  - url: http://localhost:8000/v1
+    description: Local dev
+
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+paths:
+  /documents:
+    post:
+      summary: Upload an envelope-encrypted document
+      operationId: uploadDocument
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EncryptedDocumentUpload'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRef'
+
+  /runs:
+    post:
+      summary: Start a quality-gate run against an uploaded document
+      operationId: createRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunRequest'
+      responses:
+        '202':
+          description: Accepted; poll status_url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRef'
+
+  /runs/{run_id}:
+    get:
+      summary: Fetch a QualityReport
+      operationId: getRun
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string}
+        - name: page
+          in: query
+          schema: {type: integer, minimum: 1}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityReport'
+
+  /runs/{run_id}/events:
+    get:
+      summary: Server-sent events stream of run progress
+      operationId: streamRunEvents
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: text/event-stream
+          content:
+            text/event-stream:
+              schema: {type: string}
+
+  /runs/{run_id}/suggestions/{suggestion_id}:apply:
+    post:
+      summary: Mark a suggestion as accepted; update correction history
+      operationId: applySuggestion
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string}
+        - name: suggestion_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '204':
+          description: Applied
+
+  /runs/{run_id}/suggestions/{suggestion_id}:reject:
+    post:
+      summary: Mark a suggestion as rejected; update correction history
+      operationId: rejectSuggestion
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string}
+        - name: suggestion_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '204':
+          description: Rejected
+
+  /runs/{run_id}/annotated.docx:
+    get:
+      summary: Download the annotated docx (post-fix output)
+      operationId: downloadAnnotated
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: docx binary
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: {type: string, format: binary}
+
+  /style-guides/{id}:
+    get:
+      summary: Fetch a firm/matter/user style guide
+      operationId: getStyleGuide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleGuide'
+    put:
+      summary: Update a style guide
+      operationId: updateStyleGuide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleGuide'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleGuide'
+
+  /authorities/lookup:
+    post:
+      summary: Look up the canonical authority for a citation
+      operationId: lookupAuthority
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorityLookupRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authority'
+
+  /billing/usage:
+    get:
+      summary: Per-org cost + token usage summary
+      operationId: getUsage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageReport'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Anchor-API-Key
+
+  schemas:
+    # Most domain schemas come from packages/legal_quality_gate/types
+    # via tools/codegen/export_json_schemas.py. The skeleton below
+    # references them by name; in v1 the OpenAPI build step inlines or
+    # $refs the exported JSON schemas.
+    QualityReport:
+      $ref: './json-schema/quality_report.schema.json'
+    Finding:
+      $ref: './json-schema/finding.schema.json'
+    Suggestion:
+      $ref: './json-schema/suggestion.schema.json'
+    Citation:
+      $ref: './json-schema/citation.schema.json'
+
+    EncryptedDocumentUpload:
+      type: object
+      required: [ciphertext_url_or_bytes, wrapped_dek, ephemeral_public_key, sha256]
+      properties:
+        ciphertext_url_or_bytes:
+          oneOf:
+            - {type: string, format: uri}
+            - {type: string, format: base64}
+        wrapped_dek:
+          type: string
+          format: base64
+          description: AES-256-GCM DEK wrapped with the org's public key.
+        ephemeral_public_key:
+          type: string
+          format: base64
+        sha256:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        original_filename:
+          type: string
+
+    DocumentRef:
+      type: object
+      required: [document_id]
+      properties:
+        document_id: {type: string}
+
+    CreateRunRequest:
+      type: object
+      required: [document_id]
+      properties:
+        document_id: {type: string}
+        policy_id:
+          type: string
+          description: Identifies the policy YAML to apply.
+        mode:
+          type: string
+          enum: [report, autofix]
+          default: report
+
+    RunRef:
+      type: object
+      required: [run_id, status_url]
+      properties:
+        run_id: {type: string}
+        status_url: {type: string, format: uri}
+
+    StyleGuide:
+      type: object
+      required: [id, scope, base_jurisdiction]
+      properties:
+        id: {type: string}
+        scope:
+          type: string
+          enum: [firm, matter, user]
+        base_jurisdiction: {type: string}
+        format_rules:
+          type: object
+          additionalProperties: true
+        citation_rules:
+          type: object
+          additionalProperties: true
+        terminology:
+          type: object
+          additionalProperties: {type: string}
+
+    AuthorityLookupRequest:
+      type: object
+      required: [raw_citation]
+      properties:
+        raw_citation: {type: string}
+        jurisdiction_hint: {type: string}
+
+    Authority:
+      type: object
+      required: [id, canonical_cite, current_status]
+      properties:
+        id: {type: string}
+        canonical_cite: {type: string}
+        name: {type: string}
+        court: {type: string}
+        decided: {type: string, format: date}
+        parallel_cites:
+          type: array
+          items: {type: string}
+        current_status:
+          type: string
+          enum: [good_law, questioned, overruled, reversed, vacated, superseded]
+        last_verified: {type: string, format: date-time}
+
+    UsageReport:
+      type: object
+      properties:
+        period_start: {type: string, format: date}
+        period_end: {type: string, format: date}
+        runs_count: {type: integer}
+        documents_count: {type: integer}
+        llm_cost_usd_cents: {type: integer}
+        by_provider:
+          type: object
+          additionalProperties: {type: integer}

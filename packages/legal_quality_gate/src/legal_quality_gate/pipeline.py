@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from legal_quality_gate.checker import CheckContext, Checker
 from legal_quality_gate.policy import Policy
@@ -23,9 +24,12 @@ from legal_quality_gate.types import (
     Capability,
     Document,
     Finding,
+    Provenance,
     QualityReport,
     Severity,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Pipeline:
@@ -40,7 +44,7 @@ class Pipeline:
 
     async def run(self, document: Document, ctx: CheckContext) -> QualityReport:
         run_id = str(uuid.uuid4())
-        started = datetime.utcnow()
+        started = datetime.now(timezone.utc)
 
         enabled = self.registry.enabled(self.policy.enabled or None)
         deterministic = [c for c in enabled if _is_deterministic(c)]
@@ -49,9 +53,16 @@ class Pipeline:
         findings: list[Finding] = []
         for group in (deterministic, heavy):
             results = await asyncio.gather(
-                *(_invoke(c, document, ctx) for c in group), return_exceptions=False
+                *(_invoke(c, document, ctx) for c in group),
+                return_exceptions=True,
             )
-            for r in results:
+            for checker, r in zip(group, results):
+                if isinstance(r, Exception):
+                    logger.exception(
+                        "checker %s raised; emitting synthetic finding", checker.id
+                    )
+                    findings.append(_checker_failed_finding(checker, document, r))
+                    continue
                 findings.extend(r)
 
         # Severity overrides from policy
@@ -70,7 +81,7 @@ class Pipeline:
             score=score,
             remaining_findings=[f.id for f in findings],
             started_at=started,
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc),
         )
 
 
@@ -86,3 +97,25 @@ async def _invoke(
     if inspect.isawaitable(result):
         return await result
     return result
+
+
+def _checker_failed_finding(
+    checker: Checker, document: Document, exc: BaseException
+) -> Finding:
+    """Synthetic finding emitted when a checker crashes mid-run.
+
+    Keeps the rest of the pipeline running and gives ops visibility into
+    the failure without leaking exception detail into user-facing
+    surfaces unless the checker's severity policy says it should.
+    """
+    return Finding(
+        id=str(uuid.uuid4()),
+        segment_id=document.segments[0].id if document.segments else "",
+        checker_id=checker.id,
+        rule_id="QG.CHECKER.FAILED",
+        severity=Severity.WARNING,
+        message=f"Checker {checker.id} failed: {type(exc).__name__}",
+        evidence={"exception_type": type(exc).__name__, "message": str(exc)},
+        provenance=Provenance.RULE,
+        confidence=0.0,
+    )

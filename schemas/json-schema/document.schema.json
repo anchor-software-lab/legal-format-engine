@@ -1,0 +1,472 @@
+{
+  "$defs": {
+    "CharRange": {
+      "description": "A character range within a Document, addressed by segment + offsets.",
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start",
+        "end"
+      ],
+      "title": "CharRange",
+      "type": "object"
+    },
+    "Citation": {
+      "properties": {
+        "authority_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority Ref"
+        },
+        "confidence": {
+          "default": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "normalized": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalized"
+        },
+        "parsed": {
+          "$ref": "#/$defs/ParsedCitation"
+        },
+        "raw_text": {
+          "title": "Raw Text",
+          "type": "string"
+        },
+        "span": {
+          "$ref": "#/$defs/CharRange"
+        }
+      },
+      "required": [
+        "id",
+        "raw_text",
+        "span"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "ObservedStyle": {
+      "description": "Style properties observed on a Segment.\n\nField names mirror the keys produced by\n`legal_format_engine.merge_with_rules` so the diff is direct.",
+      "properties": {
+        "alignment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alignment"
+        },
+        "bold": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bold"
+        },
+        "font_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Font Name"
+        },
+        "font_size_pt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Font Size Pt"
+        },
+        "indent_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Indent Inches"
+        },
+        "italic": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Italic"
+        },
+        "line_spacing": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line Spacing"
+        },
+        "margin_bottom_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Bottom Inches"
+        },
+        "margin_left_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Left Inches"
+        },
+        "margin_right_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Right Inches"
+        },
+        "margin_top_inches": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Margin Top Inches"
+        }
+      },
+      "title": "ObservedStyle",
+      "type": "object"
+    },
+    "ParsedCitation": {
+      "properties": {
+        "case_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Name"
+        },
+        "court": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Court"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "parenthetical": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parenthetical"
+        },
+        "pinpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pinpoint"
+        },
+        "reporter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reporter"
+        },
+        "short_form_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Short Form Of"
+        },
+        "signal": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Signal"
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Volume"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        }
+      },
+      "title": "ParsedCitation",
+      "type": "object"
+    },
+    "Segment": {
+      "description": "A logical unit of a Document \u2014 heading, paragraph, footnote, etc.\n\n`text_hash` references the segment's content. The plaintext itself\nlives in an encrypted blob; checkers retrieve it via\n`CheckContext.get_text(segment)`.",
+      "properties": {
+        "char_length": {
+          "title": "Char Length",
+          "type": "integer"
+        },
+        "citation_span_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citation Span Ids",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SegmentKind"
+        },
+        "ordinal": {
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "style_observed": {
+          "$ref": "#/$defs/ObservedStyle"
+        },
+        "text_hash": {
+          "title": "Text Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "ordinal",
+        "text_hash",
+        "char_length"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "SegmentKind": {
+      "enum": [
+        "heading",
+        "paragraph",
+        "footnote",
+        "block_quote",
+        "table_cell"
+      ],
+      "title": "SegmentKind",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/Citation"
+      },
+      "title": "Citations",
+      "type": "array"
+    },
+    "doc_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doc Type"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "jurisdiction_hints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Jurisdiction Hints",
+      "type": "array"
+    },
+    "mime": {
+      "default": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "title": "Mime",
+      "type": "string"
+    },
+    "parsed_at": {
+      "format": "date-time",
+      "title": "Parsed At",
+      "type": "string"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/Segment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "sha256": {
+      "title": "Sha256",
+      "type": "string"
+    },
+    "source_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Uri"
+    }
+  },
+  "required": [
+    "id",
+    "sha256"
+  ],
+  "title": "Document",
+  "type": "object"
+}
