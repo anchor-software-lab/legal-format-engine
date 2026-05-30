@@ -21,6 +21,10 @@ legal_cli = { workspace = true }
 legal_skill_kit = { workspace = true }
 
 [tool.pytest.ini_options]
+# `importlib` import mode lets us have multiple test files with the
+# same basename (e.g. test_parser.py in different packages) without
+# adding tests/__init__.py.
+addopts = "--import-mode=importlib"
 testpaths = [
     "packages/legal_format_engine/tests",
     "packages/legal_quality_gate/tests",

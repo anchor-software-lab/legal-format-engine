@@ -44,12 +44,14 @@ class CheckContext:
         style_guide: dict | None = None,
         policy: dict | None = None,
         services: dict | None = None,
+        cache: dict | None = None,
     ) -> None:
         self._text_loader = text_loader
         self.resolved_style = resolved_style or {}
         self.style_guide = style_guide or {}
         self.policy = policy or {}
         self.services = services or {}
+        self.cache: dict = cache if cache is not None else {}
 
     def get_text(self, segment: Segment) -> str:
         return self._text_loader(segment)
