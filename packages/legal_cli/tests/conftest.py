@@ -1,4 +1,4 @@
-"""Shared fixtures for legal_docx tests."""
+"""Shared fixtures for legal_cli tests."""
 
 from __future__ import annotations
 

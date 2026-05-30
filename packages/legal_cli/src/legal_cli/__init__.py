@@ -1,9 +1,11 @@
 """The `lqg` command-line interface.
 
-v0 surface (planned):
-- `lqg check <path> [--policy <policy.yaml>]` — run the quality gate
-  and print findings.
-- `lqg fix <path> [--in-place]` — apply all auto-safe suggestions.
-- `lqg cites <path>` — extract + normalize citations.
-- `lqg skill build` — build the distributable Claude skill bundle.
+Use via the console script (`lqg check ...`) or programmatically:
+
+    from legal_cli import app
+    app(["check", "/path/to/brief.docx"])
 """
+
+from legal_cli.app import app
+
+__all__ = ["app"]

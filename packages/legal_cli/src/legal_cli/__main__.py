@@ -1,17 +1,8 @@
-"""CLI entry point.
-
-Stub implementation. v0 will add `lqg check`, `lqg fix`, `lqg cites`,
-`lqg skill build` (per the plan).
-"""
+"""CLI entry point: `python -m legal_cli` or the `lqg` console script."""
 
 from __future__ import annotations
 
-
-def app() -> None:
-    raise SystemExit(
-        "lqg is not yet implemented. The Anchor Quality Gate v0 milestone "
-        "will land the CLI. See docs/adr for design notes."
-    )
+from legal_cli.app import app
 
 
 if __name__ == "__main__":
