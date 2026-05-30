@@ -202,6 +202,16 @@ def test_fix_in_place_overwrites_original(runner, tmp_path, sample_brief_docx):
     )
 
 
+def test_check_llm_flag_rejected_when_no_api_key(runner, sample_brief_docx, monkeypatch):
+    """`--llm` must fail fast (exit 2) when no provider env var is set,
+    rather than silently constructing a client that will 401 later."""
+    for var in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OLLAMA_HOST"):
+        monkeypatch.delenv(var, raising=False)
+    result = runner.invoke(app, ["check", str(sample_brief_docx), "--llm"])
+    assert result.exit_code != 0
+    assert "ANTHROPIC_API_KEY" in result.stdout or "ANTHROPIC_API_KEY" in (result.stderr or "")
+
+
 def test_fix_policy_auto_fix_allow_globs(runner, sample_brief_docx, tmp_path):
     """A policy that doesn't allow FORMAT.* in auto_fix should skip those fixes."""
     rules_path = tmp_path / "rules.yaml"

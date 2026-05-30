@@ -23,6 +23,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+import os
+
 from legal_citations import extract_citations_in_text
 from legal_docx import parse_docx, write_annotated
 from legal_quality_gate import CheckContext, Pipeline, Policy, load_policy
@@ -55,13 +57,21 @@ def check(
         help="Court-rules YAML consumed by the formatting checker.",
     ),
     output: OutputFormat = typer.Option(OutputFormat.TEXT, "--output", "-o"),
+    llm: bool = typer.Option(
+        False, "--llm",
+        help="Enable LLM-bound checkers (e.g. bluebook.case_form). "
+             "Requires ANTHROPIC_API_KEY or OPENAI_API_KEY in env.",
+    ),
 ) -> None:
     """Run the quality gate against a .docx and print findings."""
     console = Console()
 
     result = parse_docx(path)
     policy_obj = load_policy(policy) if policy else Policy()
-    registry = build_default_registry(rules=load_rules(rules))
+    registry = build_default_registry(
+        rules=load_rules(rules),
+        llm_client=_build_llm_client() if llm else None,
+    )
 
     ctx = CheckContext(text_loader=result.text_loader)
     report = asyncio.run(
@@ -74,6 +84,23 @@ def check(
         print_text_report(report, source=path, console=console)
 
     raise typer.Exit(code=1 if has_errors(report) else 0)
+
+
+def _build_llm_client():
+    """Construct a LiteLLMClient. Imported lazily so the offline CLI
+    path doesn't import litellm at all."""
+    if not (
+        os.environ.get("ANTHROPIC_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+        or os.environ.get("OLLAMA_HOST")
+    ):
+        raise typer.BadParameter(
+            "--llm requires ANTHROPIC_API_KEY, OPENAI_API_KEY, or "
+            "OLLAMA_HOST in env. Skip --llm to run deterministic checkers only."
+        )
+    from legal_llm_gateway import LiteLLMClient  # lazy import — heavy
+
+    return LiteLLMClient()
 
 
 @app.command()

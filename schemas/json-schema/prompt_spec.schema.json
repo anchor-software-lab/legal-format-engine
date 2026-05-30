@@ -12,7 +12,7 @@
       "type": "string"
     }
   },
-  "description": "A loaded prompt template, including frontmatter routing hints.",
+  "description": "A loaded prompt template, including frontmatter routing hints.\n\nThe prompt file format (under `schemas/prompts/`) is markdown with\nYAML frontmatter and two body sections labelled `SYSTEM:` and\n`USER:`. The system section is treated as cacheable when\n`CacheMode.PROMPT_PREFIX` is used; the user section receives\n`{name}`-style variable substitution at call time.",
   "properties": {
     "cache_segments": {
       "items": {
@@ -58,19 +58,24 @@
       "default": null,
       "title": "Pinned Model"
     },
+    "system_template": {
+      "default": "",
+      "title": "System Template",
+      "type": "string"
+    },
     "temperature": {
       "default": 0.0,
       "title": "Temperature",
       "type": "number"
     },
-    "template": {
-      "title": "Template",
+    "user_template": {
+      "default": "",
+      "title": "User Template",
       "type": "string"
     }
   },
   "required": [
-    "id",
-    "template"
+    "id"
   ],
   "title": "PromptSpec",
   "type": "object"

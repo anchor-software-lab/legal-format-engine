@@ -12,6 +12,8 @@ license = "MIT"
 dependencies = [
     "pydantic>=2.0,<3",
     "eyecite>=2.6",
+    "legal-quality-gate>=0.1.0",
+    "legal-llm-gateway>=0.1.0",
 ]
 
 [project.optional-dependencies]

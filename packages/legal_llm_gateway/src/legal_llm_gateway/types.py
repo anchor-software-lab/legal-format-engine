@@ -81,10 +81,18 @@ class LLMError(Exception):
 
 
 class PromptSpec(BaseModel):
-    """A loaded prompt template, including frontmatter routing hints."""
+    """A loaded prompt template, including frontmatter routing hints.
+
+    The prompt file format (under `schemas/prompts/`) is markdown with
+    YAML frontmatter and two body sections labelled `SYSTEM:` and
+    `USER:`. The system section is treated as cacheable when
+    `CacheMode.PROMPT_PREFIX` is used; the user section receives
+    `{name}`-style variable substitution at call time.
+    """
 
     id: str  # e.g. "bluebook.normalize_case@v3"
-    template: str
+    system_template: str = ""
+    user_template: str = ""
     model_class: ModelClass = ModelClass.BALANCED
     temperature: float = 0.0
     max_tokens: int = 1024
@@ -92,11 +100,10 @@ class PromptSpec(BaseModel):
     cache_segments: list[str] = Field(default_factory=list)
     output_schema_ref: str | None = None  # path relative to schemas/json-schema/
 
-    def render(self, variables: dict[str, Any]) -> str:
-        """Render variables into the template using `{name}` substitution.
+    def render(self, variables: dict[str, Any]) -> tuple[str, str]:
+        """Render the prompt into (system, user) strings.
 
-        Simple by design — the prompt files in `schemas/prompts/` are
-        plain text with Python-style `{}` placeholders. No Jinja, no
-        conditionals; complex prompts can be assembled in-code.
+        The system section is returned as-is; the user section gets
+        `{name}` substitution from `variables`.
         """
-        return self.template.format(**variables)
+        return self.system_template, self.user_template.format(**variables)

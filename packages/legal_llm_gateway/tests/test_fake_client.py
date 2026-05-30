@@ -108,6 +108,9 @@ def test_prompt_spec_renders_variables():
 
     spec = PromptSpec(
         id="test@v1",
-        template="Normalize: {raw}",
+        system_template="Be helpful.",
+        user_template="Normalize: {raw}",
     )
-    assert spec.render({"raw": "Tews, 2010 WI 137"}) == "Normalize: Tews, 2010 WI 137"
+    system, user = spec.render({"raw": "Tews, 2010 WI 137"})
+    assert system == "Be helpful."
+    assert user == "Normalize: Tews, 2010 WI 137"

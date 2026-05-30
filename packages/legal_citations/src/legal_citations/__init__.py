@@ -31,16 +31,26 @@ from legal_citations.bluebook.signal import (
     classify_signal_text,
     find_signal_before,
 )
+from legal_citations.bluebook.case_form import (
+    BLUEBOOK_CASE_FORM_ID,
+    BluebookCaseFormChecker,
+    NormalizeCaseOutput,
+    build_case_form_checker,
+)
 
 __all__ = [
+    "BLUEBOOK_CASE_FORM_ID",
     "BLUEBOOK_PINPOINT_ID",
     "BLUEBOOK_SIGNAL_ID",
+    "BluebookCaseFormChecker",
     "BluebookSignalChecker",
     "ExtractedCitation",
+    "NormalizeCaseOutput",
     "PinpointMissingChecker",
     "SIGNALS",
     "SignalKind",
     "all_citations",
+    "build_case_form_checker",
     "build_pinpoint_checker",
     "build_signal_checker",
     "classify_signal_text",
