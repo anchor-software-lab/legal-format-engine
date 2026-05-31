@@ -150,10 +150,70 @@ eval-clean: ## Drop the eval response cache and the DuckDB results store
 	@rm -rf $(EVAL_CACHE) $(EVAL_DB) $(EVAL_ADVERSARIAL)
 	@echo "Removed $(EVAL_CACHE), $(EVAL_DB), and $(EVAL_ADVERSARIAL)"
 
+##@ Corpus bootstrap (Wisconsin briefs)
+
+CORPUS_CACHE      ?= tools/corpus/.cache
+CORPUS_OUT        ?= tools/eval/datasets/bluebook.normalize_case/wi_corpus.jsonl
+CORPUS_SESSION    ?= tools/corpus/.session
+CORPUS_CANDIDATES ?= tools/corpus/.cache/candidates.jsonl
+CORPUS_DISCOVERY  ?= tools/corpus/.cache/discovered.json
+CORPUS_PDF        ?=
+CORPUS_TEXT       ?=
+CORPUS_COURT      ?= coa
+CORPUS_MAX        ?= 25
+
+.PHONY: corpus-discover
+corpus-discover: ## Discover up to $(CORPUS_MAX) brief URLs from wicourts.gov
+	@$(PYTHON) -m tools.corpus.cli discover \
+		--out $(CORPUS_DISCOVERY) \
+		--court $(CORPUS_COURT) \
+		--max $(CORPUS_MAX) \
+		--cache-dir $(CORPUS_CACHE)
+
+.PHONY: corpus-download
+corpus-download: ## Download every brief in $(CORPUS_DISCOVERY) into the cache
+	@$(PYTHON) -m tools.corpus.cli download $(CORPUS_DISCOVERY) --cache-dir $(CORPUS_CACHE)
+
+.PHONY: corpus-extract
+corpus-extract: ## Extract candidate citations from a PDF: PDF=path/to/brief.pdf
+	@if [ -z "$(CORPUS_PDF)" ]; then \
+		echo "set CORPUS_PDF=path/to/brief.pdf (or use corpus-extract-text CORPUS_TEXT=path)"; exit 2; \
+	fi
+	@$(PYTHON) -m tools.corpus.cli extract $(CORPUS_PDF) \
+		--out $(CORPUS_CANDIDATES) \
+		--id-prefix $(notdir $(basename $(CORPUS_PDF)))
+
+.PHONY: corpus-extract-text
+corpus-extract-text: ## Extract candidates from a text file: CORPUS_TEXT=path/to/brief.txt
+	@if [ -z "$(CORPUS_TEXT)" ]; then \
+		echo "set CORPUS_TEXT=path/to/brief.txt"; exit 2; \
+	fi
+	@$(PYTHON) -m tools.corpus.cli extract $(CORPUS_TEXT) --text \
+		--out $(CORPUS_CANDIDATES) \
+		--id-prefix $(notdir $(basename $(CORPUS_TEXT)))
+
+.PHONY: corpus-triage
+corpus-triage: ## Interactive labeling loop with checkpoints in $(CORPUS_SESSION)
+	@$(PYTHON) -m tools.corpus.cli triage $(CORPUS_CANDIDATES) \
+		--out $(CORPUS_OUT) \
+		--session-dir $(CORPUS_SESSION)
+
+.PHONY: corpus-merge
+corpus-merge: ## Merge labeled JSONLs: make corpus-merge INPUTS="a.jsonl b.jsonl" OUT=merged.jsonl
+	@if [ -z "$(INPUTS)" ] || [ -z "$(OUT)" ]; then \
+		echo "set INPUTS=\"a.jsonl b.jsonl\" OUT=merged.jsonl"; exit 2; \
+	fi
+	@$(PYTHON) -m tools.corpus.cli merge $(INPUTS) --out $(OUT)
+
+.PHONY: corpus-clean
+corpus-clean: ## Drop the corpus cache + session checkpoints
+	@rm -rf $(CORPUS_CACHE) $(CORPUS_SESSION)
+	@echo "Removed $(CORPUS_CACHE) and $(CORPUS_SESSION)"
+
 ##@ Housekeeping
 
 .PHONY: clean
-clean: eval-clean ## Remove __pycache__, .pytest_cache, build artifacts, demo files, eval cache + results
+clean: eval-clean corpus-clean ## Remove __pycache__, .pytest_cache, build artifacts, demo + eval + corpus state
 	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true

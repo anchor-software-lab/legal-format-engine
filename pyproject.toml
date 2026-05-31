@@ -38,6 +38,7 @@ testpaths = [
     "packages/legal_skill_kit/tests",
     "packages/legal_authority_scraper/tests",
     "tools/eval/tests",
+    "tools/corpus/tests",
 ]
 pythonpath = [
     "packages/legal_format_engine/src",

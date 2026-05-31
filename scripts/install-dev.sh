@@ -65,6 +65,8 @@ THIRD_PARTY=(
     "jinja2>=3.1"
     # tools/eval (results store)
     "duckdb>=1.0"
+    # tools/corpus (PDF text extraction)
+    "pdfplumber>=0.11"
 )
 
 echo "==> Installing third-party runtime deps"

@@ -212,3 +212,7 @@ __marimo__/
 # eval harness cache + local results
 tools/eval/.cache/
 tools/eval/results.duckdb
+
+# corpus bootstrap cache + triage sessions
+tools/corpus/.cache/
+tools/corpus/.session/
