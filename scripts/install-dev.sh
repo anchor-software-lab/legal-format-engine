@@ -40,14 +40,31 @@ PACKAGES=(
 # discover these from each package's pyproject; we just install the
 # union here so editable installs work with --no-deps.
 THIRD_PARTY=(
+    # Core
     "pydantic>=2.0,<3"
     "pyyaml>=6.0,<7"
+    "pytest"
+    # legal_docx + parsing
     "python-docx>=1.1.0"
     "lxml>=5.0"
+    # legal_citations
     "eyecite>=2.6"
+    # legal_cli
     "typer>=0.12"
     "rich>=13.7"
-    "pytest"
+    # legal_llm_gateway
+    "litellm>=1.50"
+    # legal_authority (CourtListener client)
+    "httpx>=0.27"
+    # legal_api (FastAPI surface + envelope encryption)
+    "fastapi>=0.110"
+    "uvicorn[standard]>=0.27"
+    "python-multipart>=0.0.9"
+    "cryptography>=41"
+    # legal_skill_kit (templated bundle)
+    "jinja2>=3.1"
+    # tools/eval (results store)
+    "duckdb>=1.0"
 )
 
 echo "==> Installing third-party runtime deps"

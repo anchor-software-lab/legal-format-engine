@@ -78,10 +78,82 @@ demo-fix: $(DEMO_DOCX) $(DEMO_RULES) ## Demonstrate lqg fix: build, fix, re-chec
 	@echo "=== lqg check (post-fix) ==="
 	@lqg check $(DEMO_DIR)/brief.fixed.docx --rules $(DEMO_RULES)
 
+##@ Eval (LLM harness)
+
+EVAL_DATASET ?= tools/eval/datasets/bluebook.normalize_case/smoke.jsonl
+EVAL_PROMPT_ID ?= bluebook.normalize_case@v1
+EVAL_MODELS ?= --model fake/canned-A --model fake/canned-B
+EVAL_DB ?= tools/eval/results.duckdb
+EVAL_CACHE ?= tools/eval/.cache
+EVAL_ADVERSARIAL ?= /tmp/anchor-eval-adversarial.jsonl
+
+# `make eval` runs the smoke dataset against the fake client by default.
+# Use EVAL_MODE=real and provider env vars to hit real APIs.
+EVAL_MODE ?= fake
+EVAL_CLIENT_FLAG := $(if $(filter real,$(EVAL_MODE)),--real,--fake)
+
+.PHONY: eval
+eval: eval-smoke ## Alias for eval-smoke (15-case offline smoke run)
+
+.PHONY: eval-smoke
+eval-smoke: ## Run the smoke dataset; set EVAL_MODE=real to hit live providers
+	@$(PYTHON) -m tools.eval.cli run \
+		$(EVAL_DATASET) \
+		--prompt-id $(EVAL_PROMPT_ID) \
+		$(EVAL_MODELS) \
+		--cache-dir $(EVAL_CACHE) \
+		--db $(EVAL_DB) \
+		$(EVAL_CLIENT_FLAG)
+
+.PHONY: eval-calibrate
+eval-calibrate: ## Run smoke dataset + print calibration (reliability) diagrams per model
+	@$(PYTHON) -m tools.eval.cli calibration \
+		$(EVAL_DATASET) \
+		--prompt-id $(EVAL_PROMPT_ID) \
+		$(EVAL_MODELS) \
+		$(EVAL_CLIENT_FLAG)
+
+.PHONY: eval-thresholds
+eval-thresholds: ## Check absolute + regression thresholds against the latest run
+	@$(PYTHON) -m tools.eval.cli thresholds-check \
+		tools/eval/thresholds.yaml \
+		--prompt-id $(EVAL_PROMPT_ID) \
+		--db $(EVAL_DB)
+
+.PHONY: eval-adversarial
+eval-adversarial: ## Generate adversarial mutants from the smoke seed into $(EVAL_ADVERSARIAL)
+	@$(PYTHON) -m tools.eval.cli generate-adversarial \
+		$(EVAL_DATASET) \
+		--out $(EVAL_ADVERSARIAL) \
+		--per-case 5
+	@echo "Wrote $(EVAL_ADVERSARIAL)"
+
+.PHONY: eval-regression
+eval-regression: eval-adversarial ## Run smoke + adversarial back-to-back (nightly-equivalent local run)
+	@$(PYTHON) -m tools.eval.cli run \
+		$(EVAL_DATASET) \
+		--prompt-id $(EVAL_PROMPT_ID) \
+		$(EVAL_MODELS) \
+		--cache-dir $(EVAL_CACHE) \
+		--db $(EVAL_DB) \
+		$(EVAL_CLIENT_FLAG)
+	@$(PYTHON) -m tools.eval.cli run \
+		$(EVAL_ADVERSARIAL) \
+		--prompt-id $(EVAL_PROMPT_ID) \
+		$(EVAL_MODELS) \
+		--cache-dir $(EVAL_CACHE) \
+		--db $(EVAL_DB) \
+		$(EVAL_CLIENT_FLAG)
+
+.PHONY: eval-clean
+eval-clean: ## Drop the eval response cache and the DuckDB results store
+	@rm -rf $(EVAL_CACHE) $(EVAL_DB) $(EVAL_ADVERSARIAL)
+	@echo "Removed $(EVAL_CACHE), $(EVAL_DB), and $(EVAL_ADVERSARIAL)"
+
 ##@ Housekeeping
 
 .PHONY: clean
-clean: ## Remove __pycache__, .pytest_cache, build artifacts, and demo files
+clean: eval-clean ## Remove __pycache__, .pytest_cache, build artifacts, demo files, eval cache + results
 	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
