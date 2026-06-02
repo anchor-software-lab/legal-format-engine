@@ -40,6 +40,7 @@ from legal_citations import (
     build_case_form_checker,
     build_citations_exists_checker,
     build_pinpoint_checker,
+    build_short_form_checker,
     build_signal_checker,
 )
 from legal_docx import parse_docx, write_annotated
@@ -365,6 +366,7 @@ def _default_registry_builder(
     registry.register(build_formatting_checker(rules=rules or {}))
     registry.register(build_signal_checker())
     registry.register(build_pinpoint_checker())
+    registry.register(build_short_form_checker())
     if llm_client is not None:
         registry.register(build_case_form_checker(llm=llm_client))
     if authority_client is not None:

@@ -141,10 +141,41 @@ def make_brief_with_malformed_signal(out_path: str | Path) -> Path:
     return out_path
 
 
+def make_brief_with_orphan_id(out_path: str | Path) -> Path:
+    """A brief that opens with `Id. at ¶ 5.` — Bluebook Rule 10.9 forbids
+    Id. without a preceding citation; the short-form checker should flag
+    BB.SHORT_FORM.ORPHAN_ID.
+    """
+    out_path = Path(out_path)
+    doc = DocxDocument()
+    section = doc.sections[0]
+    section.top_margin = Inches(1.0)
+    section.bottom_margin = Inches(1.0)
+    section.left_margin = Inches(1.0)
+    section.right_margin = Inches(1.0)
+
+    h = doc.add_heading("ARGUMENT", level=1)
+    h.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    body = doc.add_paragraph()
+    body.paragraph_format.first_line_indent = Inches(0.5)
+    body.paragraph_format.line_spacing = 2.0
+    body_run = body.add_run(
+        "The standard of review is well established. Id. at ¶ 5. "
+        "See Tews v. NHI, LLC, 2010 WI 137, ¶ 4."
+    )
+    body_run.font.name = "Times New Roman"
+    body_run.font.size = Pt(13)
+
+    doc.save(str(out_path))
+    return out_path
+
+
 # Public corpus map. Tests parametrize over this; CLI demos use it to
 # generate sample documents.
 FIXTURE_BUILDERS: dict[str, callable] = {
     "well_formatted": make_well_formatted_brief,
     "font_size_violation": make_sample_brief,
     "malformed_signal": make_brief_with_malformed_signal,
+    "orphan_id": make_brief_with_orphan_id,
 }

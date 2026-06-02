@@ -1,30 +1,54 @@
-# Example policy for Wisconsin appellate briefs.
+# Wisconsin appellate brief — checker policy.
 #
-# Used by `Pipeline(policy=load_policy("fixtures/policies/wi_appellate.yaml"))`.
-# Enables a small set of checkers and demonstrates severity overrides
-# and auto-fix glob allowlists.
+# Pairs with `fixtures/rules/wi_appellate.yaml` (the formatting
+# values consumed by formatting.spec_diff).
+#
+# Formatting requirements come from Wis. Stat. § 809.19(8)(b):
+#   - Proportional 13pt (Times New Roman) OR monospaced 12 char/inch
+#   - Double-spaced text, single-spaced indented quotes (§ 809.19(8)(b)4)
+#   - 1" margins
+#
+# Citation form follows the Bluebook plus Wisconsin's neutral-cite
+# convention per § 809.19(1)(e) and SCR 80.001.
+#
+# Usage:
+#   lqg check brief.docx --rules fixtures/rules/wi_appellate.yaml \
+#                        --policy fixtures/policies/wi_appellate.yaml
 
 name: wi_appellate
 
 enabled:
+  # Deterministic / offline:
   - formatting.spec_diff
-  # v0+ additions (currently scaffolded, not yet implemented):
-  # - bluebook.case_form
-  # - bluebook.signal
-  # - bluebook.pinpoint
-  # - citations.exists
+  - bluebook.signal
+  - bluebook.pinpoint
+  - bluebook.short_form
+  # LLM-bound (requires `lqg check --llm` + ANTHROPIC_API_KEY / OPENAI_API_KEY):
+  - bluebook.case_form
+  # Authority-bound (requires `lqg check --authority` + CL_API_TOKEN):
+  - citations.exists
 
 severity_overrides:
-  # Bluebook surface-form issues are warnings, not errors.
-  bluebook.case_form: warning
+  # Bluebook surface-form issues are warnings, not hard errors —
+  # they hurt polish but don't make the brief wrong.
   bluebook.signal: warning
+  bluebook.pinpoint: warning
+  bluebook.case_form: warning
+  bluebook.short_form: warning
+  # Ghost cites and not-good-law are real errors; default severities
+  # in legal_citations.existence already mark them ERROR. Left
+  # un-overridden here.
 
 auto_fix:
   allow:
-    # Safe auto-fixes: formatting that comes from explicit rules,
-    # and Bluebook surface-form normalizations.
+    # Safe deterministic fixes (rule-sourced formatting only).
     - "FORMAT.FONT.*"
     - "FORMAT.MARGIN.*"
     - "FORMAT.LINE_SPACING"
-    - "BB.SIGNAL.*"
-    - "BB.ITALICS.*"
+    - "FORMAT.INDENT.*"
+    # Bluebook surface-form normalizations land here when their
+    # checkers gain auto-safe Suggestions. Today, BB.* findings carry
+    # auto_apply_safe=False because text replacement needs the
+    # annotated-writer's range mapper, which is a v1.5 item.
+    # - "BB.ITALICS.*"
+    # - "BB.SIGNAL.*"

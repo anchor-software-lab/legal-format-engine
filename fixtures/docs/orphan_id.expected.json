@@ -1,0 +1,11 @@
+{
+  "_doc": "Brief opens with `Id. at ¶ 5.` — no preceding citation. Bluebook Rule 10.9 forbids orphan Id. references; the short-form checker should flag BB.SHORT_FORM.ORPHAN_ID on segment ordinal 1 (the body paragraph).",
+  "rules": {"page_format": {"font_size_pt": 13.0, "line_spacing": 2.0}},
+  "must_contain": [
+    {"rule_id": "BB.SHORT_FORM.ORPHAN_ID", "segment_ordinal": 1, "severity": "warning"}
+  ],
+  "must_not_contain": [
+    {"rule_id": "FORMAT.FONT.SIZE", "severity": "error"},
+    {"rule_id": "BB.SHORT_FORM.INTERVENING"}
+  ]
+}

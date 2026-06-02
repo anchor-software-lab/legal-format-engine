@@ -1,0 +1,31 @@
+# Wisconsin appellate brief — formatting rules.
+#
+# Per Wis. Stat. § 809.19(8)(b) (2023-24):
+#
+#   1. Brief shall be in a proportional serif font of 13 point or larger
+#      (Times New Roman or equivalent), OR a monospaced font with no
+#      more than 10 characters per inch (12-point Courier).
+#   2. Lines of text shall be double spaced.
+#   3. Margins of at least 1 inch on all sides.
+#   4. Quotations of 50 words or more shall be indented (block quote)
+#      and single spaced. [Not enforced by formatting.spec_diff — block
+#      quote line-spacing is excluded from the body checks; the
+#      single-spacing convention is handled implicitly because we
+#      don't flag block quotes for body line-spacing rules.]
+#   5. Footnotes shall be in the same font size or smaller, single
+#      spaced. [Footnote extraction lands in v1.5.]
+#
+# These values flow into legal_format_engine.merge_with_rules as the
+# "rules" layer, which always wins over ML-learned + defaults. Findings
+# sourced from this file are marked Provenance.RULE and emit at
+# severity ERROR.
+
+page_format:
+  font_name: "Times New Roman"
+  font_size_pt: 13.0
+  line_spacing: 2.0
+  margin_top_inches: 1.0
+  margin_bottom_inches: 1.0
+  margin_left_inches: 1.0
+  margin_right_inches: 1.0
+  body_first_line_indent_inches: 0.5
